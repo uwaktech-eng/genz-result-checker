@@ -30,7 +30,7 @@
 </div>
 <div id="reportArea" style="display:none"></div>
 <script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzR_FrPa9nNOdYH0SfH7WskKmw3daDO67APMF_wuYHvbe4LrOGYw1yUeQyPpMDP8Uk/exec";
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwTnf8fxSM56pTLXIw5deMGCPulj76fNoEF-geUhQlP00Wfkl-dnbKwPCBqv2oabARlXg/exec";
     function showLoad(show){ document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none'; }
     function toast(m){ let d=document.createElement('div'); d.className='toast'; d.innerText=m; document.body.appendChild(d); setTimeout(()=>d.remove(),3000); }
     function api(params, cb){ let url=WEB_APP_URL+"?"+new URLSearchParams(params).toString(); fetch(url).then(r=>r.json()).then(cb).catch(e=>toast("Network error")); }
