@@ -1,333 +1,90 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-:root{--bg:#f4f8ff;--bg2:#eef5ff;--card:rgba(255,255,255,.78);--card2:rgba(255,255,255,.92);--line:rgba(76,110,245,.16);--text:#10214a;--muted:#5f6d92;--primary:#3d6cff;--primary-2:#7b61ff;--accent:#12b886;--danger:#e03131;--warning:#f59f00;--shadow:0 20px 40px rgba(58,92,170,.10);--radius:22px}
-*{box-sizing:border-box}html,body{margin:0;padding:0;font-family:Inter,system-ui,Arial,sans-serif;color:var(--text);background:radial-gradient(circle at top left,#fefeff 0,#f6fbff 28%,#eef4ff 60%,#eaf0ff 100%)}a{text-decoration:none;color:inherit}button,input,select,textarea{font:inherit}body{min-height:100vh}.page{max-width:1220px;margin:0 auto;padding:24px}.brand{display:flex;align-items:center;gap:12px}.brand-mark{width:46px;height:46px;border-radius:15px;background:linear-gradient(135deg,var(--primary),var(--primary-2));display:grid;place-items:center;color:#fff;font-weight:800;box-shadow:var(--shadow)}.brand small{display:block;color:var(--muted);font-size:12px}.hero{background:linear-gradient(135deg,rgba(255,255,255,.92),rgba(237,244,255,.84));backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:32px;padding:28px;box-shadow:var(--shadow);position:relative;overflow:hidden}.hero:before,.panel:before{content:"";position:absolute;inset:auto auto -80px -80px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(61,108,255,.12),transparent 65%)}.hero h1{margin:16px 0 10px;font-size:clamp(28px,5vw,44px);line-height:1.05}.hero p{margin:0;color:var(--muted);max-width:760px;line-height:1.6}.grid{display:grid;gap:20px}.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.panel{position:relative;background:var(--card);backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:26px;padding:22px;box-shadow:var(--shadow)}.card{background:var(--card2);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 12px 24px rgba(41,76,157,.07)}.muted{color:var(--muted)}.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap}.navpill{display:inline-flex;gap:10px;flex-wrap:wrap}.btn{border:none;border-radius:14px;padding:12px 16px;cursor:pointer;transition:.2s ease;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;font-weight:700;box-shadow:0 12px 24px rgba(77,107,232,.18)}.btn.secondary{background:#fff;color:var(--text);border:1px solid var(--line);box-shadow:none}.btn.ok{background:linear-gradient(135deg,#12b886,#20c997)}.pill{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;background:rgba(255,255,255,.74);border:1px solid var(--line);border-radius:999px;color:var(--muted);font-weight:600}.stat{padding:18px;border-radius:18px;background:rgba(255,255,255,.8);border:1px solid var(--line)}.stat strong{display:block;font-size:28px;margin-top:8px}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.field{display:flex;flex-direction:column;gap:8px}.field label{font-size:13px;font-weight:700;color:#4f5f8b}.field input,.field select,.field textarea{width:100%;padding:13px 14px;border-radius:14px;border:1px solid rgba(98,120,191,.2);background:rgba(255,255,255,.95);outline:none;color:var(--text)}.field textarea{min-height:110px;resize:vertical}.section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.section-title h2,.section-title h3{margin:0}.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;background:rgba(255,255,255,.88);border-radius:18px;overflow:hidden}.table th,.table td{padding:12px 14px;border-bottom:1px solid rgba(98,120,191,.12);text-align:left;font-size:14px;vertical-align:top}.table th{background:rgba(61,108,255,.08);color:#344777;font-size:13px;text-transform:uppercase;letter-spacing:.03em}.table tr:last-child td{border-bottom:none}.toast{position:fixed;right:18px;bottom:18px;z-index:1000;display:none;padding:14px 16px;border-radius:14px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);max-width:320px}.toast.show{display:block}.toast.ok{border-color:rgba(18,184,134,.35)}.toast.bad{border-color:rgba(224,49,49,.35)}.hidden{display:none!important}.loader-overlay{position:fixed;inset:0;background:rgba(15,23,42,.28);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:1200;padding:16px}.loader-overlay.show{display:flex}.loader-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 18px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow)}.spinner{width:18px;height:18px;border:3px solid #dbe5f4;border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}button{transform:translateY(0);transition:transform .18s ease,opacity .18s ease,filter .18s ease}button:hover{transform:translateY(-1px)}button:active{transform:translateY(0)}button[disabled]{opacity:.72;cursor:not-allowed;filter:grayscale(.08)}.auth-switch{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.auth-switch .tab{padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.7);cursor:pointer;font-weight:700;color:var(--muted)}.auth-switch .tab.active{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;border-color:transparent}.summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.spacer{height:10px}@media (max-width:920px){.grid.two,.summary-grid,.form-grid{grid-template-columns:1fr}.page{padding:16px}}
-</style>
-<title>Admin Portal | Genz Edutech Innovations</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin | Genz Edutech</title>
+    <style>
+        * { box-sizing: border-box; font-family: system-ui; }
+        body { background: #eef2ff; margin: 0; padding: 20px; }
+        .container { max-width: 1400px; margin: auto; }
+        .glass-card { background: rgba(255,255,255,0.9); border-radius: 28px; padding: 24px; margin-bottom: 24px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); backdrop-filter: blur(4px); }
+        .btn { padding: 10px 20px; border-radius: 40px; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .btn-primary { background: #1e3c72; color: white; }
+        input, select, textarea { width: 100%; padding: 10px; margin: 6px 0; border-radius: 16px; border: 1px solid #ccc; }
+        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap: 20px; }
+        .loading-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999; color: white; font-size: 1.5rem; backdrop-filter: blur(4px); display: none; }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #323232; color: white; padding: 12px 24px; border-radius: 40px; z-index: 10000; }
+        .tab { display: flex; gap: 12px; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
+        .tab button { background: none; border: none; padding: 10px 20px; font-weight: 600; cursor: pointer; }
+        .active-tab { border-bottom: 3px solid #1e3c72; color:#1e3c72; }
+    </style>
 </head>
 <body>
-<div class="page">
-  <div class="topbar">
-    <div class="brand"><div class="brand-mark">GE</div><div><strong>Genz Edutech Innovations</strong><small>Admin management portal</small></div></div>
-    <div class="navpill"><a class="btn secondary" href="index.html">Home</a><a class="btn secondary" href="student.html">Student Portal</a></div>
-  </div>
-
-  <section class="hero">
-    <span class="pill">Admin Access</span>
-    <h1>Manage settings, students, and report cards</h1>
-    <p>Create an admin account or sign in to update school settings, add learner passport links, and publish results that reflect on the student report card.</p>
-  </section>
-
-  <div class="spacer"></div>
-
-  <section id="authPanel" class="panel">
-    <div class="auth-switch">
-      <button class="tab active" id="tabLogin" type="button">Admin Login</button>
-      <button class="tab" id="tabSignup" type="button">Admin Signup</button>
+<div class="loading-overlay" id="loadingOverlay"><div>⏳ Processing...</div></div>
+<div class="container" id="app">
+    <div class="glass-card" id="authPanel">
+        <h2>🔐 Admin Access</h2>
+        <div class="tab"><button id="loginTab" class="active-tab">Login</button><button id="signupTab">Signup</button></div>
+        <div id="loginForm">
+            <input type="text" id="loginUser" placeholder="Username"><input type="password" id="loginPass" placeholder="Password"><button class="btn btn-primary" id="doLogin">Login</button>
+        </div>
+        <div id="signupForm" style="display:none">
+            <input type="text" id="suUsername" placeholder="Username"><input type="password" id="suPass" placeholder="Password"><input type="text" id="suName" placeholder="Display Name"><input type="email" id="suEmail" placeholder="Email"><button class="btn btn-primary" id="doSignup">Create Admin</button>
+        </div>
     </div>
-
-    <form id="loginForm">
-      <div class="form-grid">
-        <div class="field"><label>Username</label><input required name="username" placeholder="Enter admin username"></div>
-        <div class="field"><label>Password</label><input required type="password" name="password" placeholder="Enter password"></div>
-      </div>
-      <div><button class="btn" type="submit">Sign In</button></div>
-    </form>
-
-    <form id="signupForm" class="hidden">
-      <div class="form-grid">
-        <div class="field"><label>Display Name</label><input required name="displayName" placeholder="e.g. Main Admin"></div>
-        <div class="field"><label>Email</label><input type="email" name="email" placeholder="you@example.com"></div>
-        <div class="field"><label>Username</label><input required name="username" placeholder="Choose a username"></div>
-        <div class="field"><label>Password</label><input required type="password" name="password" placeholder="Create a password"></div>
-      </div>
-      <div><button class="btn ok" type="submit">Create Admin Account</button></div>
-    </form>
-  </section>
-
-  <section id="dashboard" class="hidden">
-    <div class="summary-grid">
-      <div class="stat"><span class="muted">Students</span><strong id="sumStudents">0</strong></div>
-      <div class="stat"><span class="muted">Results</span><strong id="sumResults">0</strong></div>
-      <div class="stat"><span class="muted">Published</span><strong id="sumPublished">0</strong></div>
-    </div>
-    <div class="spacer"></div>
-
-    <div class="grid two">
-      <section class="panel">
-        <div class="section-title"><h2>Portal Settings</h2><button class="btn secondary" id="logoutBtn" type="button">Logout</button></div>
-        <form id="settingsForm">
-          <div class="form-grid">
-            <div class="field"><label>Brand Name</label><input name="BRAND_NAME"></div>
-            <div class="field"><label>School Name</label><input name="SCHOOL_NAME"></div>
-            <div class="field"><label>Head Office Address</label><input name="HEAD_OFFICE_ADDRESS"></div>
-            <div class="field"><label>School Phone</label><input name="SCHOOL_PHONE"></div>
-            <div class="field"><label>School Email</label><input name="SCHOOL_EMAIL"></div>
-            <div class="field"><label>Principal Name</label><input name="PRINCIPAL_NAME"></div>
-            <div class="field"><label>Academic Session</label><input name="ACADEMIC_SESSION"></div>
-            <div class="field"><label>Term</label><input name="TERM"></div>
-            <div class="field"><label>Exam Title</label><input name="EXAM_TITLE"></div>
-            <div class="field"><label>Pass Mark Number</label><input name="PASS_MARK_NUMBER" type="number"></div>
-            <div class="field"><label>Pass Mark Percentage</label><input name="PASS_MARK_PERCENTAGE" type="number"></div>
-            <div class="field"><label>Show Position on Report</label><select name="SHOW_POSITION_ON_REPORT"><option value="false">Off</option><option value="true">On</option></select></div>
-          </div>
-          <div><button class="btn" type="submit">Save Settings</button></div>
-        </form>
-      </section>
-
-      <section class="panel">
-        <div class="section-title"><h2>Create or Update Student</h2></div>
-        <form id="studentForm">
-          <div class="form-grid">
-            <div class="field"><label>Registration ID</label><input name="RegID" required></div>
-            <div class="field"><label>Password <span class="muted">(for new or reset)</span></label><input name="Password" type="text"></div>
-            <div class="field"><label>Full Name</label><input name="FullName" required></div>
-            <div class="field"><label>Age</label><input name="Age" required></div>
-            <div class="field"><label>Gender</label><select name="Gender" required><option value="">Select gender</option><option>Male</option><option>Female</option></select></div>
-            <div class="field"><label>Date of Birth</label><input name="DOB" type="date"></div>
-            <div class="field"><label>Parent/Guardian Name</label><input name="ParentName"></div>
-            <div class="field"><label>Parent/Guardian Phone</label><input name="ParentPhone" required></div>
-            <div class="field"><label>Parent/Guardian Email</label><input name="ParentEmail" type="email" required></div>
-            <div class="field"><label>School Name</label><input name="SchoolName" required></div>
-            <div class="field"><label>State</label><input name="State" required></div>
-            <div class="field"><label>City / LGA</label><input name="CityLGA" required></div>
-            <div class="field"><label>Class</label><input name="ClassLevel" required></div>
-            <div class="field"><label>Category</label><select name="Category" required></select></div>
-            <div class="field"><label>Passport Image Link</label><input name="PassportUrl" placeholder="https://..."></div>
-            <div class="field"><label>Status</label><select name="Active"><option value="true">Active</option><option value="false">Inactive</option></select></div>
-          </div>
-          <div class="field"><label>Address</label><textarea name="Address"></textarea></div>
-          <div><button class="btn ok" type="submit">Save Student</button></div>
-        </form>
-      </section>
-    </div>
-
-    <div class="spacer"></div>
-
-    <div class="grid two">
-      <section class="panel">
-        <div class="section-title"><h2>Enter Result</h2></div>
-        <form id="resultForm">
-          <div class="form-grid">
-            <div class="field"><label>Registration ID</label><input name="RegID" required></div>
-            <div class="field"><label>Exam Title</label><input name="ExamTitle" required></div>
-            <div class="field"><label>Exam Date</label><input type="date" name="ExamDate" required></div>
-            <div class="field"><label>Overall Exam Score</label><input type="number" name="MaxScore" required></div>
-            <div class="field"><label>Pass Mark Number</label><input type="number" name="PassMarkNumber"></div>
-            <div class="field"><label>Pass Mark Percentage</label><input type="number" name="PassMarkPercentage"></div>
-            <div class="field"><label>Student Score</label><input type="number" name="StudentScore" required></div>
-            <div class="field"><label>Position</label><input name="Position" placeholder="e.g. 3rd"></div>
-            <div class="field"><label>Academic Session</label><input name="AcademicSession"></div>
-            <div class="field"><label>Term</label><input name="Term"></div>
-            <div class="field"><label>Publish Result</label><select name="Published"><option value="true">Yes</option><option value="false">No</option></select></div>
-          </div>
-          <div class="field"><label>Teacher Comment</label><textarea name="TeacherComment"></textarea></div>
-          <div><button class="btn" type="submit">Save Result</button></div>
-        </form>
-      </section>
-
-      <section class="panel">
-        <div class="section-title"><h2>Recent Students</h2></div>
-        <div class="table-wrap"><table class="table"><thead><tr><th>Reg ID</th><th>Name</th><th>Class</th><th>Category</th><th>School</th></tr></thead><tbody id="studentsTable"></tbody></table></div>
-      </section>
-    </div>
-
-    <div class="spacer"></div>
-
-    <section class="panel">
-      <div class="section-title"><h2>Recent Results</h2></div>
-      <div class="table-wrap"><table class="table"><thead><tr><th>Reg ID</th><th>Exam</th><th>Score</th><th>%</th><th>Grade</th><th>Status</th><th>Published</th></tr></thead><tbody id="resultsTable"></tbody></table></div>
-    </section>
-  </section>
+    <div id="dashboard" style="display:none"></div>
 </div>
-<div id="toast" class="toast"></div>
-<div id="loader" class="loader-overlay"><div class="loader-card"><div class="spinner"></div><div id="loaderText">Please wait...</div></div></div>
-
 <script>
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwTnf8fxSM56pTLXIw5deMGCPulj76fNoEF-geUhQlP00Wfkl-dnbKwPCBqv2oabARlXg/exec';
-function showLoader(text='Please wait...'){ const el=document.getElementById('loader'); const tx=document.getElementById('loaderText'); if(tx) tx.textContent=text; if(el) el.classList.add('show'); }
-function hideLoader(){ const el=document.getElementById('loader'); if(el) el.classList.remove('show'); }
-function showToast(message, ok=true){
-  const toast = document.getElementById('toast');
-  if(!toast) return alert(message);
-  toast.textContent = message;
-  toast.className = 'toast show ' + (ok ? 'ok' : 'bad');
-  clearTimeout(window.__toastTimer);
-  window.__toastTimer = setTimeout(()=>toast.className='toast', 2800);
-}
-function safeId(){ return 'cb_' + Date.now() + '_' + Math.floor(Math.random()*100000); }
-function callBackend(action, payload={}, extra={}){
-  return new Promise((resolve, reject)=>{
-    const cb = safeId();
-    const params = new URLSearchParams();
-    params.set('action', action);
-    params.set('callback', cb);
-    params.set('payload', JSON.stringify(payload || {}));
-    params.set('_ts', String(Date.now()));
-    Object.keys(extra || {}).forEach(k=>{ if(extra[k]!==undefined && extra[k]!==null) params.set(k, extra[k]); });
-    const script = document.createElement('script');
-    window[cb] = function(data){ cleanup(); resolve(data); };
-    function cleanup(){
-      try{ delete window[cb]; }catch(err){ window[cb]=undefined; }
-      if(script.parentNode) script.parentNode.removeChild(script);
-      clearTimeout(timer);
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzR_FrPa9nNOdYH0SfH7WskKmw3daDO67APMF_wuYHvbe4LrOGYw1yUeQyPpMDP8Uk/exec"; // CHANGE
+    let adminToken = null;
+    function showLoading(show) { document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none'; }
+    function toast(msg) { let t=document.createElement('div'); t.className='toast'; t.innerText=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),3000); }
+    function apiCall(params, callback) {
+        let url = WEB_APP_URL + "?" + new URLSearchParams(params).toString();
+        fetch(url).then(r=>r.json()).then(callback).catch(e=>toast("Network error"));
     }
-    script.onerror = function(){ cleanup(); reject(new Error('Backend cannot be reached. Confirm your Apps Script is deployed as a Web App, access is set to Anyone, and WEB_APP_URL is correct.')); };
-    const timer = setTimeout(()=>{ cleanup(); reject(new Error('Backend request timed out.')); }, 20000);
-    script.src = WEB_APP_URL + '?' + params.toString();
-    document.body.appendChild(script);
-  });
-}
-function escapeHtml(str){ return String(str ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-const state = { token: localStorage.getItem('genz_admin_token') || '' };
-const categories = ['Lower Primary','Upper Primary','Junior High School','Senior High School','Undergraduate'];
-const els = {
-  authPanel: document.getElementById('authPanel'),
-  dashboard: document.getElementById('dashboard'),
-  loginForm: document.getElementById('loginForm'),
-  signupForm: document.getElementById('signupForm')
-};
-function toggleAuth(mode){
-  document.getElementById('tabLogin').classList.toggle('active', mode==='login');
-  document.getElementById('tabSignup').classList.toggle('active', mode==='signup');
-  els.loginForm.classList.toggle('hidden', mode!=='login');
-  els.signupForm.classList.toggle('hidden', mode!=='signup');
-}
-document.getElementById('tabLogin').onclick = ()=>toggleAuth('login');
-document.getElementById('tabSignup').onclick = ()=>toggleAuth('signup');
-function formToObj(form){ return Object.fromEntries(new FormData(form).entries()); }
-function fillCategorySelects(){
-  document.querySelectorAll('select[name="Category"]').forEach(sel=>{
-    sel.innerHTML = '<option value="">Select category</option>' + categories.map(c=>`<option>${c}</option>`).join('');
-  });
-}
-function renderBootstrap(data){
-  const summary = data.summary || {};
-  document.getElementById('sumStudents').textContent = summary.studentCount || 0;
-  document.getElementById('sumResults').textContent = summary.resultCount || 0;
-  document.getElementById('sumPublished').textContent = summary.publishedCount || 0;
-
-  const s = data.settings || {};
-  const settingsForm = document.getElementById('settingsForm');
-  Array.from(settingsForm.elements).forEach(el=>{
-    if(el.name && Object.prototype.hasOwnProperty.call(s, el.name)) el.value = s[el.name];
-  });
-
-  const studentsRows = (data.students || []).slice(0, 20).map(r=>`<tr><td class="mono">${escapeHtml(r.RegID)}</td><td>${escapeHtml(r.FullName)}</td><td>${escapeHtml(r.ClassLevel)}</td><td>${escapeHtml(r.Category)}</td><td>${escapeHtml(r.SchoolName)}</td></tr>`).join('') || '<tr><td colspan="5" class="muted">No students yet.</td></tr>';
-  document.getElementById('studentsTable').innerHTML = studentsRows;
-
-  const resultRows = (data.results || []).slice(0, 20).map(r=>`<tr><td class="mono">${escapeHtml(r.RegID)}</td><td>${escapeHtml(r.ExamTitle)}</td><td>${r.StudentScore}/${r.MaxScore}</td><td>${r.Percentage}%</td><td>${escapeHtml(r.Grade)}</td><td>${escapeHtml(r.Status)}</td><td>${r.Published ? 'Yes' : 'No'}</td></tr>`).join('') || '<tr><td colspan="7" class="muted">No results yet.</td></tr>';
-  document.getElementById('resultsTable').innerHTML = resultRows;
-
-  els.authPanel.classList.add('hidden');
-  els.dashboard.classList.remove('hidden');
-}
-async function loadBootstrap(){
-  const res = await callBackend('getAdminBootstrap', { token: state.token }, { token: state.token });
-  if(!res.success) throw new Error(res.message || 'Unable to load dashboard.');
-  renderBootstrap(res);
-}
-els.loginForm.addEventListener('submit', async (ev)=>{
-  ev.preventDefault();
-  try {
-    const data = formToObj(els.loginForm);
-    showLoader('Signing in...');
-    const res = await callBackend('adminLogin', data, { username: data.username, password: data.password });
-    if(!res.success) throw new Error(res.message || 'Login failed.');
-    state.token = res.token;
-    localStorage.setItem('genz_admin_token', state.token);
-    showToast(res.message || 'Login successful.');
-    await loadBootstrap();
-    hideLoader();
-  } catch(err) {
-    hideLoader();
-    showToast(err.message || 'Login failed.', false);
-  }
-});
-els.signupForm.addEventListener('submit', async (ev)=>{
-  ev.preventDefault();
-  try {
-    const data = formToObj(els.signupForm);
-    showLoader('Creating admin account...');
-    const res = await callBackend('adminSignup', data);
-    if(!res.success) throw new Error(res.message || 'Signup failed.');
-    showToast(res.message || 'Admin created successfully.');
-    toggleAuth('login');
-    if(els.loginForm.elements.username) els.loginForm.elements.username.value = data.username || '';
-    hideLoader();
-  } catch(err) {
-    hideLoader();
-    showToast(err.message || 'Signup failed.', false);
-  }
-});
-document.getElementById('settingsForm').addEventListener('submit', async (ev)=>{
-  ev.preventDefault();
-  try {
-    const data = formToObj(ev.target);
-    data.token = state.token;
-    showLoader('Saving settings...');
-    const res = await callBackend('saveSettings', data, { token: state.token });
-    if(!res.success) throw new Error(res.message || 'Unable to save settings.');
-    showToast(res.message || 'Settings saved.');
-    await loadBootstrap();
-    hideLoader();
-  } catch(err) {
-    showToast(err.message || 'Settings save failed.', false);
-  }
-});
-document.getElementById('studentForm').addEventListener('submit', async (ev)=>{
-  ev.preventDefault();
-  try {
-    const data = formToObj(ev.target);
-    data.token = state.token;
-    showLoader('Saving student...');
-    const res = await callBackend('saveStudent', data, { token: state.token });
-    if(!res.success) throw new Error(res.message || 'Unable to save student.');
-    showToast(res.message || 'Student saved.');
-    ev.target.reset();
-    fillCategorySelects();
-    await loadBootstrap();
-    hideLoader();
-  } catch(err) {
-    showToast(err.message || 'Student save failed.', false);
-  }
-});
-document.getElementById('resultForm').addEventListener('submit', async (ev)=>{
-  ev.preventDefault();
-  try {
-    const data = formToObj(ev.target);
-    data.token = state.token;
-    showLoader('Saving result...');
-    const res = await callBackend('saveResult', data, { token: state.token });
-    if(!res.success) throw new Error(res.message || 'Unable to save result.');
-    showToast(res.message || 'Result saved.');
-    ev.target.reset();
-    await loadBootstrap();
-    hideLoader();
-  } catch(err) {
-    showToast(err.message || 'Result save failed.', false);
-  }
-});
-document.getElementById('logoutBtn').onclick = ()=>{ localStorage.removeItem('genz_admin_token'); location.reload(); };
-fillCategorySelects();
-(async()=>{
-  if(state.token){
-    try {
-      await loadBootstrap();
-    } catch(err) {
-      localStorage.removeItem('genz_admin_token');
-      state.token = '';
-      showToast(err.message || 'Session expired. Please log in again.', false);
+    document.getElementById('loginTab').onclick=()=>{ document.getElementById('loginForm').style.display='block'; document.getElementById('signupForm').style.display='none'; };
+    document.getElementById('signupTab').onclick=()=>{ document.getElementById('loginForm').style.display='none'; document.getElementById('signupForm').style.display='block'; };
+    document.getElementById('doLogin').onclick=()=>{
+        let username=document.getElementById('loginUser').value, password=document.getElementById('loginPass').value;
+        if(!username||!password) return toast("Fill all");
+        showLoading(true);
+        apiCall({action:'adminLogin', username, password}, (res)=>{
+            showLoading(false);
+            if(res.status==='success') { adminToken=res.token; toast("Welcome Admin"); loadDashboard(); }
+            else toast(res.message);
+        });
+    };
+    document.getElementById('doSignup').onclick=()=>{
+        let u=document.getElementById('suUsername').value, p=document.getElementById('suPass').value, dn=document.getElementById('suName').value, em=document.getElementById('suEmail').value;
+        if(!u||!p) return toast("Required");
+        showLoading(true);
+        apiCall({action:'adminSignup', username:u, password:p, displayName:dn, email:em}, (res)=>{ showLoading(false); toast(res.message); if(res.status==='success') document.getElementById('loginTab').click(); });
+    };
+    function loadDashboard(){
+        showLoading(true);
+        apiCall({action:'getAdminBootstrap', token:adminToken}, (data)=>{
+            showLoading(false);
+            if(data.status!=='success') return toast("Session expired");
+            renderDashboard(data);
+        });
     }
-  }
-})();
+    function renderDashboard(d){
+        let html=`<div class="glass-card"><h2>📊 Stats</h2><p>Students: ${d.stats.totalStudents} | Results: ${d.stats.totalResults}</p></div>
+        <div class="glass-card"><h2>⚙️ Settings</h2><div id="settingsForm">${Object.entries(d.settings).map(([k,v])=>`<label>${k}</label><input id="set_${k}" value="${v}">`).join('')}<button class="btn btn-primary" id="saveSettingsBtn">Save Settings</button></div></div>
+        <div class="glass-card"><h2>👨‍🎓 Create/Update Student</h2><div id="studentForm"></div><button class="btn btn-primary" id="saveStudentBtn">Save Student</button></div>
+        <div class="glass-card"><h2>📝 Save Result</h2><div id="resultForm"></div><button class="btn btn-primary" id="saveResultBtn">Publish Result</button></div>
+        <div class="glass-card"><h2>📋 Recent Students</h2><ul>${d.students.map(s=>`<li>${s.regID} - ${s.name}</li>`).join('')}</ul></div>
+        <div class="glass-card"><h2>📋 Recent Results</h2><ul>${d.results.map(r=>`<li>${r.regID} - ${r.exam} - Score:${r.score}</li>`).join('')}</ul></div>`;
+        document.getElementById('dashboard').style.display='block'; document.getElementById('authPanel').style.display='none';
+        document.getElementById('dashboard').innerHTML=html;
+        document.getElementById('saveSettingsBtn').onclick=()=>{ let sets={}; for(let k in d.settings) sets[k]=document.getElementById(`set_${k}`).value; showLoading(true); apiCall({action:'saveSettings', token:adminToken, settings:JSON.stringify(sets)}, (res)=>{ showLoading(false); toast(res.message); }); };
+        document.getElementById('studentForm').innerHTML=`<input placeholder="RegID" id="s_reg"><input placeholder="FullName" id="s_name"><input placeholder="Password (leave if not change)" id="s_pass" type="password"><input placeholder="Age" id="s_age"><select id="s_gender"><option>Male</option><option>Female</option></select><input placeholder="DOB" id="s_dob"><input placeholder="ParentName" id="s_parent"><input placeholder="Phone" id="s_phone"><input placeholder="Email" id="s_email"><input placeholder="School" id="s_school"><input placeholder="State" id="s_state"><input placeholder="CityLGA" id="s_city"><input placeholder="Class" id="s_class"><input placeholder="Category" id="s_cat"><textarea placeholder="Address" id="s_addr"></textarea><input placeholder="PassportUrl" id="s_url">`;
+        document.getElementById('saveStudentBtn').onclick=()=>{ let student={ regID:document.getElementById('s_reg').value, fullName:document.getElementById('s_name').value, password:document.getElementById('s_pass').value, age:document.getElementById('s_age').value, gender:document.getElementById('s_gender').value, dob:document.getElementById('s_dob').value, parentName:document.getElementById('s_parent').value, parentPhone:document.getElementById('s_phone').value, parentEmail:document.getElementById('s_email').value, schoolName:document.getElementById('s_school').value, state:document.getElementById('s_state').value, cityLGA:document.getElementById('s_city').value, classLevel:document.getElementById('s_class').value, category:document.getElementById('s_cat').value, address:document.getElementById('s_addr').value, passportUrl:document.getElementById('s_url').value }; showLoading(true); apiCall({action:'saveStudent', token:adminToken, student:JSON.stringify(student)}, (res)=>{ showLoading(false); toast(res.message); }); };
+        document.getElementById('resultForm').innerHTML=`<input placeholder="RegID" id="r_reg"><input placeholder="Exam Title" id="r_title"><input placeholder="Max Score" id="r_max"><input placeholder="Student Score" id="r_score"><input placeholder="Academic Session" id="r_sess"><input placeholder="Term" id="r_term"><textarea placeholder="Teacher Comment" id="r_comment"></textarea><label><input type="checkbox" id="r_pub"> Published</label>`;
+        document.getElementById('saveResultBtn').onclick=()=>{ let result={ regID:document.getElementById('r_reg').value, examTitle:document.getElementById('r_title').value, maxScore:parseInt(document.getElementById('r_max').value), studentScore:parseInt(document.getElementById('r_score').value), academicSession:document.getElementById('r_sess').value, term:document.getElementById('r_term').value, teacherComment:document.getElementById('r_comment').value, published:document.getElementById('r_pub').checked, examDate:new Date().toISOString().split('T')[0], passMarkNumber:40, passMarkPercentage:40 }; showLoading(true); apiCall({action:'saveResult', token:adminToken, result:JSON.stringify(result)}, (res)=>{ showLoading(false); toast(res.message); }); };
+    }
 </script>
 </body>
 </html>
