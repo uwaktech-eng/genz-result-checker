@@ -1,502 +1,274 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Dashboard | Genz Edutech Innovations</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg:#f7fbff; --bg2:#edf4ff; --card:rgba(255,255,255,.82); --line:rgba(86,123,255,.18);
-      --text:#17305b; --muted:#61789c; --primary:#4b7bff; --accent:#7a5cff; --good:#18b56a; --bad:#e45757;
-      --shadow:0 20px 60px rgba(53,100,220,.12);
-    }
-    *{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;font-family:Inter,system-ui,sans-serif;color:var(--text);
-      background:radial-gradient(circle at top left,#ffffff 0,#f0f6ff 42%,#fbfdff 100%)}
-    .shell{max-width:1220px;margin:auto;padding:22px}
-    .glass{background:var(--card);backdrop-filter:blur(18px);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:26px}
-    .top{padding:20px 22px;display:flex;gap:14px;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;margin-bottom:18px}
-    .brand strong{display:block;font-size:22px} .brand span{font-size:13px;color:var(--muted)}
-    .grid{display:grid;gap:18px}
-    .login-card{max-width:520px;margin:30px auto;padding:28px}
-    .hidden{display:none!important}
-    h2{margin:0 0 8px} h3{margin:0 0 12px} p.lead{margin:0;color:var(--muted)}
-    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
-    .stat{padding:18px}
-    .stat .num{font-size:28px;font-weight:800} .stat .lbl{font-size:13px;color:var(--muted)}
-    .layout{display:grid;grid-template-columns:1.18fr .82fr;gap:18px;align-items:start}
-    .panel{padding:20px}
-    .forms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
-    .full{grid-column:1/-1}
-    label{display:block;font-size:13px;font-weight:700;margin-bottom:7px}
-    input,select,textarea{width:100%;padding:13px 14px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.94);outline:none;font:inherit;color:var(--text)}
-    textarea{min-height:96px;resize:vertical}
-    input:focus,select:focus,textarea:focus{border-color:rgba(75,123,255,.5);box-shadow:0 0 0 4px rgba(75,123,255,.12)}
-    .row2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-    .row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-    .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px}
-    button,.btn{border:none;cursor:pointer;border-radius:14px;padding:13px 16px;font:inherit;font-weight:800}
-    .primary{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;box-shadow:0 16px 34px rgba(75,123,255,.25)}
-    .soft{background:#fff;color:var(--primary);border:1px solid var(--line)}
-    .danger{background:#fff0f0;color:var(--bad);border:1px solid rgba(228,87,87,.18)}
-    .table-wrap{overflow:auto;border-radius:18px;border:1px solid var(--line);background:#fff}
-    table{width:100%;border-collapse:collapse;min-width:760px}
-    th,td{padding:12px 14px;border-bottom:1px solid #eef2fb;text-align:left;font-size:13px;vertical-align:top}
-    th{background:#f6f9ff;font-size:12px;letter-spacing:.02em;text-transform:uppercase;color:#5d76a2}
-    .pill{display:inline-block;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:800}
-    .ok{background:#ecfff4;color:#16935a} .off{background:#fff2f2;color:#ce4040}
-    .tiny{font-size:12px;color:var(--muted)} .mt{margin-top:18px}
-    .toast{position:fixed;right:18px;bottom:18px;padding:14px 16px;border-radius:14px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);opacity:0;transform:translateY(10px);pointer-events:none;transition:.25s}
-    .toast.show{opacity:1;transform:translateY(0)} .toast.ok{border-color:rgba(24,181,106,.18)} .toast.bad{border-color:rgba(228,87,87,.18)}
-    .footer-note{text-align:center;color:var(--muted);font-size:12px;padding:12px 0 28px}
-    @media (max-width:960px){.layout{grid-template-columns:1fr} .forms{grid-template-columns:1fr} .row2,.row3{grid-template-columns:1fr} .top{position:static;flex-direction:column;align-items:flex-start}}
-  </style>
-</head>
-<body>
-  <div class="shell">
-    <div class="top glass">
-      <div class="brand">
-        <strong>Genz Edutech Innovations</strong>
-        <span>Admin dashboard for student records, results and portal settings</span>
-      </div>
-      <div class="actions">
-        <a class="btn soft" href="./index.html">Home</a>
-        <button class="btn danger hidden" id="logoutBtn">Log out</button>
-      </div>
-    </div>
-
-    <section id="loginView" class="glass login-card">
-      <h2>Admin Login</h2>
-      <p class="lead">Sign in to manage learners, results and portal settings for Genz Edutech Innovations.</p>
-      <div class="grid mt">
-        <div><label>Username</label><input id="loginUsername" autocomplete="username" /></div>
-        <div><label>Password</label><input id="loginPassword" type="password" autocomplete="current-password" /></div>
-      </div>
-      <div class="actions">
-        <button class="primary" id="loginBtn">Login</button>
-        <button class="soft" id="pingBtn">Check Backend</button>
-      </div>
-    </section>
-
-    <section id="appView" class="hidden">
-      <div class="stats">
-        <div class="glass stat"><div class="num" id="statStudents">0</div><div class="lbl">Students</div></div>
-        <div class="glass stat"><div class="num" id="statResults">0</div><div class="lbl">Results</div></div>
-        <div class="glass stat"><div class="num" id="statPublished">0</div><div class="lbl">Published Results</div></div>
-      </div>
-
-      <div class="layout mt">
-        <div class="grid">
-          <section class="glass panel">
-            <h3>Portal Settings</h3>
-            <p class="lead">Brand, school details and report configuration.</p>
-            <div class="forms mt">
-              <div><label>Brand Name</label><input id="BRAND_NAME"></div>
-              <div><label>School Name</label><input id="SCHOOL_NAME"></div>
-              <div class="full"><label>Head Office Address</label><input id="HEAD_OFFICE_ADDRESS"></div>
-              <div><label>School Phone</label><input id="SCHOOL_PHONE"></div>
-              <div><label>School Email</label><input id="SCHOOL_EMAIL"></div>
-              <div><label>Principal Name</label><input id="PRINCIPAL_NAME"></div>
-              <div><label>Academic Session</label><input id="ACADEMIC_SESSION"></div>
-              <div><label>Term</label><input id="TERM"></div>
-              <div><label>Default Exam Title</label><input id="EXAM_TITLE"></div>
-              <div><label>Pass Mark Number</label><input id="PASS_MARK_NUMBER" type="number"></div>
-              <div><label>Pass Mark Percentage</label><input id="PASS_MARK_PERCENTAGE" type="number"></div>
-              <div><label>Show Position On Report</label>
-                <select id="SHOW_POSITION_ON_REPORT">
-                  <option value="true">On</option>
-                  <option value="false">Off</option>
-                </select>
-              </div>
-            </div>
-            <div class="actions"><button class="primary" id="saveSettingsBtn">Save Settings</button></div>
-          </section>
-
-          <section class="glass panel">
-            <h3>Create / Update Student</h3>
-            <p class="lead">Passport link is managed here in admin only.</p>
-            <div class="forms mt">
-              <div><label>Registration ID</label><input id="stu_RegID"></div>
-              <div><label>Password <span class="tiny">(leave blank to keep old one when editing)</span></label><input id="stu_Password" type="password"></div>
-              <div class="full"><label>Full Name</label><input id="stu_FullName"></div>
-              <div><label>Age</label><input id="stu_Age"></div>
-              <div><label>Gender</label>
-                <select id="stu_Gender"><option value="">Select Gender</option><option>Male</option><option>Female</option></select>
-              </div>
-              <div><label>Date of Birth</label><input id="stu_DOB" type="date"></div>
-              <div><label>Parent/Guardian Name</label><input id="stu_ParentName"></div>
-              <div><label>Parent/Guardian Email</label><input id="stu_ParentEmail" type="email"></div>
-              <div><label>Parent/Guardian Phone</label><input id="stu_ParentPhone"></div>
-              <div><label>School Name</label><input id="stu_SchoolName"></div>
-              <div><label>State</label><input id="stu_State"></div>
-              <div><label>City / LGA</label><input id="stu_CityLGA"></div>
-              <div><label>Class</label><input id="stu_ClassLevel"></div>
-              <div><label>Category</label>
-                <select id="stu_Category"></select>
-              </div>
-              <div class="full"><label>Address</label><textarea id="stu_Address"></textarea></div>
-              <div class="full"><label>Passport Image Link</label><input id="stu_PassportUrl" placeholder="https://..."></div>
-              <div><label>Active</label>
-                <select id="stu_Active"><option value="true">Active</option><option value="false">Inactive</option></select>
-              </div>
-            </div>
-            <div class="actions">
-              <button class="primary" id="saveStudentBtn">Save Student</button>
-              <button class="soft" id="clearStudentBtn">Clear Student Form</button>
-            </div>
-          </section>
-
-          <section class="glass panel">
-            <h3>Create / Update Result</h3>
-            <p class="lead">Each result will reflect on the student report card.</p>
-            <div class="forms mt">
-              <div><label>Result ID <span class="tiny">(optional when updating)</span></label><input id="res_ResultID"></div>
-              <div><label>Registration ID</label><input id="res_RegID"></div>
-              <div><label>Exam Title</label><input id="res_ExamTitle"></div>
-              <div><label>Exam Date</label><input id="res_ExamDate" type="date"></div>
-              <div><label>Overall Exam Score</label><input id="res_MaxScore" type="number"></div>
-              <div><label>Student Score</label><input id="res_StudentScore" type="number"></div>
-              <div><label>Pass Mark Number</label><input id="res_PassMarkNumber" type="number"></div>
-              <div><label>Pass Mark Percentage</label><input id="res_PassMarkPercentage" type="number"></div>
-              <div><label>Position</label><input id="res_Position" placeholder="1st, 2nd, 3rd..."></div>
-              <div><label>Academic Session</label><input id="res_AcademicSession"></div>
-              <div><label>Term</label><input id="res_Term"></div>
-              <div><label>Published</label>
-                <select id="res_Published"><option value="true">Yes</option><option value="false">No</option></select>
-              </div>
-              <div class="full"><label>Teacher Comment</label><textarea id="res_TeacherComment"></textarea></div>
-            </div>
-            <div class="actions">
-              <button class="primary" id="saveResultBtn">Save Result</button>
-              <button class="soft" id="clearResultBtn">Clear Result Form</button>
-            </div>
-          </section>
-        </div>
-
-        <div class="grid">
-          <section class="glass panel">
-            <h3>Students</h3>
-            <p class="lead">Click a row to load it into the student form.</p>
-            <div class="table-wrap mt">
-              <table>
-                <thead><tr><th>Reg ID</th><th>Name</th><th>Class</th><th>Category</th><th>Status</th></tr></thead>
-                <tbody id="studentsBody"></tbody>
-              </table>
-            </div>
-          </section>
-
-          <section class="glass panel">
-            <h3>Results</h3>
-            <p class="lead">Click a row to load it into the result form.</p>
-            <div class="table-wrap mt">
-              <table>
-                <thead><tr><th>Reg ID</th><th>Exam</th><th>Score</th><th>%</th><th>Published</th></tr></thead>
-                <tbody id="resultsBody"></tbody>
-              </table>
-            </div>
-          </section>
-        </div>
-      </div>
-    </section>
-
-    <div id="toast" class="toast"></div>
-    <div class="footer-note">Frontend hosted on GitHub / Vercel. Backend powered by Google Apps Script + Google Sheets.</div>
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"><style>
+:root{--bg:#f4f8ff;--bg2:#eef5ff;--card:rgba(255,255,255,.78);--card2:rgba(255,255,255,.92);--line:rgba(76,110,245,.16);--text:#10214a;--muted:#5f6d92;--primary:#3d6cff;--primary-2:#7b61ff;--accent:#12b886;--danger:#e03131;--warning:#f59f00;--shadow:0 20px 40px rgba(58,92,170,.10);--radius:22px}
+*{box-sizing:border-box}html,body{margin:0;padding:0;font-family:Inter,system-ui,Arial,sans-serif;color:var(--text);background:radial-gradient(circle at top left,#fefeff 0,#f6fbff 28%,#eef4ff 60%,#eaf0ff 100%)}a{text-decoration:none;color:inherit}button,input,select,textarea{font:inherit}body{min-height:100vh}.page{max-width:1220px;margin:0 auto;padding:24px}.brand{display:flex;align-items:center;gap:12px}.brand-mark{width:46px;height:46px;border-radius:15px;background:linear-gradient(135deg,var(--primary),var(--primary-2));display:grid;place-items:center;color:#fff;font-weight:800;box-shadow:var(--shadow)}.brand small{display:block;color:var(--muted);font-size:12px}.hero{background:linear-gradient(135deg,rgba(255,255,255,.92),rgba(237,244,255,.84));backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:32px;padding:28px;box-shadow:var(--shadow);position:relative;overflow:hidden}.hero:before,.panel:before{content:"";position:absolute;inset:auto auto -80px -80px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(61,108,255,.12),transparent 65%)}.hero h1{margin:16px 0 10px;font-size:clamp(28px,5vw,44px);line-height:1.05}.hero p{margin:0;color:var(--muted);max-width:760px;line-height:1.6}.grid{display:grid;gap:20px}.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.panel{position:relative;background:var(--card);backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:26px;padding:22px;box-shadow:var(--shadow)}.card{background:var(--card2);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 12px 24px rgba(41,76,157,.07)}.muted{color:var(--muted)}.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap}.navpill{display:inline-flex;gap:10px;flex-wrap:wrap}.chip,.btn{border:none;border-radius:14px;padding:12px 16px;cursor:pointer;transition:.2s ease}.btn{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;font-weight:700;box-shadow:0 12px 24px rgba(77,107,232,.18)}.btn.secondary{background:#fff;color:var(--text);border:1px solid var(--line);box-shadow:none}.btn.ghost{background:rgba(255,255,255,.65);color:var(--text);border:1px solid var(--line);box-shadow:none}.btn.bad{background:linear-gradient(135deg,#ff6b6b,#fa5252)}.btn.ok{background:linear-gradient(135deg,#12b886,#20c997)}.btn.small{padding:10px 14px;border-radius:12px;font-size:14px}.pill{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;background:rgba(255,255,255,.74);border:1px solid var(--line);border-radius:999px;color:var(--muted);font-weight:600}.stat{padding:18px;border-radius:18px;background:rgba(255,255,255,.8);border:1px solid var(--line)}.stat strong{display:block;font-size:28px;margin-top:8px}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.form-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.field{display:flex;flex-direction:column;gap:8px}.field label{font-size:13px;font-weight:700;color:#4f5f8b}.field input,.field select,.field textarea{width:100%;padding:13px 14px;border-radius:14px;border:1px solid rgba(98,120,191,.2);background:rgba(255,255,255,.95);outline:none;color:var(--text)}.field textarea{min-height:110px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(61,108,255,.45);box-shadow:0 0 0 4px rgba(61,108,255,.10)}.section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.section-title h2,.section-title h3{margin:0}.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;background:rgba(255,255,255,.88);border-radius:18px;overflow:hidden}.table th,.table td{padding:12px 14px;border-bottom:1px solid rgba(98,120,191,.12);text-align:left;font-size:14px;vertical-align:top}.table th{background:rgba(61,108,255,.08);color:#344777;font-size:13px;text-transform:uppercase;letter-spacing:.03em}.table tr:last-child td{border-bottom:none}.toast{position:fixed;right:18px;bottom:18px;z-index:1000;display:none;padding:14px 16px;border-radius:14px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);max-width:320px}.toast.show{display:block}.toast.ok{border-color:rgba(18,184,134,.35)}.toast.bad{border-color:rgba(224,49,49,.35)}.hidden{display:none!important}.report{background:#fff;border:1px solid rgba(120,140,200,.14);border-radius:24px;padding:22px;box-shadow:0 10px 24px rgba(80,100,160,.08)}.report-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;border-bottom:1px dashed rgba(110,130,190,.22);padding-bottom:18px;margin-bottom:18px}.report-brand h2{margin:0 0 6px;font-size:24px}.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.kv .item{padding:12px;border-radius:16px;background:#f8fbff;border:1px solid rgba(96,120,190,.12)}.passport{width:110px;height:130px;border-radius:18px;overflow:hidden;border:1px solid rgba(96,120,190,.18);background:#f5f8ff;display:grid;place-items:center}.passport img{width:100%;height:100%;object-fit:cover}.result-banner{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:18px 0}.result-tag{padding:10px 14px;border-radius:14px;background:#f4f8ff;border:1px solid rgba(96,120,190,.14);font-weight:700}.pass{color:#0b8f68}.fail{color:#d6336c}.links{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}.center{text-align:center}.auth-switch{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.auth-switch .tab{padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.7);cursor:pointer;font-weight:700;color:var(--muted)}.auth-switch .tab.active{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;border-color:transparent}.footer-note{margin-top:18px;color:var(--muted);font-size:13px}.summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.spacer{height:10px}@media print{body{background:#fff}.page{padding:0;max-width:none}.no-print{display:none!important}.report{box-shadow:none;border:none;border-radius:0;padding:0}a{text-decoration:none;color:inherit}}@media (max-width:920px){.grid.two,.grid.three,.summary-grid,.form-grid,.form-grid.three,.kv{grid-template-columns:1fr}.report-head{flex-direction:column}.page{padding:16px}}
+</style><title>Admin Portal | Genz Edutech Innovations</title></head><body>
+<div class="page">
+  <div class="topbar">
+    <div class="brand"><div class="brand-mark">GE</div><div><strong>Genz Edutech Innovations</strong><small>Admin management portal</small></div></div>
+    <div class="navpill no-print"><a class="btn secondary" href="index.html">Home</a><a class="btn secondary" href="student.html">Student Portal</a></div>
   </div>
 
-  <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbynYNmLAHhox3is5agewRvPmt3gtqi3YwUh1PQKfB3R8JQaCL1fu1nH3QUYe0760B0Y/exec';
-    const BRAND_NAME = 'Genz Edutech Innovations';
-    const state = { token: localStorage.getItem('genz_admin_token') || '', bootstrap: null };
-    const categories = ['Lower Primary','Upper Primary','Junior High School','Senior High School','Undergraduate'];
+  <section class="hero no-print">
+    <span class="pill">Admin Access</span>
+    <h1>Manage settings, students, and report cards</h1>
+    <p>Create an admin account or sign in to update school settings, add learner passport links, and publish results that reflect on the student report card.</p>
+  </section>
 
-    function $(id) { return document.getElementById(id); }
-    function showToast(message, ok=true) {
-      const toast = $('toast');
-      toast.textContent = message;
-      toast.className = 'toast show ' + (ok ? 'ok' : 'bad');
-      setTimeout(() => toast.className = 'toast', 2600);
+  <div class="spacer"></div>
+
+  <section id="authPanel" class="panel no-print">
+    <div class="auth-switch">
+      <button class="tab active" id="tabLogin" type="button">Admin Login</button>
+      <button class="tab" id="tabSignup" type="button">Admin Signup</button>
+    </div>
+
+    <form id="loginForm">
+      <div class="form-grid">
+        <div class="field"><label>Username</label><input required name="username" placeholder="Enter admin username"></div>
+        <div class="field"><label>Password</label><input required type="password" name="password" placeholder="Enter password"></div>
+      </div>
+      <div class="links"><button class="btn" type="submit">Sign In</button></div>
+    </form>
+
+    <form id="signupForm" class="hidden">
+      <div class="form-grid">
+        <div class="field"><label>Display Name</label><input required name="displayName" placeholder="e.g. Main Admin"></div>
+        <div class="field"><label>Email</label><input type="email" name="email" placeholder="you@example.com"></div>
+        <div class="field"><label>Username</label><input required name="username" placeholder="Choose a username"></div>
+        <div class="field"><label>Password</label><input required type="password" name="password" placeholder="Create a password"></div>
+      </div>
+      <div class="links"><button class="btn ok" type="submit">Create Admin Account</button></div>
+    </form>
+  </section>
+
+  <section id="dashboard" class="hidden">
+    <div class="summary-grid no-print">
+      <div class="stat"><span class="muted">Students</span><strong id="sumStudents">0</strong></div>
+      <div class="stat"><span class="muted">Results</span><strong id="sumResults">0</strong></div>
+      <div class="stat"><span class="muted">Published</span><strong id="sumPublished">0</strong></div>
+    </div>
+    <div class="spacer"></div>
+    <div class="grid two">
+      <section class="panel no-print">
+        <div class="section-title"><h2>Portal Settings</h2><button class="btn small secondary" id="logoutBtn" type="button">Logout</button></div>
+        <form id="settingsForm">
+          <div class="form-grid">
+            <div class="field"><label>Brand Name</label><input name="BRAND_NAME"></div>
+            <div class="field"><label>School Name</label><input name="SCHOOL_NAME"></div>
+            <div class="field"><label>Head Office Address</label><input name="HEAD_OFFICE_ADDRESS"></div>
+            <div class="field"><label>School Phone</label><input name="SCHOOL_PHONE"></div>
+            <div class="field"><label>School Email</label><input name="SCHOOL_EMAIL"></div>
+            <div class="field"><label>Principal Name</label><input name="PRINCIPAL_NAME"></div>
+            <div class="field"><label>Academic Session</label><input name="ACADEMIC_SESSION"></div>
+            <div class="field"><label>Term</label><input name="TERM"></div>
+            <div class="field"><label>Exam Title</label><input name="EXAM_TITLE"></div>
+            <div class="field"><label>Pass Mark Number</label><input name="PASS_MARK_NUMBER" type="number"></div>
+            <div class="field"><label>Pass Mark Percentage</label><input name="PASS_MARK_PERCENTAGE" type="number"></div>
+            <div class="field"><label>Show Position on Report</label><select name="SHOW_POSITION_ON_REPORT"><option value="false">Off</option><option value="true">On</option></select></div>
+          </div>
+          <div class="links"><button class="btn" type="submit">Save Settings</button></div>
+        </form>
+      </section>
+
+      <section class="panel no-print">
+        <div class="section-title"><h2>Create or Update Student</h2></div>
+        <form id="studentForm">
+          <div class="form-grid">
+            <div class="field"><label>Registration ID</label><input name="RegID" required></div>
+            <div class="field"><label>Password <span class="muted">(for new or reset)</span></label><input name="Password" type="text"></div>
+            <div class="field"><label>Full Name</label><input name="FullName" required></div>
+            <div class="field"><label>Age</label><input name="Age" required></div>
+            <div class="field"><label>Gender</label><select name="Gender" required><option value="">Select gender</option><option>Male</option><option>Female</option></select></div>
+            <div class="field"><label>Date of Birth</label><input name="DOB" type="date"></div>
+            <div class="field"><label>Parent/Guardian Name</label><input name="ParentName"></div>
+            <div class="field"><label>Parent/Guardian Phone</label><input name="ParentPhone" required></div>
+            <div class="field"><label>Parent/Guardian Email</label><input name="ParentEmail" type="email" required></div>
+            <div class="field"><label>School Name</label><input name="SchoolName" required></div>
+            <div class="field"><label>State</label><input name="State" required></div>
+            <div class="field"><label>City / LGA</label><input name="CityLGA" required></div>
+            <div class="field"><label>Class</label><input name="ClassLevel" required></div>
+            <div class="field"><label>Category</label><select name="Category" required></select></div>
+            <div class="field"><label>Passport Image Link</label><input name="PassportUrl" placeholder="https://..."></div>
+            <div class="field"><label>Status</label><select name="Active"><option value="true">Active</option><option value="false">Inactive</option></select></div>
+          </div>
+          <div class="field"><label>Address</label><textarea name="Address"></textarea></div>
+          <div class="links"><button class="btn ok" type="submit">Save Student</button></div>
+        </form>
+      </section>
+    </div>
+
+    <div class="spacer"></div>
+    <div class="grid two">
+      <section class="panel no-print">
+        <div class="section-title"><h2>Enter Result</h2></div>
+        <form id="resultForm">
+          <div class="form-grid">
+            <div class="field"><label>Registration ID</label><input name="RegID" required></div>
+            <div class="field"><label>Exam Title</label><input name="ExamTitle" required></div>
+            <div class="field"><label>Exam Date</label><input type="date" name="ExamDate" required></div>
+            <div class="field"><label>Overall Exam Score</label><input type="number" name="MaxScore" required></div>
+            <div class="field"><label>Pass Mark Number</label><input type="number" name="PassMarkNumber"></div>
+            <div class="field"><label>Pass Mark Percentage</label><input type="number" name="PassMarkPercentage"></div>
+            <div class="field"><label>Student Score</label><input type="number" name="StudentScore" required></div>
+            <div class="field"><label>Position</label><input name="Position" placeholder="e.g. 3rd"></div>
+            <div class="field"><label>Academic Session</label><input name="AcademicSession"></div>
+            <div class="field"><label>Term</label><input name="Term"></div>
+            <div class="field"><label>Publish Result</label><select name="Published"><option value="true">Yes</option><option value="false">No</option></select></div>
+          </div>
+          <div class="field"><label>Teacher Comment</label><textarea name="TeacherComment"></textarea></div>
+          <div class="links"><button class="btn" type="submit">Save Result</button></div>
+        </form>
+      </section>
+      <section class="panel">
+        <div class="section-title"><h2>Recent Students</h2></div>
+        <div class="table-wrap"><table class="table"><thead><tr><th>Reg ID</th><th>Name</th><th>Class</th><th>Category</th><th>School</th></tr></thead><tbody id="studentsTable"></tbody></table></div>
+      </section>
+    </div>
+
+    <div class="spacer"></div>
+    <section class="panel">
+      <div class="section-title"><h2>Recent Results</h2></div>
+      <div class="table-wrap"><table class="table"><thead><tr><th>Reg ID</th><th>Exam</th><th>Score</th><th>%</th><th>Grade</th><th>Status</th><th>Published</th></tr></thead><tbody id="resultsTable"></tbody></table></div>
+    </section>
+  </section>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbynYNmLAHhox3is5agewRvPmt3gtqi3YwUh1PQKfB3R8JQaCL1fu1nH3QUYe0760B0Y/exec';
+function showToast(message, ok=true){
+  const toast = document.getElementById('toast');
+  if(!toast) return alert(message);
+  toast.textContent = message;
+  toast.className = 'toast show ' + (ok ? 'ok' : 'bad');
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=>toast.className='toast', 2800);
+}
+function safeId(){ return 'cb_' + Date.now() + '_' + Math.floor(Math.random()*100000); }
+function callBackend(action, payload={}, extra={}){
+  return new Promise((resolve, reject)=>{
+    const cb = safeId();
+    const params = new URLSearchParams();
+    params.set('action', action);
+    params.set('callback', cb);
+    params.set('payload', JSON.stringify(payload||{}));
+    Object.keys(extra||{}).forEach(k=>{ if(extra[k]!==undefined && extra[k]!==null) params.set(k, extra[k]); });
+    const script = document.createElement('script');
+    window[cb] = function(data){
+      cleanup();
+      resolve(data);
+    };
+    function cleanup(){
+      try{ delete window[cb]; }catch(err){ window[cb]=undefined; }
+      if(script.parentNode) script.parentNode.removeChild(script);
+      clearTimeout(timer);
     }
+    script.onerror = function(){ cleanup(); reject(new Error('Unable to reach backend. Check your deployed Apps Script Web App URL and access settings.')); };
+    const timer = setTimeout(()=>{ cleanup(); reject(new Error('Backend request timed out.')); }, 20000);
+    script.src = WEB_APP_URL + '?' + params.toString();
+    document.body.appendChild(script);
+  });
+}
+function formatDate(v){ if(!v) return ''; const d=new Date(v); return isNaN(d)?String(v):d.toLocaleDateString(); }
+function setText(id, value){ const el=document.getElementById(id); if(el) el.textContent = value ?? ''; }
+function escapeHtml(str){ return String(str ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+</script>
 
-    function fillCategorySelects() {
-      const select = $('stu_Category');
-      select.innerHTML = '<option value="">Select Category</option>' + categories.map(v => `<option>${v}</option>`).join('');
-    }
-
-    function jsonp(action, payload={}) {
-      return new Promise((resolve, reject) => {
-        const cb = 'cb_' + Date.now() + '_' + Math.floor(Math.random()*100000);
-        const qs = new URLSearchParams({
-          action,
-          payload: JSON.stringify(payload),
-          callback: cb
-        });
-        const script = document.createElement('script');
-        let timer;
-
-        window[cb] = (data) => {
-          clearTimeout(timer);
-          delete window[cb];
-          script.remove();
-          resolve(data);
-        };
-
-        script.onerror = () => {
-          clearTimeout(timer);
-          delete window[cb];
-          script.remove();
-          reject(new Error('Unable to reach backend. Confirm the current WEB_APP_URL in this page matches your latest Apps Script /exec URL and that the web app access is set to Anyone.'));
-        };
-
-        timer = setTimeout(() => {
-          delete window[cb];
-          script.remove();
-          reject(new Error('Backend request timed out. Confirm the latest Apps Script deployment URL is still correct.'));
-        }, 20000);
-
-        script.src = WEB_APP_URL + '?' + qs.toString();
-        document.body.appendChild(script);
-      });
-    }
-
-    async function pingBackend() {
-      try {
-        const res = await jsonp('ping', {});
-        showToast(res.message || 'Backend is live.', !!res.success);
-      } catch (err) {
-        showToast(err.message, false);
-      }
-    }
-
-    async function login() {
-      try {
-        const res = await jsonp('adminLogin', {
-          username: $('loginUsername').value.trim(),
-          password: $('loginPassword').value
-        });
-        if (!res.success) return showToast(res.message || 'Login failed.', false);
-        state.token = res.token;
-        localStorage.setItem('genz_admin_token', state.token);
-        $('logoutBtn').classList.remove('hidden');
-        await loadBootstrap();
-        $('loginView').classList.add('hidden');
-        $('appView').classList.remove('hidden');
-        showToast('Login successful.');
-      } catch (err) {
-        showToast(err.message, false);
-      }
-    }
-
-    async function loadBootstrap() {
-      const res = await jsonp('getAdminBootstrap', { token: state.token });
-      if (!res.success) throw new Error(res.message || 'Could not load admin dashboard.');
-      state.bootstrap = res;
-      renderDashboard();
-    }
-
-    function renderDashboard() {
-      const b = state.bootstrap;
-      $('statStudents').textContent = b.summary.studentCount || 0;
-      $('statResults').textContent = b.summary.resultCount || 0;
-      $('statPublished').textContent = b.summary.publishedCount || 0;
-
-      ['BRAND_NAME','SCHOOL_NAME','HEAD_OFFICE_ADDRESS','SCHOOL_PHONE','SCHOOL_EMAIL','PRINCIPAL_NAME','ACADEMIC_SESSION','TERM','EXAM_TITLE','PASS_MARK_NUMBER','PASS_MARK_PERCENTAGE','SHOW_POSITION_ON_REPORT']
-        .forEach(key => { if ($(key)) $(key).value = b.settings[key] ?? ''; });
-
-      $('res_AcademicSession').value = b.settings.ACADEMIC_SESSION || '';
-      $('res_Term').value = b.settings.TERM || '';
-      $('res_ExamTitle').value = b.settings.EXAM_TITLE || '';
-      $('res_PassMarkNumber').value = b.settings.PASS_MARK_NUMBER || '';
-      $('res_PassMarkPercentage').value = b.settings.PASS_MARK_PERCENTAGE || '';
-
-      renderStudentsTable(b.students || []);
-      renderResultsTable(b.results || []);
-    }
-
-    function renderStudentsTable(rows) {
-      $('studentsBody').innerHTML = rows.map(r => `
-        <tr onclick='loadStudentToForm(${JSON.stringify(r).replace(/'/g,"&#39;")})'>
-          <td>${escapeHtml(r.RegID)}</td>
-          <td>${escapeHtml(r.FullName)}</td>
-          <td>${escapeHtml(r.ClassLevel || '')}</td>
-          <td>${escapeHtml(r.Category || '')}</td>
-          <td><span class="pill ${r.Active ? 'ok' : 'off'}">${r.Active ? 'Active' : 'Inactive'}</span></td>
-        </tr>`).join('') || `<tr><td colspan="5" class="tiny">No students yet.</td></tr>`;
-    }
-
-    function renderResultsTable(rows) {
-      $('resultsBody').innerHTML = rows.map(r => `
-        <tr onclick='loadResultToForm(${JSON.stringify(r).replace(/'/g,"&#39;")})'>
-          <td>${escapeHtml(r.RegID)}</td>
-          <td>${escapeHtml(r.ExamTitle)}</td>
-          <td>${r.StudentScore} / ${r.MaxScore}</td>
-          <td>${r.Percentage}%</td>
-          <td><span class="pill ${r.Published ? 'ok' : 'off'}">${r.Published ? 'Yes' : 'No'}</span></td>
-        </tr>`).join('') || `<tr><td colspan="5" class="tiny">No results yet.</td></tr>`;
-    }
-
-    function loadStudentToForm(item) {
-      Object.entries({
-        stu_RegID:item.RegID, stu_FullName:item.FullName, stu_Age:item.Age, stu_Gender:item.Gender, stu_DOB:item.DOB,
-        stu_ParentName:item.ParentName, stu_ParentEmail:item.ParentEmail, stu_ParentPhone:item.ParentPhone,
-        stu_SchoolName:item.SchoolName, stu_State:item.State, stu_CityLGA:item.CityLGA, stu_ClassLevel:item.ClassLevel,
-        stu_Category:item.Category, stu_Address:item.Address, stu_PassportUrl:item.PassportUrl, stu_Active:String(item.Active)
-      }).forEach(([id,val]) => { if ($(id)) $(id).value = val ?? ''; });
-      $('stu_Password').value = '';
-      window.scrollTo({ top: $('saveStudentBtn').closest('.panel').offsetTop - 20, behavior:'smooth' });
-    }
-
-    function loadResultToForm(item) {
-      Object.entries({
-        res_ResultID:item.ResultID, res_RegID:item.RegID, res_ExamTitle:item.ExamTitle, res_ExamDate:item.ExamDate,
-        res_MaxScore:item.MaxScore, res_StudentScore:item.StudentScore, res_PassMarkNumber:item.PassMarkNumber,
-        res_PassMarkPercentage:item.PassMarkPercentage, res_Position:item.Position, res_AcademicSession:item.AcademicSession,
-        res_Term:item.Term, res_Published:String(item.Published), res_TeacherComment:item.TeacherComment
-      }).forEach(([id,val]) => { if ($(id)) $(id).value = val ?? ''; });
-      window.scrollTo({ top: $('saveResultBtn').closest('.panel').offsetTop - 20, behavior:'smooth' });
-    }
-
-    async function saveSettings() {
-      try {
-        const payload = {
-          token: state.token,
-          BRAND_NAME:$('BRAND_NAME').value.trim(),
-          SCHOOL_NAME:$('SCHOOL_NAME').value.trim(),
-          HEAD_OFFICE_ADDRESS:$('HEAD_OFFICE_ADDRESS').value.trim(),
-          SCHOOL_PHONE:$('SCHOOL_PHONE').value.trim(),
-          SCHOOL_EMAIL:$('SCHOOL_EMAIL').value.trim(),
-          PRINCIPAL_NAME:$('PRINCIPAL_NAME').value.trim(),
-          ACADEMIC_SESSION:$('ACADEMIC_SESSION').value.trim(),
-          TERM:$('TERM').value.trim(),
-          EXAM_TITLE:$('EXAM_TITLE').value.trim(),
-          PASS_MARK_NUMBER:$('PASS_MARK_NUMBER').value.trim(),
-          PASS_MARK_PERCENTAGE:$('PASS_MARK_PERCENTAGE').value.trim(),
-          SHOW_POSITION_ON_REPORT:$('SHOW_POSITION_ON_REPORT').value
-        };
-        const res = await jsonp('saveSettings', payload);
-        if (!res.success) throw new Error(res.message);
-        showToast(res.message || 'Settings saved.');
-        await loadBootstrap();
-      } catch (err) {
-        showToast(err.message, false);
-      }
-    }
-
-    async function saveStudent() {
-      try {
-        const payload = {
-          token: state.token,
-          RegID:$('stu_RegID').value.trim(),
-          Password:$('stu_Password').value,
-          FullName:$('stu_FullName').value.trim(),
-          Age:$('stu_Age').value.trim(),
-          Gender:$('stu_Gender').value,
-          DOB:$('stu_DOB').value,
-          ParentName:$('stu_ParentName').value.trim(),
-          ParentEmail:$('stu_ParentEmail').value.trim(),
-          ParentPhone:$('stu_ParentPhone').value.trim(),
-          SchoolName:$('stu_SchoolName').value.trim(),
-          State:$('stu_State').value.trim(),
-          CityLGA:$('stu_CityLGA').value.trim(),
-          ClassLevel:$('stu_ClassLevel').value.trim(),
-          Category:$('stu_Category').value,
-          Address:$('stu_Address').value.trim(),
-          PassportUrl:$('stu_PassportUrl').value.trim(),
-          Active:$('stu_Active').value
-        };
-        const res = await jsonp('saveStudent', payload);
-        if (!res.success) throw new Error(res.message);
-        showToast(res.message || 'Student saved.');
-        clearStudentForm();
-        await loadBootstrap();
-      } catch (err) {
-        showToast(err.message, false);
-      }
-    }
-
-    async function saveResult() {
-      try {
-        const payload = {
-          token: state.token,
-          ResultID:$('res_ResultID').value.trim(),
-          RegID:$('res_RegID').value.trim(),
-          ExamTitle:$('res_ExamTitle').value.trim(),
-          ExamDate:$('res_ExamDate').value,
-          MaxScore:$('res_MaxScore').value,
-          StudentScore:$('res_StudentScore').value,
-          PassMarkNumber:$('res_PassMarkNumber').value,
-          PassMarkPercentage:$('res_PassMarkPercentage').value,
-          Position:$('res_Position').value.trim(),
-          AcademicSession:$('res_AcademicSession').value.trim(),
-          Term:$('res_Term').value.trim(),
-          Published:$('res_Published').value,
-          TeacherComment:$('res_TeacherComment').value.trim()
-        };
-        const res = await jsonp('saveResult', payload);
-        if (!res.success) throw new Error(res.message);
-        showToast(res.message || 'Result saved.');
-        clearResultForm();
-        await loadBootstrap();
-      } catch (err) {
-        showToast(err.message, false);
-      }
-    }
-
-    function clearStudentForm() {
-      ['stu_RegID','stu_Password','stu_FullName','stu_Age','stu_Gender','stu_DOB','stu_ParentName','stu_ParentEmail','stu_ParentPhone','stu_SchoolName','stu_State','stu_CityLGA','stu_ClassLevel','stu_Category','stu_Address','stu_PassportUrl'].forEach(id => $(id).value = '');
-      $('stu_Active').value = 'true';
-    }
-
-    function clearResultForm() {
-      ['res_ResultID','res_RegID','res_ExamDate','res_MaxScore','res_StudentScore','res_Position','res_TeacherComment'].forEach(id => $(id).value = '');
-      if (state.bootstrap?.settings) {
-        $('res_ExamTitle').value = state.bootstrap.settings.EXAM_TITLE || '';
-        $('res_PassMarkNumber').value = state.bootstrap.settings.PASS_MARK_NUMBER || '';
-        $('res_PassMarkPercentage').value = state.bootstrap.settings.PASS_MARK_PERCENTAGE || '';
-        $('res_AcademicSession').value = state.bootstrap.settings.ACADEMIC_SESSION || '';
-        $('res_Term').value = state.bootstrap.settings.TERM || '';
-      }
-      $('res_Published').value = 'true';
-    }
-
-    function logout() {
-      localStorage.removeItem('genz_admin_token');
-      state.token = '';
-      $('appView').classList.add('hidden');
-      $('loginView').classList.remove('hidden');
-      $('logoutBtn').classList.add('hidden');
-      showToast('Logged out.');
-    }
-
-    function escapeHtml(v) {
-      return String(v ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-    }
-
-    $('loginBtn').onclick = login;
-    $('pingBtn').onclick = pingBackend;
-
-    if ($('loginUsername') && !$('loginUsername').value) $('loginUsername').placeholder = 'Enter admin username';
-    if ($('loginPassword')) $('loginPassword').placeholder = 'Enter admin password';
-    $('saveSettingsBtn').onclick = saveSettings;
-    $('saveStudentBtn').onclick = saveStudent;
-    $('saveResultBtn').onclick = saveResult;
-    $('clearStudentBtn').onclick = clearStudentForm;
-    $('clearResultBtn').onclick = clearResultForm;
-    $('logoutBtn').onclick = logout;
-
-    fillCategorySelects();
-
-    if (state.token) {
-      loadBootstrap().then(() => {
-        $('loginView').classList.add('hidden');
-        $('appView').classList.remove('hidden');
-        $('logoutBtn').classList.remove('hidden');
-      }).catch(() => {
-        localStorage.removeItem('genz_admin_token');
-        state.token = '';
-      });
-    }
-  </script>
-</body>
-</html>
+<script>
+const state = { token: localStorage.getItem('genz_admin_token') || '', bootstrap: null };
+const categories = ['Lower Primary','Upper Primary','Junior High School','Senior High School','Undergraduate'];
+const els = { authPanel: document.getElementById('authPanel'), dashboard: document.getElementById('dashboard'), loginForm: document.getElementById('loginForm'), signupForm: document.getElementById('signupForm') };
+function toggleAuth(mode){
+  document.getElementById('tabLogin').classList.toggle('active', mode==='login');
+  document.getElementById('tabSignup').classList.toggle('active', mode==='signup');
+  els.loginForm.classList.toggle('hidden', mode!=='login');
+  els.signupForm.classList.toggle('hidden', mode!=='signup');
+}
+document.getElementById('tabLogin').onclick=()=>toggleAuth('login');
+document.getElementById('tabSignup').onclick=()=>toggleAuth('signup');
+function formToObj(form){ return Object.fromEntries(new FormData(form).entries()); }
+function fillCategorySelects(){
+  document.querySelectorAll('select[name="Category"]').forEach(sel=>{
+    sel.innerHTML = '<option value="">Select category</option>' + categories.map(c=>`<option>${c}</option>`).join('');
+  });
+}
+function renderBootstrap(data){
+  state.bootstrap = data;
+  setText('sumStudents', data.summary.studentCount || 0);
+  setText('sumResults', data.summary.resultCount || 0);
+  setText('sumPublished', data.summary.publishedCount || 0);
+  const s = data.settings || {};
+  const settingsForm = document.getElementById('settingsForm');
+  Array.from(settingsForm.elements).forEach(el=>{ if(el.name && s[el.name] !== undefined) el.value = s[el.name]; });
+  const studentsRows = (data.students||[]).slice(0,20).map(r=>`<tr><td class="mono">${escapeHtml(r.RegID)}</td><td>${escapeHtml(r.FullName)}</td><td>${escapeHtml(r.ClassLevel)}</td><td>${escapeHtml(r.Category)}</td><td>${escapeHtml(r.SchoolName)}</td></tr>`).join('') || '<tr><td colspan="5" class="center muted">No students yet.</td></tr>';
+  document.getElementById('studentsTable').innerHTML = studentsRows;
+  const resultRows = (data.results||[]).slice(0,20).map(r=>`<tr><td class="mono">${escapeHtml(r.RegID)}</td><td>${escapeHtml(r.ExamTitle)}</td><td>${r.StudentScore}/${r.MaxScore}</td><td>${r.Percentage}%</td><td>${escapeHtml(r.Grade)}</td><td class="${r.Status==='PASS'?'pass':'fail'}">${escapeHtml(r.Status)}</td><td>${r.Published?'Yes':'No'}</td></tr>`).join('') || '<tr><td colspan="7" class="center muted">No results yet.</td></tr>';
+  document.getElementById('resultsTable').innerHTML = resultRows;
+  els.authPanel.classList.add('hidden');
+  els.dashboard.classList.remove('hidden');
+}
+async function loadBootstrap(){
+  const res = await callBackend('getAdminBootstrap', { token: state.token }, { token: state.token });
+  if(!res.success) throw new Error(res.message || 'Unable to load dashboard.');
+  renderBootstrap(res);
+}
+els.loginForm.addEventListener('submit', async (ev)=>{
+  ev.preventDefault();
+  try{
+    const data = formToObj(els.loginForm);
+    const res = await callBackend('adminLogin', data, { username: data.username, password: data.password });
+    if(!res.success) throw new Error(res.message || 'Login failed.');
+    state.token = res.token;
+    localStorage.setItem('genz_admin_token', state.token);
+    showToast(res.message || 'Login successful.');
+    await loadBootstrap();
+  }catch(err){ showToast(err.message || 'Login failed.', false); }
+});
+els.signupForm.addEventListener('submit', async (ev)=>{
+  ev.preventDefault();
+  try{
+    const data = formToObj(els.signupForm);
+    const res = await callBackend('adminSignup', data);
+    if(!res.success) throw new Error(res.message || 'Signup failed.');
+    showToast(res.message || 'Admin created successfully.');
+    toggleAuth('login');
+    els.loginForm.username.value = data.username || '';
+  }catch(err){ showToast(err.message || 'Signup failed.', false); }
+});
+document.getElementById('settingsForm').addEventListener('submit', async (ev)=>{
+  ev.preventDefault();
+  try{
+    const data = formToObj(ev.target); data.token = state.token;
+    const res = await callBackend('saveSettings', data, { token: state.token });
+    if(!res.success) throw new Error(res.message || 'Unable to save settings.');
+    showToast(res.message || 'Settings saved.');
+    await loadBootstrap();
+  }catch(err){ showToast(err.message || 'Settings save failed.', false); }
+});
+document.getElementById('studentForm').addEventListener('submit', async (ev)=>{
+  ev.preventDefault();
+  try{
+    const data = formToObj(ev.target); data.token = state.token;
+    const res = await callBackend('saveStudent', data, { token: state.token });
+    if(!res.success) throw new Error(res.message || 'Unable to save student.');
+    showToast(res.message || 'Student saved.');
+    ev.target.reset(); fillCategorySelects();
+    await loadBootstrap();
+  }catch(err){ showToast(err.message || 'Student save failed.', false); }
+});
+document.getElementById('resultForm').addEventListener('submit', async (ev)=>{
+  ev.preventDefault();
+  try{
+    const data = formToObj(ev.target); data.token = state.token;
+    const res = await callBackend('saveResult', data, { token: state.token });
+    if(!res.success) throw new Error(res.message || 'Unable to save result.');
+    showToast(res.message || 'Result saved.');
+    ev.target.reset();
+    await loadBootstrap();
+  }catch(err){ showToast(err.message || 'Result save failed.', false); }
+});
+document.getElementById('logoutBtn').onclick = ()=>{ localStorage.removeItem('genz_admin_token'); location.reload(); };
+fillCategorySelects();
+(async()=>{ if(state.token){ try{ await loadBootstrap(); }catch(err){ localStorage.removeItem('genz_admin_token'); state.token=''; showToast(err.message || 'Session expired. Please log in again.', false); } } })();
+</script>
+</body></html>
