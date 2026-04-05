@@ -1,272 +1,646 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Portal - Genz Edutech</title>
-    <style>
-        :root { --primary: #0f172a; --accent: #10b981; --bg: #f8fafc; --glass: rgba(255,255,255,0.9); }
-        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
-        body { background: var(--bg); color: #333; }
-        .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
-        
-        /* Auth */
-        .auth-wrapper { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #d1fae5 0%, #f8fafc 100%); }
-        .glass-card { background: var(--glass); backdrop-filter: blur(10px); padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); width: 100%; max-width: 400px; }
-        .glass-card h2 { margin-bottom: 20px; text-align: center; color: var(--primary); }
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; outline: none; }
-        input:focus { border-color: var(--accent); }
-        .btn { width: 100%; padding: 12px; background: var(--accent); color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .btn:hover { background: #059669; }
-        .toggle-link { text-align: center; margin-top: 15px; cursor: pointer; color: var(--accent); font-size: 0.9rem; }
-        
-        /* Dashboard & Report */
-        #portal-view { display: none; }
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 2px solid #eee; margin-bottom: 30px; }
-        .profile-card { display: flex; gap: 20px; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 30px; align-items: center;}
-        .passport { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; background: #eee; border: 3px solid var(--accent); }
-        .profile-info h3 { margin-bottom: 5px; color: var(--primary); }
-        .profile-info p { color: #64748b; font-size: 0.9rem; margin-bottom: 3px; }
-        
-        .report-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 30px; margin-bottom: 30px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); }
-        .rc-header { text-align: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 20px; margin-bottom: 20px; }
-        .rc-header h1 { color: var(--primary); font-size: 1.8rem; text-transform: uppercase; }
-        .rc-header p { color: #64748b; margin-top: 5px; }
-        
-        .rc-body { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-        .info-box { background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid #e2e8f0; }
-        .info-box p { margin-bottom: 5px; font-size: 0.95rem; }
-        .info-box strong { color: var(--primary); }
-        
-        .result-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        .result-table th, .result-table td { border: 1px solid #cbd5e1; padding: 12px; text-align: center; }
-        .result-table th { background: #f1f5f9; color: var(--primary); }
-        .pass-status { font-weight: bold; padding: 4px 10px; border-radius: 4px; }
-        .status-pass { background: #d1fae5; color: #065f46; }
-        .status-fail { background: #fee2e2; color: #991b1b; }
-        
-        .teacher-remark { margin-top: 20px; padding: 15px; background: #f8fafc; border-left: 4px solid var(--accent); font-style: italic; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Portal | Genz Edutech Innovations</title>
+  <style>
+    :root {
+      --bg: #07101d;
+      --panel: rgba(255,255,255,.1);
+      --panel-2: rgba(255,255,255,.07);
+      --border: rgba(255,255,255,.14);
+      --text: #ebf1ff;
+      --muted: #b7c5e4;
+      --primary: #6e83ff;
+      --primary-2: #7be8ff;
+      --danger: #fb7185;
+      --success: #4ade80;
+      --warning: #fbbf24;
+      --shadow: 0 20px 60px rgba(0,0,0,.35);
+      --radius: 20px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(110,131,255,.35), transparent 30%),
+        radial-gradient(circle at top right, rgba(123,232,255,.16), transparent 25%),
+        linear-gradient(135deg, #050913, #0b1422 50%, #0a1020);
+    }
+    .container { width: min(1250px, calc(100% - 28px)); margin: 0 auto; }
+    .glass {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+    }
+    .topbar {
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: blur(18px);
+      background: rgba(5,9,19,.7);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .topbar-inner {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      padding: 16px 0;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; }
+    .logo {
+      width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2)); color: #081120; font-weight: 900;
+    }
+    .btn {
+      appearance: none; border: none; cursor: pointer; color: white; text-decoration: none;
+      background: linear-gradient(135deg, var(--primary), #5b71ff); border-radius: 14px; padding: 12px 16px;
+      font-weight: 700; transition: transform .2s ease, opacity .2s ease, box-shadow .2s ease;
+      box-shadow: 0 12px 30px rgba(91,113,255,.35);
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn.secondary { background: rgba(255,255,255,.08); box-shadow: none; border: 1px solid rgba(255,255,255,.12); }
+    .btn.ghost { background: transparent; box-shadow: none; border: 1px solid rgba(255,255,255,.12); }
+    .btn.success { background: linear-gradient(135deg, #22c55e, #16a34a); }
+    .btn.full { width: 100%; }
+    .btn[disabled] { opacity: .65; cursor: not-allowed; transform: none; }
+    .hero { padding: 28px 0 22px; }
+    .hero .glass { padding: 24px; }
+    .hero h1 { margin: 0 0 8px; font-size: clamp(1.8rem, 4vw, 3rem); }
+    .muted { color: var(--muted); }
 
-        /* Loader & Toast */
-        .overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.8); display: none; justify-content: center; align-items: center; flex-direction: column; z-index: 1000; }
-        .spinner { width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .toast { position: fixed; top: 20px; right: 20px; background: #334155; color: white; padding: 15px 25px; border-radius: 8px; transform: translateY(-100px); opacity: 0; transition: all 0.3s; z-index: 1001; }
-        .toast.show { transform: translateY(0); opacity: 1; }
+    .auth-wrap {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;
+    }
+    .panel { padding: 22px; }
+    .tabs { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+    .tab-btn {
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); color: var(--text);
+      padding: 10px 14px; border-radius: 12px; cursor: pointer; font-weight: 700;
+    }
+    .tab-btn.active { background: rgba(110,131,255,.22); border-color: rgba(110,131,255,.35); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
 
-        /* Print styles */
-        @media print {
-            body { background: white; }
-            .auth-wrapper, .header, .btn, .profile-card, .toast { display: none !important; }
-            .container { max-width: 100%; padding: 0; }
-            .report-card { box-shadow: none; border: none; page-break-after: always; padding: 0; }
-        }
-    </style>
+    .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    .form-grid.three { grid-template-columns: repeat(3, 1fr); }
+    .form-grid.one { grid-template-columns: 1fr; }
+    .field { display: grid; gap: 7px; }
+    .field label { font-size: .92rem; color: #d9e5ff; }
+    .field input, .field select, .field textarea {
+      width: 100%; padding: 13px 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.07); color: white; outline: none; transition: border-color .2s ease, transform .2s ease;
+      font: inherit;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: rgba(123,232,255,.45); }
+    .field textarea { min-height: 110px; resize: vertical; }
+
+    #dashboard { display: none; padding: 8px 0 40px; }
+    .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+    .summary-card { padding: 18px; }
+    .summary-card .label { color: var(--muted); font-size: .92rem; }
+    .summary-card .value { font-size: 2rem; font-weight: 800; margin-top: 6px; }
+
+    .content-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 20px; }
+    .stack { display: grid; gap: 20px; }
+    .section-card { padding: 22px; }
+    .section-card h2 { margin: 0 0 14px; font-size: 1.2rem; }
+    .list-card { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 14px; }
+    .list-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px dashed rgba(255,255,255,.08); }
+    .list-row:last-child { border-bottom: none; }
+    .badge {
+      padding: 6px 10px; border-radius: 999px; font-size: .78rem; font-weight: 800;
+      background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.1);
+    }
+    .badge.yes { color: #86efac; border-color: rgba(134,239,172,.35); background: rgba(34,197,94,.1); }
+    .badge.no { color: #fda4af; border-color: rgba(251,113,133,.3); background: rgba(251,113,133,.1); }
+
+    .actions-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+
+    .loading {
+      position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
+      background: rgba(2,6,23,.65); backdrop-filter: blur(8px); z-index: 100;
+    }
+    .loading.active { display: flex; }
+    .loading-box {
+      width: min(360px, calc(100% - 32px)); padding: 26px; text-align: center;
+      background: rgba(9,14,27,.86); border: 1px solid rgba(255,255,255,.12); border-radius: 22px;
+      box-shadow: var(--shadow);
+    }
+    .spinner {
+      width: 58px; height: 58px; border-radius: 50%; margin: 0 auto 16px;
+      border: 4px solid rgba(255,255,255,.12); border-top-color: var(--primary-2); animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .toast-wrap {
+      position: fixed; top: 16px; right: 16px; z-index: 120; display: grid; gap: 10px; width: min(360px, calc(100% - 24px));
+    }
+    .toast {
+      padding: 14px 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,.12); box-shadow: var(--shadow);
+      background: rgba(9,14,27,.92); color: white; animation: slideIn .22s ease;
+    }
+    .toast.success { border-color: rgba(74,222,128,.28); }
+    .toast.error { border-color: rgba(251,113,133,.28); }
+    @keyframes slideIn { from { transform: translateY(-8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .help-note {
+      margin-top: 12px; padding: 14px; border-radius: 14px; background: rgba(251,191,36,.08); border: 1px solid rgba(251,191,36,.18);
+      color: #fde68a; font-size: .92rem;
+    }
+
+    @media (max-width: 1000px) {
+      .content-grid, .auth-wrap { grid-template-columns: 1fr; }
+      .summary-grid { grid-template-columns: 1fr 1fr; }
+      .form-grid.three { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 680px) {
+      .summary-grid, .form-grid, .form-grid.three { grid-template-columns: 1fr; }
+      .topbar-inner { flex-direction: column; align-items: flex-start; }
+      .btn { width: 100%; }
+      .actions-row { flex-direction: column; }
+    }
+  </style>
 </head>
 <body>
-
-    <div class="overlay" id="loader">
-        <div class="spinner"></div>
-        <p id="loader-text" style="margin-top: 15px; font-weight: bold; color: var(--primary);">Loading...</p>
+  <div class="loading" id="loadingOverlay">
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <div id="loadingText" style="font-weight:800; font-size:1.05rem; margin-bottom:6px;">Loading...</div>
+      <div class="muted">Please wait while we process your request.</div>
     </div>
-    <div class="toast" id="toast">Message here</div>
+  </div>
+  <div class="toast-wrap" id="toastWrap"></div>
 
-    <div class="auth-wrapper" id="auth-view">
-        <div class="glass-card" id="login-card">
-            <h2>Student Portal</h2>
-            <form id="login-form">
-                <div class="form-group"><label>Registration ID</label><input type="text" id="l-reg" required></div>
-                <div class="form-group"><label>Password</label><input type="password" id="l-pass" required></div>
-                <button type="submit" class="btn">View Results</button>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <div class="brand">
+        <div class="logo">GE</div>
+        <div>
+          <div>Genz Edutech Innovations</div>
+          <small class="muted">Admin Result Portal</small>
+        </div>
+      </div>
+      <div class="actions-row">
+        <a class="btn secondary" href="index.html">Landing Page</a>
+        <button class="btn ghost" id="logoutBtn" style="display:none;">Log Out</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div class="glass">
+        <h1>Admin control center</h1>
+        <p class="muted">Create an admin account, sign in, manage settings, student records, and published results from one polished dashboard.</p>
+      </div>
+    </section>
+
+    <section id="authSection" class="auth-wrap">
+      <div class="glass panel">
+        <div class="tabs">
+          <button class="tab-btn active" data-tab-target="loginTab">Admin Login</button>
+          <button class="tab-btn" data-tab-target="signupTab">Admin Signup</button>
+        </div>
+
+        <div class="tab-panel active" id="loginTab">
+          <form id="adminLoginForm">
+            <div class="form-grid one">
+              <div class="field">
+                <label>Username</label>
+                <input type="text" name="username" placeholder="Enter admin username" required />
+              </div>
+              <div class="field">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="Enter password" required />
+              </div>
+            </div>
+            <div class="actions-row">
+              <button class="btn" type="submit">Sign In</button>
+            </div>
+          </form>
+          <div class="help-note">Default admin is automatically created only when the ADMINS sheet is empty. Default username: <strong>admin</strong>, default password: <strong>admin123</strong>.</div>
+        </div>
+
+        <div class="tab-panel" id="signupTab">
+          <form id="adminSignupForm">
+            <div class="form-grid">
+              <div class="field">
+                <label>Display Name</label>
+                <input type="text" name="displayName" required />
+              </div>
+              <div class="field">
+                <label>Username</label>
+                <input type="text" name="username" required />
+              </div>
+              <div class="field">
+                <label>Email</label>
+                <input type="email" name="email" required />
+              </div>
+              <div class="field">
+                <label>Password</label>
+                <input type="password" name="password" required />
+              </div>
+            </div>
+            <div class="actions-row">
+              <button class="btn success" type="submit">Create Admin Account</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="glass panel">
+        <h2 style="margin-top:0;">Before you start</h2>
+        <div class="list-card">
+          <div class="list-row"><span>Backend</span><span class="badge">Google Apps Script</span></div>
+          <div class="list-row"><span>Database</span><span class="badge">Google Sheets</span></div>
+          <div class="list-row"><span>Frontend</span><span class="badge">Vanilla HTML/CSS/JS</span></div>
+          <div class="list-row"><span>Calls</span><span class="badge">JSONP Compatible</span></div>
+        </div>
+        <p class="muted" style="margin:14px 0 0;">Replace the <strong>WEB_APP_URL</strong> constant in this file with your deployed Apps Script <strong>/exec</strong> URL.</p>
+      </div>
+    </section>
+
+    <section id="dashboard">
+      <div class="summary-grid">
+        <div class="glass summary-card"><div class="label">Total Students</div><div class="value" id="sumStudents">0</div></div>
+        <div class="glass summary-card"><div class="label">Active Students</div><div class="value" id="sumActive">0</div></div>
+        <div class="glass summary-card"><div class="label">Total Results</div><div class="value" id="sumResults">0</div></div>
+        <div class="glass summary-card"><div class="label">Published Results</div><div class="value" id="sumPublished">0</div></div>
+      </div>
+
+      <div class="content-grid">
+        <div class="stack">
+          <div class="glass section-card">
+            <h2>Portal Settings</h2>
+            <form id="settingsForm">
+              <div class="form-grid three">
+                <div class="field"><label>Brand Name</label><input name="BRAND_NAME" /></div>
+                <div class="field"><label>School Name</label><input name="SCHOOL_NAME" /></div>
+                <div class="field"><label>Head Office Address</label><input name="HEAD_OFFICE_ADDRESS" /></div>
+                <div class="field"><label>School Phone</label><input name="SCHOOL_PHONE" /></div>
+                <div class="field"><label>School Email</label><input name="SCHOOL_EMAIL" /></div>
+                <div class="field"><label>Principal Name</label><input name="PRINCIPAL_NAME" /></div>
+                <div class="field"><label>Academic Session</label><input name="ACADEMIC_SESSION" /></div>
+                <div class="field"><label>Term</label><input name="TERM" /></div>
+                <div class="field"><label>Exam Title</label><input name="EXAM_TITLE" /></div>
+                <div class="field"><label>Pass Mark Number</label><input name="PASS_MARK_NUMBER" type="number" /></div>
+                <div class="field"><label>Pass Mark Percentage</label><input name="PASS_MARK_PERCENTAGE" type="number" /></div>
+                <div class="field"><label>Show Position on Report</label>
+                  <select name="SHOW_POSITION_ON_REPORT">
+                    <option value="true">true</option>
+                    <option value="false">false</option>
+                  </select>
+                </div>
+              </div>
+              <div class="actions-row">
+                <button class="btn" type="submit">Save Settings</button>
+              </div>
             </form>
-            <div class="toggle-link" onclick="toggleAuth()">Register new account</div>
-        </div>
+          </div>
 
-        <div class="glass-card" id="signup-card" style="display:none; max-width: 600px;">
-            <h2>Student Registration</h2>
-            <form id="signup-form" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                <div class="form-group" style="grid-column: span 2;"><label>Registration ID *</label><input type="text" id="s-reg" required></div>
-                <div class="form-group" style="grid-column: span 2;"><label>Password *</label><input type="password" id="s-pass" required></div>
-                <div class="form-group" style="grid-column: span 2;"><label>Full Name *</label><input type="text" id="s-name" required></div>
-                <div class="form-group"><label>Gender</label><select id="s-gender"><option>Male</option><option>Female</option></select></div>
-                <div class="form-group"><label>Class Level</label><input type="text" id="s-class"></div>
-                <button type="submit" class="btn" style="grid-column: span 2;">Complete Registration</button>
+          <div class="glass section-card">
+            <h2>Create / Update Student</h2>
+            <form id="studentForm">
+              <div class="form-grid three">
+                <div class="field"><label>Registration ID</label><input name="RegID" required /></div>
+                <div class="field"><label>Full Name</label><input name="FullName" required /></div>
+                <div class="field"><label>Password (required for new student)</label><input name="Password" type="password" /></div>
+                <div class="field"><label>Age</label><input name="Age" /></div>
+                <div class="field"><label>Gender</label><input name="Gender" /></div>
+                <div class="field"><label>Date of Birth</label><input name="DOB" type="date" /></div>
+                <div class="field"><label>Parent Name</label><input name="ParentName" /></div>
+                <div class="field"><label>Parent Phone</label><input name="ParentPhone" /></div>
+                <div class="field"><label>Parent Email</label><input name="ParentEmail" type="email" /></div>
+                <div class="field"><label>School Name</label><input name="SchoolName" /></div>
+                <div class="field"><label>State</label><input name="State" /></div>
+                <div class="field"><label>City / LGA</label><input name="CityLGA" /></div>
+                <div class="field"><label>Class Level</label><input name="ClassLevel" /></div>
+                <div class="field"><label>Category</label><input name="Category" /></div>
+                <div class="field"><label>Passport URL</label><input name="PassportUrl" type="url" /></div>
+                <div class="field"><label>Active</label>
+                  <select name="Active"><option value="true">true</option><option value="false">false</option></select>
+                </div>
+              </div>
+              <div class="field" style="margin-top:14px;"><label>Address</label><textarea name="Address"></textarea></div>
+              <div class="actions-row">
+                <button class="btn success" type="submit">Save Student</button>
+                <button class="btn secondary" type="button" id="clearStudentBtn">Clear Form</button>
+              </div>
             </form>
-            <div class="toggle-link" onclick="toggleAuth()" style="grid-column: span 2;">Back to Login</div>
+          </div>
+
+          <div class="glass section-card">
+            <h2>Save Result</h2>
+            <form id="resultForm">
+              <div class="form-grid three">
+                <div class="field"><label>Result ID (leave blank for new)</label><input name="ResultID" /></div>
+                <div class="field"><label>Registration ID</label><input name="RegID" required /></div>
+                <div class="field"><label>Exam Title</label><input name="ExamTitle" /></div>
+                <div class="field"><label>Exam Date</label><input name="ExamDate" type="date" /></div>
+                <div class="field"><label>Max Score</label><input name="MaxScore" type="number" value="100" /></div>
+                <div class="field"><label>Student Score</label><input name="StudentScore" type="number" required /></div>
+                <div class="field"><label>Pass Mark Number</label><input name="PassMarkNumber" type="number" /></div>
+                <div class="field"><label>Pass Mark Percentage</label><input name="PassMarkPercentage" type="number" /></div>
+                <div class="field"><label>Position</label><input name="Position" /></div>
+                <div class="field"><label>Grade (optional)</label><input name="Grade" /></div>
+                <div class="field"><label>Remark (optional)</label><input name="Remark" /></div>
+                <div class="field"><label>Published</label>
+                  <select name="Published"><option value="true">true</option><option value="false">false</option></select>
+                </div>
+                <div class="field"><label>Academic Session</label><input name="AcademicSession" /></div>
+                <div class="field"><label>Term</label><input name="Term" /></div>
+              </div>
+              <div class="field" style="margin-top:14px;"><label>Teacher Comment</label><textarea name="TeacherComment"></textarea></div>
+              <div class="actions-row">
+                <button class="btn" type="submit">Save Result</button>
+                <button class="btn secondary" type="button" id="clearResultBtn">Clear Form</button>
+              </div>
+            </form>
+          </div>
         </div>
-    </div>
 
-    <div class="container" id="portal-view">
-        <div class="header">
-            <h2>My Dashboard</h2>
-            <div>
-                <button onclick="window.print()" class="btn" style="width:auto; display:inline-block; margin-right:10px;">Print / Download PDF</button>
-                <button onclick="logout()" class="btn" style="width:auto; display:inline-block; background:#dc2626;">Logout</button>
-            </div>
+        <div class="stack">
+          <div class="glass section-card">
+            <h2>Recent Students</h2>
+            <div id="recentStudents" class="list-card"></div>
+          </div>
+          <div class="glass section-card">
+            <h2>Recent Results</h2>
+            <div id="recentResults" class="list-card"></div>
+          </div>
         </div>
+      </div>
+    </section>
+  </main>
 
-        <div class="profile-card">
-            <img src="" alt="Passport" class="passport" id="p-passport" onerror="this.src='https://via.placeholder.com/100?text=No+Image'">
-            <div class="profile-info">
-                <h3 id="p-name">Student Name</h3>
-                <p><strong>Reg ID:</strong> <span id="p-reg"></span></p>
-                <p><strong>Class:</strong> <span id="p-class"></span> | <strong>Gender:</strong> <span id="p-gender"></span></p>
-            </div>
+  <script>
+    const WEB_APP_URL = 'PASTE_YOUR_APPS_SCRIPT_EXEC_URL_HERE';
+    const STORAGE_KEY = 'genz_admin_session';
+
+    const state = {
+      token: '',
+      admin: null,
+      settings: {}
+    };
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(x => x.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tabTarget).classList.add('active');
+      });
+    });
+
+    function showLoading(text = 'Loading...') {
+      document.getElementById('loadingText').textContent = text;
+      document.getElementById('loadingOverlay').classList.add('active');
+    }
+    function hideLoading() {
+      document.getElementById('loadingOverlay').classList.remove('active');
+    }
+    function toast(message, type = 'success') {
+      const wrap = document.getElementById('toastWrap');
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.textContent = message;
+      wrap.appendChild(el);
+      setTimeout(() => el.remove(), 4200);
+    }
+
+    function buildQuery(params) {
+      return Object.keys(params)
+        .filter(k => params[k] !== undefined && params[k] !== null)
+        .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`)
+        .join('&');
+    }
+
+    function api(action, payload = {}, loadingText = 'Loading...') {
+      return new Promise((resolve, reject) => {
+        if (!WEB_APP_URL || WEB_APP_URL.includes('PASTE_YOUR')) {
+          reject(new Error('Please replace WEB_APP_URL in admin.html with your Apps Script /exec URL.'));
+          return;
+        }
+
+        showLoading(loadingText);
+        const callbackName = `jsonp_cb_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+        const script = document.createElement('script');
+
+        window[callbackName] = response => {
+          cleanup();
+          resolve(response);
+        };
+
+        function cleanup() {
+          hideLoading();
+          if (script.parentNode) script.parentNode.removeChild(script);
+          try { delete window[callbackName]; } catch (e) { window[callbackName] = undefined; }
+        }
+
+        script.onerror = () => {
+          cleanup();
+          reject(new Error('Backend cannot be reached. Confirm your Apps Script is deployed as a Web App, access is set to Anyone, and WEB_APP_URL is correct.'));
+        };
+
+        const params = Object.assign({}, payload, { action, callback: callbackName });
+        script.src = `${WEB_APP_URL}?${buildQuery(params)}`;
+        document.body.appendChild(script);
+      });
+    }
+
+    function fillForm(form, values) {
+      Object.keys(values || {}).forEach(key => {
+        const field = form.elements[key];
+        if (field) field.value = values[key] ?? '';
+      });
+    }
+
+    function serializeForm(form) {
+      const data = {};
+      new FormData(form).forEach((value, key) => data[key] = value.trim());
+      return data;
+    }
+
+    function saveSession() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ token: state.token, admin: state.admin }));
+    }
+    function clearSession() {
+      localStorage.removeItem(STORAGE_KEY);
+      state.token = '';
+      state.admin = null;
+    }
+    function loadSession() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return null;
+        return JSON.parse(raw);
+      } catch { return null; }
+    }
+
+    function renderRecentStudents(items) {
+      const root = document.getElementById('recentStudents');
+      if (!items || !items.length) {
+        root.innerHTML = '<div class="muted">No student records yet.</div>';
+        return;
+      }
+      root.innerHTML = items.map(item => `
+        <div class="list-row">
+          <div>
+            <div><strong>${escapeHtml(item.fullName || '')}</strong></div>
+            <div class="muted">${escapeHtml(item.regId || '')} • ${escapeHtml(item.classLevel || '—')}</div>
+          </div>
+          <div class="badge ${String(item.active).toLowerCase() === 'true' ? 'yes' : 'no'}">${escapeHtml(String(item.active))}</div>
         </div>
+      `).join('');
+    }
 
-        <h3 style="margin-bottom: 15px; color: var(--primary);">Published Results</h3>
-        <div id="results-container">
-            </div>
-    </div>
+    function renderRecentResults(items) {
+      const root = document.getElementById('recentResults');
+      if (!items || !items.length) {
+        root.innerHTML = '<div class="muted">No result records yet.</div>';
+        return;
+      }
+      root.innerHTML = items.map(item => `
+        <div class="list-row">
+          <div>
+            <div><strong>${escapeHtml(item.examTitle || '')}</strong></div>
+            <div class="muted">${escapeHtml(item.regId || '')} • Score: ${escapeHtml(String(item.score || '0'))} • ${escapeHtml(String(item.percentage || '0'))}%</div>
+          </div>
+          <div class="badge ${String(item.published).toLowerCase() === 'true' ? 'yes' : 'no'}">${String(item.published).toLowerCase() === 'true' ? 'Published' : 'Draft'}</div>
+        </div>
+      `).join('');
+    }
 
-    <script>
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwTnf8fxSM56pTLXIw5deMGCPulj76fNoEF-geUhQlP00Wfkl-dnbKwPCBqv2oabARlXg/exec'; // <--- PASTE YOUR APP SCRIPT URL HERE
+    function applyBootstrap(data) {
+      state.settings = data.settings || {};
+      fillForm(document.getElementById('settingsForm'), state.settings);
+      document.getElementById('sumStudents').textContent = data.summary?.totalStudents ?? 0;
+      document.getElementById('sumActive').textContent = data.summary?.activeStudents ?? 0;
+      document.getElementById('sumResults').textContent = data.summary?.totalResults ?? 0;
+      document.getElementById('sumPublished').textContent = data.summary?.publishedResults ?? 0;
+      renderRecentStudents(data.recentStudents || []);
+      renderRecentResults(data.recentResults || []);
+      setDashboardVisible(true);
+    }
 
-        // UI Helpers
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.textContent = msg; t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
+    function setDashboardVisible(show) {
+      document.getElementById('authSection').style.display = show ? 'none' : 'grid';
+      document.getElementById('dashboard').style.display = show ? 'block' : 'none';
+      document.getElementById('logoutBtn').style.display = show ? 'inline-flex' : 'none';
+    }
+
+    async function refreshBootstrap() {
+      const res = await api('getAdminBootstrap', { token: state.token }, 'Loading dashboard...');
+      if (!res.success) throw new Error(res.error || 'Failed to load admin dashboard.');
+      applyBootstrap(res.data);
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    document.getElementById('adminLoginForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const payload = serializeForm(e.target);
+      try {
+        const res = await api('adminLogin', payload, 'Signing in...');
+        if (!res.success) throw new Error(res.error || 'Admin login failed.');
+        state.token = res.data.admin.token;
+        state.admin = res.data.admin;
+        saveSession();
+        applyBootstrap(res.data);
+        toast(`Welcome back, ${res.data.admin.displayName || 'Admin'}.`, 'success');
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    });
+
+    document.getElementById('adminSignupForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const payload = serializeForm(e.target);
+      try {
+        const res = await api('adminSignup', payload, 'Creating admin account...');
+        if (!res.success) throw new Error(res.error || 'Admin signup failed.');
+        toast(res.data.message || 'Admin account created.', 'success');
+        e.target.reset();
+        document.querySelector('[data-tab-target="loginTab"]').click();
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    });
+
+    document.getElementById('settingsForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const payload = serializeForm(e.target);
+      try {
+        const res = await api('saveSettings', { token: state.token, settings: JSON.stringify(payload) }, 'Saving settings...');
+        if (!res.success) throw new Error(res.error || 'Failed to save settings.');
+        state.settings = res.data.settings || {};
+        fillForm(e.target, state.settings);
+        toast(res.data.message || 'Settings saved.', 'success');
+        await refreshBootstrap();
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    });
+
+    document.getElementById('studentForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const payload = serializeForm(e.target);
+      try {
+        const res = await api('saveStudent', { token: state.token, student: JSON.stringify(payload) }, 'Saving student...');
+        if (!res.success) throw new Error(res.error || 'Failed to save student.');
+        toast(res.data.message || 'Student saved.', 'success');
+        await refreshBootstrap();
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    });
+
+    document.getElementById('resultForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const payload = serializeForm(e.target);
+      try {
+        const res = await api('saveResult', { token: state.token, result: JSON.stringify(payload) }, 'Saving result...');
+        if (!res.success) throw new Error(res.error || 'Failed to save result.');
+        toast(res.data.message || 'Result saved.', 'success');
+        await refreshBootstrap();
+      } catch (err) {
+        toast(err.message, 'error');
+      }
+    });
+
+    document.getElementById('clearStudentBtn').addEventListener('click', () => document.getElementById('studentForm').reset());
+    document.getElementById('clearResultBtn').addEventListener('click', () => document.getElementById('resultForm').reset());
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      clearSession();
+      setDashboardVisible(false);
+      toast('Logged out successfully.', 'success');
+    });
+
+    window.addEventListener('load', async () => {
+      const session = loadSession();
+      if (session?.token) {
+        state.token = session.token;
+        state.admin = session.admin || null;
+        try {
+          await refreshBootstrap();
+          toast('Session restored.', 'success');
+        } catch (err) {
+          clearSession();
+          setDashboardVisible(false);
         }
-        function showLoader(text) { document.getElementById('loader-text').textContent = text; document.getElementById('loader').style.display = 'flex'; }
-        function hideLoader() { document.getElementById('loader').style.display = 'none'; }
-        function toggleAuth() {
-            const lc = document.getElementById('login-card');
-            const sc = document.getElementById('signup-card');
-            if(lc.style.display === 'none') { lc.style.display = 'block'; sc.style.display = 'none'; }
-            else { lc.style.display = 'none'; sc.style.display = 'block'; }
-        }
-
-        function logout() { location.reload(); }
-
-        // API Wrapper
-        async function apiCall(action, payload = {}) {
-            try {
-                const res = await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify({ action, ...payload })
-                });
-                return await res.json();
-            } catch (err) {
-                console.error(err); showToast("Network Error"); return { success: false };
-            }
-        }
-
-        // Auth
-        document.getElementById('signup-form').onsubmit = async (e) => {
-            e.preventDefault();
-            showLoader("Registering...");
-            const student = {
-                RegID: document.getElementById('s-reg').value,
-                Password: document.getElementById('s-pass').value,
-                FullName: document.getElementById('s-name').value,
-                Gender: document.getElementById('s-gender').value,
-                ClassLevel: document.getElementById('s-class').value
-            };
-            const res = await apiCall('studentSignup', { student });
-            hideLoader();
-            showToast(res.message);
-            if(res.success) toggleAuth();
-        }
-
-        document.getElementById('login-form').onsubmit = async (e) => {
-            e.preventDefault();
-            showLoader("Checking records...");
-            const res = await apiCall('studentLogin', { 
-                regId: document.getElementById('l-reg').value, 
-                password: document.getElementById('l-pass').value 
-            });
-            hideLoader();
-            
-            if(res.success) {
-                document.getElementById('auth-view').style.display = 'none';
-                document.getElementById('portal-view').style.display = 'block';
-                renderDashboard(res.student, res.results, res.settings);
-            } else {
-                showToast(res.message);
-            }
-        }
-
-        function renderDashboard(student, results, settings) {
-            // Profile
-            document.getElementById('p-name').textContent = student.FullName;
-            document.getElementById('p-reg').textContent = student.RegID;
-            document.getElementById('p-class').textContent = student.ClassLevel || 'N/A';
-            document.getElementById('p-gender').textContent = student.Gender || 'N/A';
-            if(student.PassportUrl) document.getElementById('p-passport').src = student.PassportUrl;
-
-            // Results
-            const container = document.getElementById('results-container');
-            container.innerHTML = '';
-
-            if(!results || results.length === 0) {
-                container.innerHTML = '<p style="text-align:center; padding: 40px; background:white; border-radius:12px;">No published results found for this account.</p>';
-                return;
-            }
-
-            results.forEach(r => {
-                const passPerc = parseFloat(r.PassMarkPercentage) || 40;
-                const studentPerc = parseFloat(r.Percentage) || 0;
-                const isPass = studentPerc >= passPerc;
-                const statusHtml = `<span class="pass-status ${isPass ? 'status-pass' : 'status-fail'}">${isPass ? 'PASS' : 'FAIL'}</span>`;
-                
-                const posHtml = settings.SHOW_POSITION_ON_REPORT === 'true' && r.Position ? `<p><strong>Position:</strong> ${r.Position}</p>` : '';
-
-                const html = `
-                <div class="report-card">
-                    <div class="rc-header">
-                        <h1>${settings.BRAND_NAME || 'Educational Portal'}</h1>
-                        <p style="font-size:1.2rem; font-weight:bold; color:#333;">${settings.SCHOOL_NAME || ''}</p>
-                        <p>${settings.HEAD_OFFICE_ADDRESS || ''} | ${settings.SCHOOL_PHONE || ''}</p>
-                        <h2 style="margin-top:15px; color:var(--accent);">${r.ExamTitle}</h2>
-                    </div>
-                    
-                    <div class="rc-body">
-                        <div class="info-box">
-                            <p><strong>Student Name:</strong> ${student.FullName}</p>
-                            <p><strong>Registration ID:</strong> ${student.RegID}</p>
-                            <p><strong>Class:</strong> ${student.ClassLevel || 'N/A'}</p>
-                        </div>
-                        <div class="info-box">
-                            <p><strong>Session:</strong> ${r.AcademicSession}</p>
-                            <p><strong>Term:</strong> ${r.Term}</p>
-                            ${posHtml}
-                        </div>
-                    </div>
-
-                    <table class="result-table">
-                        <thead>
-                            <tr>
-                                <th>Max Score</th>
-                                <th>Pass Mark</th>
-                                <th>Score Obtained</th>
-                                <th>Percentage</th>
-                                <th>Grade</th>
-                                <th>Remark</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>${r.MaxScore}</td>
-                                <td>${r.PassMarkNumber} (${r.PassMarkPercentage}%)</td>
-                                <td style="font-weight:bold; font-size:1.1rem;">${r.StudentScore}</td>
-                                <td>${r.Percentage}%</td>
-                                <td><strong>${r.Grade}</strong></td>
-                                <td>${r.Remark}</td>
-                                <td>${statusHtml}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    ${r.TeacherComment ? `<div class="teacher-remark"><strong>Teacher's Comment:</strong> ${r.TeacherComment}</div>` : ''}
-                </div>`;
-                container.innerHTML += html;
-            });
-        }
-    </script>
+      }
+    });
+  </script>
 </body>
 </html>
