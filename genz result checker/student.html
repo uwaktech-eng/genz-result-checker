@@ -1,231 +1,69 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-:root{--bg:#f4f8ff;--bg2:#eef5ff;--card:rgba(255,255,255,.78);--card2:rgba(255,255,255,.92);--line:rgba(76,110,245,.16);--text:#10214a;--muted:#5f6d92;--primary:#3d6cff;--primary-2:#7b61ff;--accent:#12b886;--danger:#e03131;--warning:#f59f00;--shadow:0 20px 40px rgba(58,92,170,.10);--radius:22px}
-*{box-sizing:border-box}html,body{margin:0;padding:0;font-family:Inter,system-ui,Arial,sans-serif;color:var(--text);background:radial-gradient(circle at top left,#fefeff 0,#f6fbff 28%,#eef4ff 60%,#eaf0ff 100%)}a{text-decoration:none;color:inherit}button,input,select,textarea{font:inherit}body{min-height:100vh}.page{max-width:1220px;margin:0 auto;padding:24px}.brand{display:flex;align-items:center;gap:12px}.brand-mark{width:46px;height:46px;border-radius:15px;background:linear-gradient(135deg,var(--primary),var(--primary-2));display:grid;place-items:center;color:#fff;font-weight:800;box-shadow:var(--shadow)}.brand small{display:block;color:var(--muted);font-size:12px}.hero{background:linear-gradient(135deg,rgba(255,255,255,.92),rgba(237,244,255,.84));backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:32px;padding:28px;box-shadow:var(--shadow);position:relative;overflow:hidden}.hero:before,.panel:before{content:"";position:absolute;inset:auto auto -80px -80px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(61,108,255,.12),transparent 65%)}.hero h1{margin:16px 0 10px;font-size:clamp(28px,5vw,44px);line-height:1.05}.hero p{margin:0;color:var(--muted);max-width:760px;line-height:1.6}.panel{position:relative;background:var(--card);backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:26px;padding:22px;box-shadow:var(--shadow)}.card{background:var(--card2);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 12px 24px rgba(41,76,157,.07)}.muted{color:var(--muted)}.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap}.navpill{display:inline-flex;gap:10px;flex-wrap:wrap}.btn{border:none;border-radius:14px;padding:12px 16px;cursor:pointer;transition:.2s ease;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;font-weight:700;box-shadow:0 12px 24px rgba(77,107,232,.18)}.btn.secondary{background:#fff;color:var(--text);border:1px solid var(--line);box-shadow:none}.btn.ok{background:linear-gradient(135deg,#12b886,#20c997)}.pill{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;background:rgba(255,255,255,.74);border:1px solid var(--line);border-radius:999px;color:var(--muted);font-weight:600}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.field{display:flex;flex-direction:column;gap:8px}.field label{font-size:13px;font-weight:700;color:#4f5f8b}.field input,.field select,.field textarea{width:100%;padding:13px 14px;border-radius:14px;border:1px solid rgba(98,120,191,.2);background:rgba(255,255,255,.95);outline:none;color:var(--text)}.field textarea{min-height:110px;resize:vertical}.section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.section-title h2,.section-title h3{margin:0}.toast{position:fixed;right:18px;bottom:18px;z-index:1000;display:none;padding:14px 16px;border-radius:14px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);max-width:320px}.toast.show{display:block}.toast.ok{border-color:rgba(18,184,134,.35)}.toast.bad{border-color:rgba(224,49,49,.35)}.hidden{display:none!important}.loader-overlay{position:fixed;inset:0;background:rgba(15,23,42,.28);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:1200;padding:16px}.loader-overlay.show{display:flex}.loader-card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 18px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow)}.spinner{width:18px;height:18px;border:3px solid #dbe5f4;border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}button{transform:translateY(0);transition:transform .18s ease,opacity .18s ease,filter .18s ease}button:hover{transform:translateY(-1px)}button:active{transform:translateY(0)}button[disabled]{opacity:.72;cursor:not-allowed;filter:grayscale(.08)}.report{background:#fff;border:1px solid rgba(120,140,200,.14);border-radius:24px;padding:22px;box-shadow:0 10px 24px rgba(80,100,160,.08)}.report-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;border-bottom:1px dashed rgba(110,130,190,.22);padding-bottom:18px;margin-bottom:18px}.passport{width:110px;height:130px;border-radius:18px;overflow:hidden;border:1px solid rgba(96,120,190,.18);background:#f5f8ff;display:grid;place-items:center}.passport img{width:100%;height:100%;object-fit:cover}.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.kv .item{padding:12px;border-radius:16px;background:#f8fbff;border:1px solid rgba(96,120,190,.12)}.result-banner{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:18px 0}.result-tag{padding:10px 14px;border-radius:14px;background:#f4f8ff;border:1px solid rgba(96,120,190,.14);font-weight:700}.pass{color:#0b8f68}.fail{color:#d6336c}.links{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}.auth-switch{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.auth-switch .tab{padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.7);cursor:pointer;font-weight:700;color:var(--muted)}.auth-switch .tab.active{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;border-color:transparent}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.spacer{height:10px}@media (max-width:920px){.form-grid,.kv{grid-template-columns:1fr}.report-head{flex-direction:column}.page{padding:16px}}
-</style>
-<title>Student Portal | Genz Edutech Innovations</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student | Genz Edutech</title>
+    <style>
+        *{ box-sizing: border-box; font-family: system-ui; }
+        body{ background: #f0f4fa; padding: 20px; }
+        .glass{ background: rgba(255,255,255,0.9); border-radius: 32px; padding: 28px; max-width: 1000px; margin: auto; box-shadow: 0 12px 28px rgba(0,0,0,0.1); }
+        .btn{ background: #1e3c72; color: white; border: none; padding: 10px 24px; border-radius: 40px; cursor: pointer; font-weight: bold; }
+        input, select{ width: 100%; padding: 12px; margin: 8px 0; border-radius: 20px; border: 1px solid #ccc; }
+        .report-card{ background: white; border-radius: 24px; padding: 20px; margin-top: 24px; border: 1px solid #e2e8f0; }
+        .loading{ position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 999; color: white; font-size: 1.3rem; display: none; backdrop-filter: blur(6px); }
+        .toast{ position: fixed; bottom: 20px; right: 20px; background: #2c3e50; color: white; padding: 12px 20px; border-radius: 40px; z-index: 1000; }
+        @media print{ .no-print{ display: none; } .glass{ box-shadow: none; padding: 0; } }
+    </style>
 </head>
 <body>
-<div class="page">
-  <div class="topbar">
-    <div class="brand"><div class="brand-mark">GE</div><div><strong>Genz Edutech Innovations</strong><small>Student portal</small></div></div>
-    <div class="navpill"></div>
-  </div>
-
-  <section class="hero">
-    <span class="pill">Student Signup + Result Checker</span>
-    <h1>Register once, then log in to view your published report card</h1>
-    <p>Students can sign up with their personal and school details, then use their registration ID and password to view any published results. Passport image is managed by the admin dashboard only.</p>
-  </section>
-
-  <div class="spacer"></div>
-  <section class="panel" id="studentAccessPanel">
-    <div class="auth-switch">
-      <button class="tab active" id="tabStudentSignup" type="button">Student Signup</button>
-      <button class="tab" id="tabStudentLogin" type="button">Student Login</button>
+<div class="loading" id="loadingOverlay">⏳ Loading...</div>
+<div class="glass" id="authContainer">
+    <h2>🎓 Student Portal</h2>
+    <div><button id="showLoginBtn" class="btn" style="margin-right:10px">Login</button><button id="showSignupBtn" class="btn" style="background:#aaa">Sign Up</button></div>
+    <div id="loginPanel">
+        <input type="text" id="loginReg" placeholder="Registration ID"><input type="password" id="loginPass" placeholder="Password"><button class="btn" id="studentLoginBtn">Login</button>
     </div>
-
-    <form id="studentSignupForm">
-      <div class="form-grid">
-        <div class="field"><label>Registration ID</label><input name="RegID" required placeholder="e.g. GEI/2026/001"></div>
-        <div class="field"><label>Password</label><input name="Password" type="password" required placeholder="Create password"></div>
-        <div class="field"><label>Full Name</label><input name="FullName" required placeholder="e.g. Adaeze Okafor"></div>
-        <div class="field"><label>Age</label><input name="Age" required placeholder="e.g. 15"></div>
-        <div class="field"><label>Gender</label><select name="Gender" required><option value="">Select gender</option><option>Male</option><option>Female</option></select></div>
-        <div class="field"><label>Date of Birth</label><input name="DOB" type="date"></div>
-        <div class="field"><label>Parent/Guardian Name</label><input name="ParentName" placeholder="e.g. Mrs Okafor"></div>
-        <div class="field"><label>Parent/Guardian Phone</label><input name="ParentPhone" required placeholder="+234 800 987 6543"></div>
-        <div class="field"><label>Parent/Guardian Email</label><input name="ParentEmail" type="email" required placeholder="you@email.com"></div>
-        <div class="field"><label>School Name</label><input name="SchoolName" required placeholder="e.g. Federal Government College"></div>
-        <div class="field"><label>State</label><input name="State" required placeholder="e.g. Lagos"></div>
-        <div class="field"><label>City / LGA</label><input name="CityLGA" required placeholder="e.g. Ikeja"></div>
-        <div class="field"><label>Class</label><input name="ClassLevel" required placeholder="e.g. SS2, JSS1"></div>
-        <div class="field"><label>Category</label><select name="Category" required></select></div>
-      </div>
-      <div class="field"><label>Address</label><textarea name="Address" placeholder="Optional home address"></textarea></div>
-      <div><button class="btn ok" type="submit">Create Student Account</button></div>
-    </form>
-
-    <form id="studentLoginForm" class="hidden">
-      <div class="form-grid">
-        <div class="field"><label>Registration ID</label><input name="regId" required></div>
-        <div class="field"><label>Password</label><input type="password" name="password" required></div>
-      </div>
-      <div><button class="btn" type="submit">Check Result</button></div>
-    </form>
-  </section>
-
-  <section id="reportSection" class="hidden">
-    <div class="links"><button class="btn secondary" id="backBtn" type="button">Back</button><button class="btn" id="printBtn" type="button">Download / Save as PDF</button></div>
-    <div class="spacer"></div>
-    <article id="reportCard" class="report">
-      <div class="report-head">
-        <div class="report-brand">
-          <h2 id="reportBrand">Genz Edutech Innovations</h2>
-          <div class="muted" id="reportSchool"></div>
-          <div class="muted" id="reportAddress"></div>
-          <div class="muted" id="reportContact"></div>
-        </div>
-        <div class="passport" id="passportBox"><span class="muted">No Passport</span></div>
-      </div>
-      <div class="section-title"><h3>Student Profile</h3></div>
-      <div class="kv">
-        <div class="item"><strong>Full Name</strong><div id="sFullName"></div></div>
-        <div class="item"><strong>Registration ID</strong><div id="sRegId" class="mono"></div></div>
-        <div class="item"><strong>Age</strong><div id="sAge"></div></div>
-        <div class="item"><strong>Gender</strong><div id="sGender"></div></div>
-        <div class="item"><strong>Date of Birth</strong><div id="sDob"></div></div>
-        <div class="item"><strong>Parent/Guardian Name</strong><div id="sParentName"></div></div>
-        <div class="item"><strong>Parent/Guardian Phone</strong><div id="sParentPhone"></div></div>
-        <div class="item"><strong>Parent/Guardian Email</strong><div id="sParentEmail"></div></div>
-        <div class="item"><strong>School Name</strong><div id="sSchoolName"></div></div>
-        <div class="item"><strong>State</strong><div id="sState"></div></div>
-        <div class="item"><strong>City / LGA</strong><div id="sCity"></div></div>
-        <div class="item"><strong>Class</strong><div id="sClass"></div></div>
-        <div class="item"><strong>Category</strong><div id="sCategory"></div></div>
-        <div class="item"><strong>Address</strong><div id="sAddress"></div></div>
-      </div>
-      <div class="spacer"></div>
-      <div class="section-title"><h3>Published Results</h3></div>
-      <div id="resultsContainer"></div>
-    </article>
-  </section>
+    <div id="signupPanel" style="display:none">
+        <input placeholder="RegID" id="su_reg"><input placeholder="Password" id="su_pass" type="password"><input placeholder="Full Name" id="su_name"><input placeholder="Age" id="su_age"><select id="su_gender"><option>Male</option><option>Female</option></select><input placeholder="DOB (YYYY-MM-DD)" id="su_dob"><input placeholder="Parent Name" id="su_parent"><input placeholder="Parent Phone" id="su_phone"><input placeholder="Parent Email" id="su_email"><input placeholder="School Name" id="su_school"><input placeholder="State" id="su_state"><input placeholder="City/LGA" id="su_city"><input placeholder="Class Level" id="su_class"><input placeholder="Category" id="su_cat"><textarea placeholder="Address" id="su_addr"></textarea><button class="btn" id="doStudentSignup">Register</button>
+    </div>
 </div>
-<div id="toast" class="toast"></div>
-<div id="loader" class="loader-overlay"><div class="loader-card"><div class="spinner"></div><div id="loaderText">Please wait...</div></div></div>
-
+<div id="reportArea" style="display:none"></div>
 <script>
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwTnf8fxSM56pTLXIw5deMGCPulj76fNoEF-geUhQlP00Wfkl-dnbKwPCBqv2oabARlXg/exec';
-function showLoader(text='Please wait...'){ const el=document.getElementById('loader'); const tx=document.getElementById('loaderText'); if(tx) tx.textContent=text; if(el) el.classList.add('show'); }
-function hideLoader(){ const el=document.getElementById('loader'); if(el) el.classList.remove('show'); }
-function showToast(message, ok=true){
-  const toast = document.getElementById('toast');
-  if(!toast) return alert(message);
-  toast.textContent = message;
-  toast.className = 'toast show ' + (ok ? 'ok' : 'bad');
-  clearTimeout(window.__toastTimer);
-  window.__toastTimer = setTimeout(()=>toast.className='toast', 2800);
-}
-function safeId(){ return 'cb_' + Date.now() + '_' + Math.floor(Math.random()*100000); }
-function callBackend(action, payload={}, extra={}){
-  return new Promise((resolve, reject)=>{
-    const cb = safeId();
-    const params = new URLSearchParams();
-    params.set('action', action);
-    params.set('callback', cb);
-    params.set('payload', JSON.stringify(payload || {}));
-    params.set('_ts', String(Date.now()));
-    Object.keys(extra || {}).forEach(k=>{ if(extra[k]!==undefined && extra[k]!==null) params.set(k, extra[k]); });
-    const script = document.createElement('script');
-    window[cb] = function(data){ cleanup(); resolve(data); };
-    function cleanup(){
-      try{ delete window[cb]; }catch(err){ window[cb]=undefined; }
-      if(script.parentNode) script.parentNode.removeChild(script);
-      clearTimeout(timer);
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzR_FrPa9nNOdYH0SfH7WskKmw3daDO67APMF_wuYHvbe4LrOGYw1yUeQyPpMDP8Uk/exec";
+    function showLoad(show){ document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none'; }
+    function toast(m){ let d=document.createElement('div'); d.className='toast'; d.innerText=m; document.body.appendChild(d); setTimeout(()=>d.remove(),3000); }
+    function api(params, cb){ let url=WEB_APP_URL+"?"+new URLSearchParams(params).toString(); fetch(url).then(r=>r.json()).then(cb).catch(e=>toast("Network error")); }
+    document.getElementById('showLoginBtn').onclick=()=>{ document.getElementById('loginPanel').style.display='block'; document.getElementById('signupPanel').style.display='none'; };
+    document.getElementById('showSignupBtn').onclick=()=>{ document.getElementById('loginPanel').style.display='none'; document.getElementById('signupPanel').style.display='block'; };
+    document.getElementById('studentLoginBtn').onclick=()=>{
+        let reg=document.getElementById('loginReg').value, pass=document.getElementById('loginPass').value;
+        if(!reg||!pass) return toast("Enter credentials");
+        showLoad(true);
+        api({action:'studentLogin', regID:reg, password:pass}, (res)=>{
+            showLoad(false);
+            if(res.status==='success'){
+                document.getElementById('authContainer').style.display='none';
+                renderReport(res.profile, res.results, res.settings);
+            } else toast(res.message);
+        });
+    };
+    document.getElementById('doStudentSignup').onclick=()=>{
+        let data={ regID:document.getElementById('su_reg').value, password:document.getElementById('su_pass').value, fullName:document.getElementById('su_name').value, age:document.getElementById('su_age').value, gender:document.getElementById('su_gender').value, dob:document.getElementById('su_dob').value, parentName:document.getElementById('su_parent').value, parentPhone:document.getElementById('su_phone').value, parentEmail:document.getElementById('su_email').value, schoolName:document.getElementById('su_school').value, state:document.getElementById('su_state').value, cityLGA:document.getElementById('su_city').value, classLevel:document.getElementById('su_class').value, category:document.getElementById('su_cat').value, address:document.getElementById('su_addr').value };
+        if(!data.regID||!data.password) return toast("RegID & password required");
+        showLoad(true);
+        api({action:'studentSignup', ...data}, (res)=>{ showLoad(false); toast(res.message); if(res.status==='success') document.getElementById('showLoginBtn').click(); });
+    };
+    function renderReport(profile, results, settings){
+        let html=`<div class="glass"><div class="no-print"><button class="btn" onclick="window.print()">🖨️ Print / PDF</button><button class="btn" id="logoutBtn" style="background:#6c757d">Logout</button></div><div style="text-align:center"><h2>${settings.BRAND_NAME || 'Genz Edutech'}</h2><p>${settings.SCHOOL_NAME}<br>${settings.HEAD_OFFICE_ADDRESS}<br>📞 ${settings.SCHOOL_PHONE} ✉️ ${settings.SCHOOL_EMAIL}</p><hr><h3>Student Profile</h3><p><strong>${profile.fullName}</strong> (Reg: ${profile.regID})<br>Class: ${profile.classLevel} | Parent: ${profile.parentName}</p>${profile.passportUrl ? `<img src="${profile.passportUrl}" width="80" style="border-radius:50%">` : ''}</div>`;
+        results.forEach(r=>{
+            let passFail = r.studentScore >= r.passMarkNumber ? "✅ PASS" : "❌ FAIL";
+            html+=`<div class="report-card"><h3>📌 ${r.examTitle} (${r.academicSession} - ${r.term})</h3><p>📅 ${r.examDate} | Score: ${r.studentScore}/${r.maxScore} (${r.percentage.toFixed(1)}%)<br>Grade: ${r.grade} | ${r.remark}<br>${r.teacherComment ? `💬 Teacher: ${r.teacherComment}` : ''}<br><strong>${passFail}</strong> ${settings.SHOW_POSITION_ON_REPORT === 'true' && r.position ? `🏅 Position: ${r.position}` : ''}</p></div>`;
+        });
+        html+=`<footer class="no-print" style="margin-top:20px">© ${settings.SCHOOL_NAME} | Principal: ${settings.PRINCIPAL_NAME}</footer></div>`;
+        document.getElementById('reportArea').innerHTML=html; document.getElementById('reportArea').style.display='block';
+        document.getElementById('logoutBtn')?.addEventListener('click',()=>{ location.reload(); });
     }
-    script.onerror = function(){ cleanup(); reject(new Error('Backend cannot be reached. Confirm your Apps Script is deployed as a Web App, access is set to Anyone, and WEB_APP_URL is correct.')); };
-    const timer = setTimeout(()=>{ cleanup(); reject(new Error('Backend request timed out.')); }, 20000);
-    script.src = WEB_APP_URL + '?' + params.toString();
-    document.body.appendChild(script);
-  });
-}
-function formatDate(v){ if(!v) return ''; const d=new Date(v); return isNaN(d)?String(v):d.toLocaleDateString(); }
-function setText(id, value){ const el=document.getElementById(id); if(el) el.textContent = value ?? ''; }
-function escapeHtml(str){ return String(str ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-const categoryList = ['Lower Primary','Upper Primary','Junior High School','Senior High School','Undergraduate'];
-function toggleStudentMode(mode){
-  document.getElementById('tabStudentSignup').classList.toggle('active', mode==='signup');
-  document.getElementById('tabStudentLogin').classList.toggle('active', mode==='login');
-  document.getElementById('studentSignupForm').classList.toggle('hidden', mode!=='signup');
-  document.getElementById('studentLoginForm').classList.toggle('hidden', mode!=='login');
-}
-document.getElementById('tabStudentSignup').onclick = ()=>toggleStudentMode('signup');
-document.getElementById('tabStudentLogin').onclick = ()=>toggleStudentMode('login');
-function formToObj(form){ return Object.fromEntries(new FormData(form).entries()); }
-document.querySelector('select[name="Category"]').innerHTML = '<option value="">Select category</option>' + categoryList.map(c=>`<option>${c}</option>`).join('');
-document.getElementById('studentSignupForm').addEventListener('submit', async (ev)=>{
-  ev.preventDefault();
-  try {
-    const data = formToObj(ev.target);
-    showLoader('Creating student account...');
-    const res = await callBackend('studentSignup', data);
-    if(!res.success) throw new Error(res.message || 'Signup failed.');
-    showToast(res.message || 'Signup successful.');
-    const loginForm = document.getElementById('studentLoginForm');
-    if(loginForm.elements.regId) loginForm.elements.regId.value = data.RegID || '';
-    toggleStudentMode('login');
-    hideLoader();
-  } catch(err) {
-    hideLoader();
-    showToast(err.message || 'Signup failed.', false);
-  }
-});
-document.getElementById('studentLoginForm').addEventListener('submit', async (ev)=>{
-  ev.preventDefault();
-  try {
-    const data = formToObj(ev.target);
-    showLoader('Checking result...');
-    const res = await callBackend('studentLogin', data, { regId: data.regId, password: data.password });
-    if(!res.success) throw new Error(res.message || 'Login failed.');
-    renderReport(res);
-    showToast(res.message || 'Result loaded successfully.');
-    hideLoader();
-  } catch(err) {
-    hideLoader();
-    showToast(err.message || 'Unable to load result.', false);
-  }
-});
-function renderReport(res){
-  const settings = res.settings || {};
-  const student = res.student || {};
-  const results = res.results || [];
-  document.getElementById('studentAccessPanel').classList.add('hidden');
-  document.getElementById('reportSection').classList.remove('hidden');
-
-  setText('reportBrand', settings.BRAND_NAME || 'Genz Edutech Innovations');
-  setText('reportSchool', settings.SCHOOL_NAME || student.SchoolName || '');
-  setText('reportAddress', settings.HEAD_OFFICE_ADDRESS || '');
-  setText('reportContact', [settings.SCHOOL_PHONE, settings.SCHOOL_EMAIL].filter(Boolean).join(' | '));
-
-  setText('sFullName', student.FullName);
-  setText('sRegId', student.RegID);
-  setText('sAge', student.Age);
-  setText('sGender', student.Gender);
-  setText('sDob', formatDate(student.DOB));
-  setText('sParentName', student.ParentName);
-  setText('sParentPhone', student.ParentPhone);
-  setText('sParentEmail', student.ParentEmail);
-  setText('sSchoolName', student.SchoolName);
-  setText('sState', student.State);
-  setText('sCity', student.CityLGA);
-  setText('sClass', student.ClassLevel);
-  setText('sCategory', student.Category);
-  setText('sAddress', student.Address);
-
-  const passportBox = document.getElementById('passportBox');
-  passportBox.innerHTML = student.PassportUrl ? `<img src="${escapeHtml(student.PassportUrl)}" alt="Passport">` : '<span class="muted">No Passport</span>';
-
-  const showPosition = String(settings.SHOW_POSITION_ON_REPORT || 'false') === 'true';
-  const container = document.getElementById('resultsContainer');
-  if(!results.length){
-    container.innerHTML = '<div class="card muted">No published result yet.</div>';
-    return;
-  }
-
-  container.innerHTML = results.map((r, idx)=>`<div class="card" style="margin-bottom:14px"><div class="section-title"><h3>Result ${idx+1}</h3><span class="pill">${escapeHtml(r.ExamTitle)}</span></div><div class="result-banner"><span class="result-tag">Date: ${escapeHtml(formatDate(r.ExamDate))}</span><span class="result-tag">Session: ${escapeHtml(r.AcademicSession)}</span><span class="result-tag">Term: ${escapeHtml(r.Term)}</span><span class="result-tag ${r.Status==='PASS' ? 'pass' : 'fail'}">${escapeHtml(r.Status)}</span></div><div class="kv"><div class="item"><strong>Student Score</strong><div>${r.StudentScore} / ${r.MaxScore}</div></div><div class="item"><strong>Percentage</strong><div>${r.Percentage}%</div></div><div class="item"><strong>Pass Mark</strong><div>${r.PassMarkNumber} | ${r.PassMarkPercentage}%</div></div><div class="item"><strong>Grade</strong><div>${escapeHtml(r.Grade)}</div></div>${showPosition ? `<div class="item"><strong>Position</strong><div>${escapeHtml(r.Position || '-')}</div></div>` : ''}<div class="item"><strong>Remark</strong><div>${escapeHtml(r.Remark)}</div></div><div class="item" style="grid-column:1/-1"><strong>Teacher Comment</strong><div>${escapeHtml(r.TeacherComment || 'No comment')}</div></div></div></div>`).join('');
-}
-document.getElementById('backBtn').onclick = ()=>{
-  document.getElementById('reportSection').classList.add('hidden');
-  document.getElementById('studentAccessPanel').classList.remove('hidden');
-};
-document.getElementById('printBtn').onclick = ()=>window.print();
 </script>
 </body>
 </html>
