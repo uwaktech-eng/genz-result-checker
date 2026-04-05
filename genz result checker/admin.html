@@ -1,90 +1,882 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin | Genz Edutech</title>
-    <style>
-        * { box-sizing: border-box; font-family: system-ui; }
-        body { background: #eef2ff; margin: 0; padding: 20px; }
-        .container { max-width: 1400px; margin: auto; }
-        .glass-card { background: rgba(255,255,255,0.9); border-radius: 28px; padding: 24px; margin-bottom: 24px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); backdrop-filter: blur(4px); }
-        .btn { padding: 10px 20px; border-radius: 40px; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .btn-primary { background: #1e3c72; color: white; }
-        input, select, textarea { width: 100%; padding: 10px; margin: 6px 0; border-radius: 16px; border: 1px solid #ccc; }
-        .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap: 20px; }
-        .loading-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999; color: white; font-size: 1.5rem; backdrop-filter: blur(4px); display: none; }
-        .toast { position: fixed; bottom: 20px; right: 20px; background: #323232; color: white; padding: 12px 24px; border-radius: 40px; z-index: 10000; }
-        .tab { display: flex; gap: 12px; margin-bottom: 20px; border-bottom: 2px solid #ddd; }
-        .tab button { background: none; border: none; padding: 10px 20px; font-weight: 600; cursor: pointer; }
-        .active-tab { border-bottom: 3px solid #1e3c72; color:#1e3c72; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Portal — Genz Edutech Innovations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #0d1b2a; --navy2: #1a2d44; --navy3: #243650;
+      --accent: #c9a84c; --accent2: #e8c97a; --accent-dim: rgba(201,168,76,0.15);
+      --glass: rgba(255,255,255,0.05); --glass-border: rgba(255,255,255,0.1);
+      --text: #e0e8f4; --muted: #7a90ab; --danger: #e05555; --success: #3db87a;
+      --radius: 12px; --radius-lg: 16px;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--navy); color: var(--text); min-height: 100vh; }
+    body::before {
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background-image: linear-gradient(rgba(201,168,76,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,168,76,0.025) 1px, transparent 1px);
+      background-size: 50px 50px;
+    }
+
+    /* ---- OVERLAY ---- */
+    #overlay {
+      display: none; position: fixed; inset: 0; z-index: 1000;
+      background: rgba(8,14,24,0.85); backdrop-filter: blur(6px);
+      align-items: center; justify-content: center; flex-direction: column; gap: 18px;
+    }
+    #overlay.active { display: flex; }
+    .spinner {
+      width: 44px; height: 44px; border: 3px solid rgba(201,168,76,0.2);
+      border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #overlay-text { color: var(--accent2); font-size: 0.95rem; font-weight: 500; }
+
+    /* ---- TOAST ---- */
+    #toast-container { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; }
+    .toast {
+      padding: 14px 20px; border-radius: 10px; font-size: 0.9rem; font-weight: 500;
+      max-width: 340px; border: 1px solid; animation: slideIn 0.3s ease;
+      display: flex; align-items: center; gap: 10px;
+    }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .toast-success { background: rgba(61,184,122,0.12); border-color: rgba(61,184,122,0.4); color: #6edea8; }
+    .toast-error { background: rgba(224,85,85,0.12); border-color: rgba(224,85,85,0.4); color: #f08080; }
+
+    /* ---- NAV ---- */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(13,27,42,0.9); border-bottom: 1px solid var(--glass-border);
+      backdrop-filter: blur(20px); padding: 14px 0;
+    }
+    .nav-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-icon { width: 38px; height: 38px; background: linear-gradient(135deg,var(--accent),var(--accent2)); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .logo-text { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: #fff; }
+    .logo-sub { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+    #nav-admin-info { display: none; align-items: center; gap: 12px; }
+    .admin-badge { background: var(--accent-dim); border: 1px solid rgba(201,168,76,0.3); color: var(--accent2); padding: 6px 14px; border-radius: 20px; font-size: 0.82rem; font-weight: 500; }
+    .btn-sm { padding: 8px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.2s; border: 1px solid; font-family: 'DM Sans',sans-serif; }
+    .btn-danger-sm { background: transparent; border-color: rgba(224,85,85,0.5); color: #f08080; }
+    .btn-danger-sm:hover { background: rgba(224,85,85,0.1); }
+
+    /* ---- MAIN LAYOUT ---- */
+    .main { max-width: 1200px; margin: 0 auto; padding: 32px 24px; position: relative; z-index: 1; }
+
+    /* ---- AUTH PANEL ---- */
+    #auth-panel {
+      max-width: 480px; margin: 60px auto 0;
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg); padding: 40px; backdrop-filter: blur(12px);
+    }
+    .auth-header { text-align: center; margin-bottom: 32px; }
+    .auth-header .icon { font-size: 40px; margin-bottom: 12px; display: block; }
+    .auth-header h2 { font-family: 'Playfair Display', serif; font-size: 1.7rem; color: #fff; margin-bottom: 6px; }
+    .auth-header p { color: var(--muted); font-size: 0.88rem; font-weight: 300; }
+
+    /* ---- TABS ---- */
+    .tabs { display: flex; gap: 0; background: rgba(255,255,255,0.04); border-radius: 10px; padding: 4px; margin-bottom: 28px; }
+    .tab-btn { flex: 1; padding: 10px; border: none; background: transparent; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 500; cursor: pointer; border-radius: 7px; transition: all 0.2s; }
+    .tab-btn.active { background: var(--navy2); color: var(--accent2); box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ---- FORMS ---- */
+    .form-group { margin-bottom: 18px; }
+    label { display: block; font-size: 0.82rem; font-weight: 500; color: var(--muted); margin-bottom: 7px; letter-spacing: 0.03em; text-transform: uppercase; }
+    input, select, textarea {
+      width: 100%; padding: 12px 14px; border-radius: 9px;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border);
+      color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.92rem;
+      transition: border-color 0.2s; outline: none;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); background: rgba(255,255,255,0.07); }
+    textarea { resize: vertical; min-height: 80px; }
+    select option { background: var(--navy2); }
+
+    .btn-full {
+      width: 100%; padding: 13px; border-radius: 9px; font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.25s;
+      border: none; letter-spacing: 0.03em;
+    }
+    .btn-primary-full { background: linear-gradient(135deg, var(--accent), #b8922e); color: #1a1200; box-shadow: 0 4px 20px rgba(201,168,76,0.25); }
+    .btn-primary-full:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(201,168,76,0.4); }
+    .btn-primary-full:active { transform: scale(0.98); }
+    .btn-primary-full:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    /* ---- DASHBOARD ---- */
+    #dashboard { display: none; }
+    .dash-header { margin-bottom: 32px; }
+    .dash-header h1 { font-family: 'Playfair Display', serif; font-size: 2rem; color: #fff; margin-bottom: 6px; }
+    .dash-header p { color: var(--muted); font-size: 0.9rem; font-weight: 300; }
+
+    /* Stats */
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
+    .stat-card {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: var(--radius); padding: 20px 24px;
+      display: flex; align-items: center; gap: 16px; backdrop-filter: blur(8px);
+    }
+    .stat-icon { font-size: 28px; }
+    .stat-num { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; color: var(--accent2); }
+    .stat-lbl { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+
+    /* Sections */
+    .section-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+    .sec-tab {
+      padding: 9px 20px; border-radius: 8px; background: var(--glass);
+      border: 1px solid var(--glass-border); color: var(--muted);
+      cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.2s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .sec-tab.active { background: var(--accent-dim); border-color: rgba(201,168,76,0.5); color: var(--accent2); }
+    .sec-tab:hover:not(.active) { background: rgba(255,255,255,0.08); color: var(--text); }
+    .section-panel { display: none; }
+    .section-panel.active { display: block; }
+
+    /* Cards */
+    .card {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg); padding: 28px; backdrop-filter: blur(8px);
+      margin-bottom: 24px;
+    }
+    .card-title {
+      font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #fff;
+      margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid var(--glass-border);
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    /* Grid forms */
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .col-span-2 { grid-column: span 2; }
+    .col-span-3 { grid-column: span 3; }
+
+    /* Tables */
+    .table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid var(--glass-border); }
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    th { background: rgba(255,255,255,0.05); color: var(--muted); font-weight: 500; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.07em; padding: 12px 16px; text-align: left; }
+    td { padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.05); color: var(--text); }
+    tr:hover td { background: rgba(255,255,255,0.03); }
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.76rem; font-weight: 500;
+    }
+    .badge-green { background: rgba(61,184,122,0.15); color: #6edea8; }
+    .badge-red { background: rgba(224,85,85,0.12); color: #f08080; }
+    .badge-amber { background: rgba(201,168,76,0.12); color: var(--accent2); }
+
+    /* Row action */
+    .tbl-btn { padding: 5px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 500; cursor: pointer; border: 1px solid; transition: all 0.2s; font-family: 'DM Sans',sans-serif; background: transparent; }
+    .tbl-btn-blue { border-color: rgba(90,175,255,0.4); color: #5aafff; }
+    .tbl-btn-blue:hover { background: rgba(90,175,255,0.08); }
+
+    /* ---- RESPONSIVE ---- */
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
+      .col-span-2, .col-span-3 { grid-column: span 1; }
+    }
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      #auth-panel { padding: 28px 20px; }
+      .main { padding: 20px 16px; }
+    }
+  </style>
 </head>
 <body>
-<div class="loading-overlay" id="loadingOverlay"><div>⏳ Processing...</div></div>
-<div class="container" id="app">
-    <div class="glass-card" id="authPanel">
-        <h2>🔐 Admin Access</h2>
-        <div class="tab"><button id="loginTab" class="active-tab">Login</button><button id="signupTab">Signup</button></div>
-        <div id="loginForm">
-            <input type="text" id="loginUser" placeholder="Username"><input type="password" id="loginPass" placeholder="Password"><button class="btn btn-primary" id="doLogin">Login</button>
+  <div id="overlay"><div class="spinner"></div><div id="overlay-text">Please wait...</div></div>
+  <div id="toast-container"></div>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">🎓</div>
+        <div>
+          <div class="logo-text">Genz Edutech</div>
+          <div class="logo-sub">Admin Portal</div>
         </div>
-        <div id="signupForm" style="display:none">
-            <input type="text" id="suUsername" placeholder="Username"><input type="password" id="suPass" placeholder="Password"><input type="text" id="suName" placeholder="Display Name"><input type="email" id="suEmail" placeholder="Email"><button class="btn btn-primary" id="doSignup">Create Admin</button>
-        </div>
+      </a>
+      <div id="nav-admin-info">
+        <span class="admin-badge" id="admin-name-badge">Admin</span>
+        <button class="btn-sm btn-danger-sm" onclick="logout()">Log Out</button>
+      </div>
     </div>
-    <div id="dashboard" style="display:none"></div>
-</div>
-<script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwTnf8fxSM56pTLXIw5deMGCPulj76fNoEF-geUhQlP00Wfkl-dnbKwPCBqv2oabARlXg/exec"; // CHANGE
-    let adminToken = null;
-    function showLoading(show) { document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none'; }
-    function toast(msg) { let t=document.createElement('div'); t.className='toast'; t.innerText=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),3000); }
-    function apiCall(params, callback) {
-        let url = WEB_APP_URL + "?" + new URLSearchParams(params).toString();
-        fetch(url).then(r=>r.json()).then(callback).catch(e=>toast("Network error"));
-    }
-    document.getElementById('loginTab').onclick=()=>{ document.getElementById('loginForm').style.display='block'; document.getElementById('signupForm').style.display='none'; };
-    document.getElementById('signupTab').onclick=()=>{ document.getElementById('loginForm').style.display='none'; document.getElementById('signupForm').style.display='block'; };
-    document.getElementById('doLogin').onclick=()=>{
-        let username=document.getElementById('loginUser').value, password=document.getElementById('loginPass').value;
-        if(!username||!password) return toast("Fill all");
-        showLoading(true);
-        apiCall({action:'adminLogin', username, password}, (res)=>{
-            showLoading(false);
-            if(res.status==='success') { adminToken=res.token; toast("Welcome Admin"); loadDashboard(); }
-            else toast(res.message);
-        });
+  </nav>
+
+  <div class="main">
+
+    <!-- AUTH PANEL -->
+    <div id="auth-panel">
+      <div class="auth-header">
+        <span class="icon">🛡️</span>
+        <h2>Admin Portal</h2>
+        <p>Manage students, results, and portal settings</p>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchAuthTab('login')">Sign In</button>
+        <button class="tab-btn" onclick="switchAuthTab('signup')">Create Account</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div class="tab-content active" id="tab-login">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="login-username" placeholder="Enter username" autocomplete="username" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="login-password" placeholder="Enter password" autocomplete="current-password" />
+        </div>
+        <button class="btn-full btn-primary-full" onclick="adminLogin()">Sign In</button>
+        <p style="text-align:center;margin-top:14px;font-size:0.8rem;color:var(--muted)">Default: admin / admin123</p>
+      </div>
+
+      <!-- SIGNUP -->
+      <div class="tab-content" id="tab-signup">
+        <div class="form-group">
+          <label>Display Name</label>
+          <input type="text" id="su-name" placeholder="Your full name" />
+        </div>
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="su-username" placeholder="Choose a username" />
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="su-email" placeholder="admin@example.com" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="su-password" placeholder="Choose a strong password" />
+        </div>
+        <button class="btn-full btn-primary-full" onclick="adminSignup()">Create Admin Account</button>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard">
+
+      <div class="dash-header">
+        <h1>Dashboard</h1>
+        <p>Welcome back, <span id="welcome-name">Admin</span>. Manage your portal below.</p>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div>
+            <div class="stat-num" id="stat-students">0</div>
+            <div class="stat-lbl">Total Students</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">📝</div>
+          <div>
+            <div class="stat-num" id="stat-results">0</div>
+            <div class="stat-lbl">Total Results</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">✅</div>
+          <div>
+            <div class="stat-num" id="stat-published">0</div>
+            <div class="stat-lbl">Published</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION TABS -->
+      <div class="section-tabs">
+        <button class="sec-tab active" onclick="switchSection('students')">👥 Students</button>
+        <button class="sec-tab" onclick="switchSection('results')">📝 Results</button>
+        <button class="sec-tab" onclick="switchSection('add-student')">➕ Add Student</button>
+        <button class="sec-tab" onclick="switchSection('add-result')">📋 Add Result</button>
+        <button class="sec-tab" onclick="switchSection('settings')">⚙️ Settings</button>
+      </div>
+
+      <!-- STUDENTS LIST -->
+      <div class="section-panel active" id="panel-students">
+        <div class="card">
+          <div class="card-title">👥 Recent Students</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Reg ID</th><th>Full Name</th><th>Class</th><th>Category</th><th>School</th><th>Status</th><th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="students-tbody">
+                <tr><td colspan="7" style="text-align:center;color:var(--muted)">Loading students...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESULTS LIST -->
+      <div class="section-panel" id="panel-results">
+        <div class="card">
+          <div class="card-title">📝 Recent Results</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Result ID</th><th>Reg ID</th><th>Exam</th><th>Score</th><th>%</th><th>Grade</th><th>Session</th><th>Published</th>
+                </tr>
+              </thead>
+              <tbody id="results-tbody">
+                <tr><td colspan="8" style="text-align:center;color:var(--muted)">Loading results...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADD / UPDATE STUDENT -->
+      <div class="section-panel" id="panel-add-student">
+        <div class="card">
+          <div class="card-title">➕ Create / Update Student</div>
+          <p style="color:var(--muted);font-size:0.85rem;margin-bottom:20px;font-weight:300">Enter a RegID to create a new student. If RegID already exists, the record will be updated.</p>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label>Registration ID *</label>
+              <input type="text" id="s-regid" placeholder="e.g. GEI/2025/001" />
+            </div>
+            <div class="form-group">
+              <label>Full Name *</label>
+              <input type="text" id="s-fullname" placeholder="Student full name" />
+            </div>
+            <div class="form-group">
+              <label>Password (required for new)</label>
+              <input type="password" id="s-password" placeholder="Leave blank to keep existing" />
+            </div>
+            <div class="form-group">
+              <label>Age</label>
+              <input type="number" id="s-age" placeholder="Age" />
+            </div>
+            <div class="form-group">
+              <label>Gender</label>
+              <select id="s-gender">
+                <option value="">— Select —</option>
+                <option>Male</option><option>Female</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Date of Birth</label>
+              <input type="date" id="s-dob" />
+            </div>
+            <div class="form-group">
+              <label>Parent/Guardian Name</label>
+              <input type="text" id="s-parentname" placeholder="Parent full name" />
+            </div>
+            <div class="form-group">
+              <label>Parent Phone</label>
+              <input type="tel" id="s-parentphone" placeholder="+234..." />
+            </div>
+            <div class="form-group">
+              <label>Parent Email</label>
+              <input type="email" id="s-parentemail" placeholder="parent@email.com" />
+            </div>
+            <div class="form-group">
+              <label>School Name</label>
+              <input type="text" id="s-school" placeholder="School name" />
+            </div>
+            <div class="form-group">
+              <label>State</label>
+              <input type="text" id="s-state" placeholder="State" />
+            </div>
+            <div class="form-group">
+              <label>City / LGA</label>
+              <input type="text" id="s-city" placeholder="City or LGA" />
+            </div>
+            <div class="form-group">
+              <label>Class Level</label>
+              <input type="text" id="s-class" placeholder="e.g. JSS 1, SS 2, Primary 5" />
+            </div>
+            <div class="form-group">
+              <label>Category</label>
+              <input type="text" id="s-category" placeholder="e.g. Science, Arts, Commercial" />
+            </div>
+            <div class="form-group col-span-2">
+              <label>Address</label>
+              <input type="text" id="s-address" placeholder="Full address" />
+            </div>
+            <div class="form-group col-span-2">
+              <label>Passport Photo URL (Admin only)</label>
+              <input type="url" id="s-passport" placeholder="https://example.com/photo.jpg" />
+            </div>
+          </div>
+          <button class="btn-full btn-primary-full" style="max-width:280px" onclick="saveStudent()">💾 Save Student Record</button>
+        </div>
+      </div>
+
+      <!-- ADD RESULT -->
+      <div class="section-panel" id="panel-add-result">
+        <div class="card">
+          <div class="card-title">📋 Save Student Result</div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label>Registration ID *</label>
+              <input type="text" id="r-regid" placeholder="e.g. GEI/2025/001" />
+            </div>
+            <div class="form-group">
+              <label>Exam Title *</label>
+              <input type="text" id="r-examtitle" placeholder="e.g. First Term Examination" />
+            </div>
+            <div class="form-group">
+              <label>Academic Session</label>
+              <input type="text" id="r-session" placeholder="e.g. 2024/2025" />
+            </div>
+            <div class="form-group">
+              <label>Term</label>
+              <input type="text" id="r-term" placeholder="e.g. First Term" />
+            </div>
+            <div class="form-group">
+              <label>Exam Date</label>
+              <input type="date" id="r-examdate" />
+            </div>
+            <div class="form-group">
+              <label>Maximum Score *</label>
+              <input type="number" id="r-maxscore" placeholder="e.g. 100" />
+            </div>
+            <div class="form-group">
+              <label>Student Score *</label>
+              <input type="number" id="r-score" placeholder="Score obtained" />
+            </div>
+            <div class="form-group">
+              <label>Pass Mark (Number)</label>
+              <input type="number" id="r-passmark" placeholder="e.g. 50" />
+            </div>
+            <div class="form-group">
+              <label>Pass Mark (%)</label>
+              <input type="number" id="r-passpct" placeholder="e.g. 50" />
+            </div>
+            <div class="form-group">
+              <label>Position in Class</label>
+              <input type="text" id="r-position" placeholder="e.g. 3rd" />
+            </div>
+            <div class="form-group">
+              <label>Publish Result?</label>
+              <select id="r-published">
+                <option value="false">No — Keep Hidden</option>
+                <option value="true">Yes — Publish Now</option>
+              </select>
+            </div>
+            <div class="form-group col-span-2">
+              <label>Teacher's Comment</label>
+              <textarea id="r-comment" placeholder="Write a comment for this student..."></textarea>
+            </div>
+          </div>
+          <button class="btn-full btn-primary-full" style="max-width:280px" onclick="saveResult()">📋 Save Result</button>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="section-panel" id="panel-settings">
+        <div class="card">
+          <div class="card-title">⚙️ Portal Settings</div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label>Brand Name</label>
+              <input type="text" id="cfg-brand" />
+            </div>
+            <div class="form-group">
+              <label>School Name</label>
+              <input type="text" id="cfg-school" />
+            </div>
+            <div class="form-group col-span-2">
+              <label>Head Office Address</label>
+              <input type="text" id="cfg-address" />
+            </div>
+            <div class="form-group">
+              <label>School Phone</label>
+              <input type="text" id="cfg-phone" />
+            </div>
+            <div class="form-group">
+              <label>School Email</label>
+              <input type="email" id="cfg-email" />
+            </div>
+            <div class="form-group">
+              <label>Principal Name</label>
+              <input type="text" id="cfg-principal" />
+            </div>
+            <div class="form-group">
+              <label>Academic Session</label>
+              <input type="text" id="cfg-session" />
+            </div>
+            <div class="form-group">
+              <label>Current Term</label>
+              <input type="text" id="cfg-term" />
+            </div>
+            <div class="form-group">
+              <label>Exam Title</label>
+              <input type="text" id="cfg-exam" />
+            </div>
+            <div class="form-group">
+              <label>Pass Mark (Number)</label>
+              <input type="number" id="cfg-passnum" />
+            </div>
+            <div class="form-group">
+              <label>Pass Mark (%)</label>
+              <input type="number" id="cfg-passpct" />
+            </div>
+            <div class="form-group">
+              <label>Show Position on Report?</label>
+              <select id="cfg-showpos">
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn-full btn-primary-full" style="max-width:260px" onclick="saveSettings()">💾 Save Settings</button>
+        </div>
+      </div>
+
+    </div><!-- /dashboard -->
+  </div><!-- /main -->
+
+  <script>
+    // ============================================================
+    // CONFIGURATION — Replace with your Apps Script /exec URL
+    // ============================================================
+    const WEB_APP_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID_HERE/exec';
+
+    // ---- State ----
+    let adminToken = localStorage.getItem('adminToken') || null;
+    let adminName = localStorage.getItem('adminName') || '';
+
+    // ---- Init ----
+    window.onload = () => {
+      if (adminToken) showDashboard();
     };
-    document.getElementById('doSignup').onclick=()=>{
-        let u=document.getElementById('suUsername').value, p=document.getElementById('suPass').value, dn=document.getElementById('suName').value, em=document.getElementById('suEmail').value;
-        if(!u||!p) return toast("Required");
-        showLoading(true);
-        apiCall({action:'adminSignup', username:u, password:p, displayName:dn, email:em}, (res)=>{ showLoading(false); toast(res.message); if(res.status==='success') document.getElementById('loginTab').click(); });
-    };
-    function loadDashboard(){
-        showLoading(true);
-        apiCall({action:'getAdminBootstrap', token:adminToken}, (data)=>{
-            showLoading(false);
-            if(data.status!=='success') return toast("Session expired");
-            renderDashboard(data);
+
+    // ============================================================
+    // JSONP FETCH
+    // ============================================================
+    function apiCall(params) {
+      return new Promise((resolve, reject) => {
+        const cbName = 'cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+        const query = new URLSearchParams({ ...params, callback: cbName }).toString();
+        const script = document.createElement('script');
+        script.src = WEB_APP_URL + '?' + query;
+
+        window[cbName] = (data) => {
+          delete window[cbName];
+          document.body.removeChild(script);
+          resolve(data);
+        };
+
+        script.onerror = () => {
+          delete window[cbName];
+          document.body.removeChild(script);
+          reject(new Error('Network error — check your WEB_APP_URL or CORS settings.'));
+        };
+
+        document.body.appendChild(script);
+      });
+    }
+
+    // ============================================================
+    // LOADING OVERLAY
+    // ============================================================
+    function showOverlay(text = 'Please wait...') {
+      document.getElementById('overlay-text').textContent = text;
+      document.getElementById('overlay').classList.add('active');
+    }
+    function hideOverlay() {
+      document.getElementById('overlay').classList.remove('active');
+    }
+
+    // ============================================================
+    // TOAST
+    // ============================================================
+    function toast(msg, type = 'success') {
+      const el = document.createElement('div');
+      el.className = `toast toast-${type}`;
+      el.innerHTML = `<span>${type === 'success' ? '✅' : '❌'}</span> ${msg}`;
+      document.getElementById('toast-container').appendChild(el);
+      setTimeout(() => el.remove(), 4500);
+    }
+
+    // ============================================================
+    // AUTH TAB SWITCH
+    // ============================================================
+    function switchAuthTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'signup')));
+      document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+      document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
+    }
+
+    // ============================================================
+    // ADMIN LOGIN
+    // ============================================================
+    async function adminLogin() {
+      const username = document.getElementById('login-username').value.trim();
+      const password = document.getElementById('login-password').value;
+      if (!username || !password) return toast('Please fill in all fields.', 'error');
+
+      showOverlay('Signing in...');
+      try {
+        const res = await apiCall({ action: 'adminLogin', username, password });
+        if (res.success) {
+          adminToken = res.token;
+          adminName = res.displayName;
+          localStorage.setItem('adminToken', adminToken);
+          localStorage.setItem('adminName', adminName);
+          toast(`Welcome back, ${adminName}!`);
+          showDashboard();
+        } else {
+          toast(res.message, 'error');
+        }
+      } catch (e) { toast('Connection failed: ' + e.message, 'error'); }
+      hideOverlay();
+    }
+
+    // ============================================================
+    // ADMIN SIGNUP
+    // ============================================================
+    async function adminSignup() {
+      const displayName = document.getElementById('su-name').value.trim();
+      const username = document.getElementById('su-username').value.trim();
+      const email = document.getElementById('su-email').value.trim();
+      const password = document.getElementById('su-password').value;
+      if (!displayName || !username || !email || !password) return toast('All fields are required.', 'error');
+
+      showOverlay('Creating admin account...');
+      try {
+        const res = await apiCall({ action: 'adminSignup', displayName, username, email, password });
+        toast(res.message, res.success ? 'success' : 'error');
+        if (res.success) switchAuthTab('login');
+      } catch (e) { toast('Connection failed: ' + e.message, 'error'); }
+      hideOverlay();
+    }
+
+    // ============================================================
+    // SHOW DASHBOARD
+    // ============================================================
+    async function showDashboard() {
+      document.getElementById('auth-panel').style.display = 'none';
+      document.getElementById('dashboard').style.display = 'block';
+      document.getElementById('nav-admin-info').style.display = 'flex';
+      document.getElementById('admin-name-badge').textContent = adminName || 'Admin';
+      document.getElementById('welcome-name').textContent = adminName || 'Admin';
+      loadBootstrap();
+    }
+
+    // ============================================================
+    // LOAD BOOTSTRAP DATA
+    // ============================================================
+    async function loadBootstrap() {
+      showOverlay('Loading dashboard...');
+      try {
+        const res = await apiCall({ action: 'getAdminBootstrap', token: adminToken });
+        if (!res.success) { toast(res.message, 'error'); hideOverlay(); return; }
+
+        // Stats
+        document.getElementById('stat-students').textContent = res.counts.students;
+        document.getElementById('stat-results').textContent = res.counts.results;
+        document.getElementById('stat-published').textContent = res.counts.published;
+
+        // Settings inputs
+        const s = res.settings || {};
+        document.getElementById('cfg-brand').value = s.BRAND_NAME || '';
+        document.getElementById('cfg-school').value = s.SCHOOL_NAME || '';
+        document.getElementById('cfg-address').value = s.HEAD_OFFICE_ADDRESS || '';
+        document.getElementById('cfg-phone').value = s.SCHOOL_PHONE || '';
+        document.getElementById('cfg-email').value = s.SCHOOL_EMAIL || '';
+        document.getElementById('cfg-principal').value = s.PRINCIPAL_NAME || '';
+        document.getElementById('cfg-session').value = s.ACADEMIC_SESSION || '';
+        document.getElementById('cfg-term').value = s.TERM || '';
+        document.getElementById('cfg-exam').value = s.EXAM_TITLE || '';
+        document.getElementById('cfg-passnum').value = s.PASS_MARK_NUMBER || '50';
+        document.getElementById('cfg-passpct').value = s.PASS_MARK_PERCENTAGE || '50';
+        document.getElementById('cfg-showpos').value = s.SHOW_POSITION_ON_REPORT || 'true';
+
+        // Pre-fill result defaults
+        document.getElementById('r-session').value = s.ACADEMIC_SESSION || '';
+        document.getElementById('r-term').value = s.TERM || '';
+        document.getElementById('r-examtitle').value = s.EXAM_TITLE || '';
+        document.getElementById('r-passmark').value = s.PASS_MARK_NUMBER || '50';
+        document.getElementById('r-passpct').value = s.PASS_MARK_PERCENTAGE || '50';
+
+        // Students table
+        const tbody = document.getElementById('students-tbody');
+        tbody.innerHTML = '';
+        if (res.recentStudents && res.recentStudents.length) {
+          res.recentStudents.forEach(s => {
+            tbody.innerHTML += `<tr>
+              <td style="font-weight:500">${s.RegID}</td>
+              <td>${s.FullName}</td>
+              <td>${s.ClassLevel || '—'}</td>
+              <td>${s.Category || '—'}</td>
+              <td>${s.SchoolName || '—'}</td>
+              <td><span class="badge ${s.Active === true || s.Active === 'true' ? 'badge-green' : 'badge-red'}">${s.Active === true || s.Active === 'true' ? 'Active' : 'Inactive'}</span></td>
+              <td><button class="tbl-btn tbl-btn-blue" onclick="prefillStudent('${s.RegID}','${s.FullName}','${s.ClassLevel||''}','${s.SchoolName||''}','${s.Category||''}','${s.PassportUrl||''}')">Edit</button></td>
+            </tr>`;
+          });
+        } else {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted)">No students yet.</td></tr>';
+        }
+
+        // Results table
+        const rtbody = document.getElementById('results-tbody');
+        rtbody.innerHTML = '';
+        if (res.recentResults && res.recentResults.length) {
+          res.recentResults.forEach(r => {
+            rtbody.innerHTML += `<tr>
+              <td style="font-size:0.78rem">${r.ResultID}</td>
+              <td><strong>${r.RegID}</strong></td>
+              <td>${r.ExamTitle || '—'}</td>
+              <td>${r.StudentScore}</td>
+              <td>${r.Percentage}%</td>
+              <td><span class="badge badge-amber">${r.Grade}</span></td>
+              <td>${r.AcademicSession || '—'}</td>
+              <td><span class="badge ${String(r.Published) === 'true' ? 'badge-green' : 'badge-red'}">${String(r.Published) === 'true' ? 'Yes' : 'No'}</span></td>
+            </tr>`;
+          });
+        } else {
+          rtbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted)">No results yet.</td></tr>';
+        }
+      } catch (e) { toast('Failed to load data: ' + e.message, 'error'); }
+      hideOverlay();
+    }
+
+    // ---- Prefill student for editing ----
+    function prefillStudent(regid, name, classLevel, school, cat, passport) {
+      document.getElementById('s-regid').value = regid;
+      document.getElementById('s-fullname').value = name;
+      document.getElementById('s-class').value = classLevel;
+      document.getElementById('s-school').value = school;
+      document.getElementById('s-category').value = cat;
+      document.getElementById('s-passport').value = passport;
+      switchSection('add-student');
+      toast('Student loaded for editing. Update fields and save.', 'success');
+    }
+
+    // ============================================================
+    // SAVE STUDENT
+    // ============================================================
+    async function saveStudent() {
+      const regID = document.getElementById('s-regid').value.trim();
+      const fullName = document.getElementById('s-fullname').value.trim();
+      if (!regID || !fullName) return toast('RegID and Full Name are required.', 'error');
+
+      showOverlay('Saving student record...');
+      try {
+        const res = await apiCall({
+          action: 'saveStudent', token: adminToken,
+          regID, fullName,
+          password: document.getElementById('s-password').value,
+          age: document.getElementById('s-age').value,
+          gender: document.getElementById('s-gender').value,
+          dob: document.getElementById('s-dob').value,
+          parentName: document.getElementById('s-parentname').value,
+          parentPhone: document.getElementById('s-parentphone').value,
+          parentEmail: document.getElementById('s-parentemail').value,
+          schoolName: document.getElementById('s-school').value,
+          state: document.getElementById('s-state').value,
+          cityLGA: document.getElementById('s-city').value,
+          classLevel: document.getElementById('s-class').value,
+          category: document.getElementById('s-category').value,
+          address: document.getElementById('s-address').value,
+          passportUrl: document.getElementById('s-passport').value,
         });
+        toast(res.message, res.success ? 'success' : 'error');
+        if (res.success) loadBootstrap();
+      } catch (e) { toast('Failed: ' + e.message, 'error'); }
+      hideOverlay();
     }
-    function renderDashboard(d){
-        let html=`<div class="glass-card"><h2>📊 Stats</h2><p>Students: ${d.stats.totalStudents} | Results: ${d.stats.totalResults}</p></div>
-        <div class="glass-card"><h2>⚙️ Settings</h2><div id="settingsForm">${Object.entries(d.settings).map(([k,v])=>`<label>${k}</label><input id="set_${k}" value="${v}">`).join('')}<button class="btn btn-primary" id="saveSettingsBtn">Save Settings</button></div></div>
-        <div class="glass-card"><h2>👨‍🎓 Create/Update Student</h2><div id="studentForm"></div><button class="btn btn-primary" id="saveStudentBtn">Save Student</button></div>
-        <div class="glass-card"><h2>📝 Save Result</h2><div id="resultForm"></div><button class="btn btn-primary" id="saveResultBtn">Publish Result</button></div>
-        <div class="glass-card"><h2>📋 Recent Students</h2><ul>${d.students.map(s=>`<li>${s.regID} - ${s.name}</li>`).join('')}</ul></div>
-        <div class="glass-card"><h2>📋 Recent Results</h2><ul>${d.results.map(r=>`<li>${r.regID} - ${r.exam} - Score:${r.score}</li>`).join('')}</ul></div>`;
-        document.getElementById('dashboard').style.display='block'; document.getElementById('authPanel').style.display='none';
-        document.getElementById('dashboard').innerHTML=html;
-        document.getElementById('saveSettingsBtn').onclick=()=>{ let sets={}; for(let k in d.settings) sets[k]=document.getElementById(`set_${k}`).value; showLoading(true); apiCall({action:'saveSettings', token:adminToken, settings:JSON.stringify(sets)}, (res)=>{ showLoading(false); toast(res.message); }); };
-        document.getElementById('studentForm').innerHTML=`<input placeholder="RegID" id="s_reg"><input placeholder="FullName" id="s_name"><input placeholder="Password (leave if not change)" id="s_pass" type="password"><input placeholder="Age" id="s_age"><select id="s_gender"><option>Male</option><option>Female</option></select><input placeholder="DOB" id="s_dob"><input placeholder="ParentName" id="s_parent"><input placeholder="Phone" id="s_phone"><input placeholder="Email" id="s_email"><input placeholder="School" id="s_school"><input placeholder="State" id="s_state"><input placeholder="CityLGA" id="s_city"><input placeholder="Class" id="s_class"><input placeholder="Category" id="s_cat"><textarea placeholder="Address" id="s_addr"></textarea><input placeholder="PassportUrl" id="s_url">`;
-        document.getElementById('saveStudentBtn').onclick=()=>{ let student={ regID:document.getElementById('s_reg').value, fullName:document.getElementById('s_name').value, password:document.getElementById('s_pass').value, age:document.getElementById('s_age').value, gender:document.getElementById('s_gender').value, dob:document.getElementById('s_dob').value, parentName:document.getElementById('s_parent').value, parentPhone:document.getElementById('s_phone').value, parentEmail:document.getElementById('s_email').value, schoolName:document.getElementById('s_school').value, state:document.getElementById('s_state').value, cityLGA:document.getElementById('s_city').value, classLevel:document.getElementById('s_class').value, category:document.getElementById('s_cat').value, address:document.getElementById('s_addr').value, passportUrl:document.getElementById('s_url').value }; showLoading(true); apiCall({action:'saveStudent', token:adminToken, student:JSON.stringify(student)}, (res)=>{ showLoading(false); toast(res.message); }); };
-        document.getElementById('resultForm').innerHTML=`<input placeholder="RegID" id="r_reg"><input placeholder="Exam Title" id="r_title"><input placeholder="Max Score" id="r_max"><input placeholder="Student Score" id="r_score"><input placeholder="Academic Session" id="r_sess"><input placeholder="Term" id="r_term"><textarea placeholder="Teacher Comment" id="r_comment"></textarea><label><input type="checkbox" id="r_pub"> Published</label>`;
-        document.getElementById('saveResultBtn').onclick=()=>{ let result={ regID:document.getElementById('r_reg').value, examTitle:document.getElementById('r_title').value, maxScore:parseInt(document.getElementById('r_max').value), studentScore:parseInt(document.getElementById('r_score').value), academicSession:document.getElementById('r_sess').value, term:document.getElementById('r_term').value, teacherComment:document.getElementById('r_comment').value, published:document.getElementById('r_pub').checked, examDate:new Date().toISOString().split('T')[0], passMarkNumber:40, passMarkPercentage:40 }; showLoading(true); apiCall({action:'saveResult', token:adminToken, result:JSON.stringify(result)}, (res)=>{ showLoading(false); toast(res.message); }); };
+
+    // ============================================================
+    // SAVE RESULT
+    // ============================================================
+    async function saveResult() {
+      const regID = document.getElementById('r-regid').value.trim();
+      const maxScore = document.getElementById('r-maxscore').value;
+      const studentScore = document.getElementById('r-score').value;
+      if (!regID || !maxScore || !studentScore) return toast('RegID, Max Score, and Student Score are required.', 'error');
+
+      showOverlay('Saving result...');
+      try {
+        const res = await apiCall({
+          action: 'saveResult', token: adminToken,
+          regID, maxScore, studentScore,
+          examTitle: document.getElementById('r-examtitle').value,
+          academicSession: document.getElementById('r-session').value,
+          term: document.getElementById('r-term').value,
+          examDate: document.getElementById('r-examdate').value,
+          passMarkNumber: document.getElementById('r-passmark').value,
+          passMarkPercentage: document.getElementById('r-passpct').value,
+          position: document.getElementById('r-position').value,
+          teacherComment: document.getElementById('r-comment').value,
+          published: document.getElementById('r-published').value,
+        });
+        toast(res.message, res.success ? 'success' : 'error');
+        if (res.success) loadBootstrap();
+      } catch (e) { toast('Failed: ' + e.message, 'error'); }
+      hideOverlay();
     }
-</script>
+
+    // ============================================================
+    // SAVE SETTINGS
+    // ============================================================
+    async function saveSettings() {
+      showOverlay('Saving settings...');
+      try {
+        const res = await apiCall({
+          action: 'saveSettings', token: adminToken,
+          BRAND_NAME: document.getElementById('cfg-brand').value,
+          SCHOOL_NAME: document.getElementById('cfg-school').value,
+          HEAD_OFFICE_ADDRESS: document.getElementById('cfg-address').value,
+          SCHOOL_PHONE: document.getElementById('cfg-phone').value,
+          SCHOOL_EMAIL: document.getElementById('cfg-email').value,
+          PRINCIPAL_NAME: document.getElementById('cfg-principal').value,
+          ACADEMIC_SESSION: document.getElementById('cfg-session').value,
+          TERM: document.getElementById('cfg-term').value,
+          EXAM_TITLE: document.getElementById('cfg-exam').value,
+          PASS_MARK_NUMBER: document.getElementById('cfg-passnum').value,
+          PASS_MARK_PERCENTAGE: document.getElementById('cfg-passpct').value,
+          SHOW_POSITION_ON_REPORT: document.getElementById('cfg-showpos').value,
+        });
+        toast(res.message, res.success ? 'success' : 'error');
+      } catch (e) { toast('Failed: ' + e.message, 'error'); }
+      hideOverlay();
+    }
+
+    // ============================================================
+    // SECTION SWITCHING
+    // ============================================================
+    function switchSection(name) {
+      document.querySelectorAll('.sec-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+      const map = { students: 0, results: 1, 'add-student': 2, 'add-result': 3, settings: 4 };
+      document.querySelectorAll('.sec-tab')[map[name]].classList.add('active');
+      document.getElementById('panel-' + name).classList.add('active');
+    }
+
+    // ============================================================
+    // LOGOUT
+    // ============================================================
+    function logout() {
+      adminToken = null; adminName = '';
+      localStorage.removeItem('adminToken');
+      localStorage.removeItem('adminName');
+      document.getElementById('dashboard').style.display = 'none';
+      document.getElementById('auth-panel').style.display = 'block';
+      document.getElementById('nav-admin-info').style.display = 'none';
+      toast('Logged out successfully.');
+    }
+  </script>
 </body>
 </html>
