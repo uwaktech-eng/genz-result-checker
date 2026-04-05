@@ -1,36 +1,59 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-:root{--line:rgba(76,110,245,.16);--text:#10214a;--muted:#5f6d92;--primary:#3d6cff;--primary-2:#7b61ff;--shadow:0 20px 40px rgba(58,92,170,.10)}
-*{box-sizing:border-box}html,body{margin:0;padding:0;font-family:Inter,system-ui,Arial,sans-serif;color:var(--text);background:radial-gradient(circle at top left,#fefeff 0,#f6fbff 28%,#eef4ff 60%,#eaf0ff 100%)}a{text-decoration:none;color:inherit}body{min-height:100vh}.page{max-width:1220px;margin:0 auto;padding:24px}.brand{display:flex;align-items:center;gap:12px}.brand-mark{width:46px;height:46px;border-radius:15px;background:linear-gradient(135deg,var(--primary),var(--primary-2));display:grid;place-items:center;color:#fff;font-weight:800;box-shadow:var(--shadow)}.brand small{display:block;color:var(--muted);font-size:12px}.hero{background:linear-gradient(135deg,rgba(255,255,255,.92),rgba(237,244,255,.84));backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:32px;padding:28px;box-shadow:var(--shadow)}.hero h1{margin:16px 0 10px;font-size:clamp(28px,5vw,44px);line-height:1.05}.hero p{margin:0;color:var(--muted);max-width:760px;line-height:1.6}.grid{display:grid;gap:20px;grid-template-columns:repeat(3,minmax(0,1fr))}.panel{background:rgba(255,255,255,.78);backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:26px;padding:22px;box-shadow:var(--shadow)}.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap}.navpill{display:inline-flex;gap:10px;flex-wrap:wrap}.btn{border:none;border-radius:14px;padding:12px 16px;cursor:pointer;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;font-weight:700;box-shadow:0 12px 24px rgba(77,107,232,.18)}.btn.secondary{background:#fff;color:var(--text);border:1px solid var(--line);box-shadow:none}.pill{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;background:rgba(255,255,255,.74);border:1px solid var(--line);border-radius:999px;color:var(--muted);font-weight:600}.spacer{height:10px}.muted{color:var(--muted)}@media (max-width:920px){.grid{grid-template-columns:1fr}.page{padding:16px}}
-</style>
-<title>Genz Edutech Innovations Portal</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genz Edutech | Result Checker</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui; }
+        body {
+            background: linear-gradient(145deg, #eef2ff 0%, #d9e4f5 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .glass {
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(15px);
+            border-radius: 2rem;
+            padding: 2.5rem;
+            max-width: 1100px;
+            width: 100%;
+            box-shadow: 0 25px 45px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+        h1 {
+            font-size: 2.7rem;
+            background: linear-gradient(135deg, #1e3c72, #2b4c7c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .feature-grid { display: flex; gap: 1.5rem; flex-wrap: wrap; margin: 2rem 0; }
+        .card { background: white; border-radius: 1.2rem; padding: 1.3rem; flex: 1; text-align: center; box-shadow: 0 6px 14px rgba(0,0,0,0.05); }
+        .btn-group { display: flex; gap: 1rem; justify-content: center; margin-top: 1rem; }
+        .btn { padding: 0.9rem 2rem; border-radius: 2rem; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s; }
+        .btn-primary { background: #1e3c72; color: white; }
+        .btn-primary:hover { background: #0e2a4f; transform: scale(1.02); }
+        .btn-outline { background: transparent; border: 1px solid #1e3c72; color: #1e3c72; }
+        footer { text-align: center; margin-top: 2rem; color: #4a5568; }
+        @media (max-width: 700px) { .glass { padding: 1.5rem; } h1 { font-size: 1.8rem; } }
+    </style>
 </head>
 <body>
-<div class="page">
-  <div class="topbar">
-    <div class="brand"><div class="brand-mark">GE</div><div><strong>Genz Edutech Innovations</strong><small>Bright digital learning and result portal</small></div></div>
-    <div class="navpill"><a class="btn secondary" href="student.html">Student Portal</a><a class="btn" href="admin.html">Admin Portal</a></div>
-  </div>
-  <section class="hero">
-    <span class="pill">Modern Result Checker Portal</span>
-    <h1>Welcome to the Genz Edutech Innovations Result System</h1>
-    <p>Use the student portal to sign up and check published results. Use the admin portal to create an account, sign in, manage learner records, upload passport links, and publish report cards with a clean printable layout.</p>
-    <div class="spacer"></div>
-    <div class="navpill"><a class="btn" href="student.html">Open Student Portal</a><a class="btn secondary" href="admin.html">Open Admin Portal</a></div>
-  </section>
-  <div class="spacer"></div>
-  <div class="grid">
-    <div class="panel"><h3>Student Signup + Login</h3><p class="muted">Students register with personal and school details, then log in with registration ID and password to view results.</p></div>
-    <div class="panel"><h3>Admin Signup + Login</h3><p class="muted">Admins create an account first, then sign in to manage students, settings, and published results.</p></div>
-    <div class="panel"><h3>Professional Report Card</h3><p class="muted">Published results appear on a bright, branded report card that can be printed or saved as PDF.</p></div>
-  </div>
+<div class="glass">
+    <h1>📘 Genz Edutech Innovations</h1>
+    <p style="margin-top: 0.5rem; color:#2d3748;">Smart Result Management Portal</p>
+    <div class="feature-grid">
+        <div class="card">🎓 Instant Results</div><div class="card">🔒 Secure Login</div><div class="card">📱 Mobile Ready</div>
+    </div>
+    <div class="btn-group">
+        <button class="btn btn-primary" onclick="location.href='student.html'">👩‍🎓 Student Portal</button>
+        <button class="btn btn-outline" onclick="location.href='admin.html'">👨‍💼 Admin Portal</button>
+    </div>
+    <footer>© 2025 Genz Edutech · Powered by Google Sheets</footer>
 </div>
 </body>
 </html>
