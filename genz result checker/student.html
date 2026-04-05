@@ -1,69 +1,658 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student | Genz Edutech</title>
-    <style>
-        *{ box-sizing: border-box; font-family: system-ui; }
-        body{ background: #f0f4fa; padding: 20px; }
-        .glass{ background: rgba(255,255,255,0.9); border-radius: 32px; padding: 28px; max-width: 1000px; margin: auto; box-shadow: 0 12px 28px rgba(0,0,0,0.1); }
-        .btn{ background: #1e3c72; color: white; border: none; padding: 10px 24px; border-radius: 40px; cursor: pointer; font-weight: bold; }
-        input, select{ width: 100%; padding: 12px; margin: 8px 0; border-radius: 20px; border: 1px solid #ccc; }
-        .report-card{ background: white; border-radius: 24px; padding: 20px; margin-top: 24px; border: 1px solid #e2e8f0; }
-        .loading{ position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 999; color: white; font-size: 1.3rem; display: none; backdrop-filter: blur(6px); }
-        .toast{ position: fixed; bottom: 20px; right: 20px; background: #2c3e50; color: white; padding: 12px 20px; border-radius: 40px; z-index: 1000; }
-        @media print{ .no-print{ display: none; } .glass{ box-shadow: none; padding: 0; } }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Portal — Genz Edutech Innovations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #0d1b2a; --navy2: #1a2d44; --navy3: #243650;
+      --accent: #c9a84c; --accent2: #e8c97a; --accent-dim: rgba(201,168,76,0.13);
+      --glass: rgba(255,255,255,0.05); --glass-border: rgba(255,255,255,0.1);
+      --text: #e0e8f4; --muted: #7a90ab; --danger: #e05555; --success: #3db87a;
+      --pass-color: #3db87a; --fail-color: #e05555;
+      --radius: 12px; --radius-lg: 16px;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--navy); color: var(--text); min-height: 100vh; }
+    body::before {
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background-image: linear-gradient(rgba(201,168,76,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,168,76,0.025) 1px, transparent 1px);
+      background-size: 50px 50px;
+    }
+
+    /* ---- OVERLAY ---- */
+    #overlay {
+      display: none; position: fixed; inset: 0; z-index: 1000;
+      background: rgba(8,14,24,0.85); backdrop-filter: blur(6px);
+      align-items: center; justify-content: center; flex-direction: column; gap: 18px;
+    }
+    #overlay.active { display: flex; }
+    .spinner { width: 44px; height: 44px; border: 3px solid rgba(201,168,76,0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #overlay-text { color: var(--accent2); font-size: 0.95rem; font-weight: 500; }
+
+    /* ---- TOAST ---- */
+    #toast-container { position: fixed; top: 20px; right: 20px; z-index: 2000; display: flex; flex-direction: column; gap: 10px; }
+    .toast { padding: 14px 20px; border-radius: 10px; font-size: 0.9rem; font-weight: 500; max-width: 340px; border: 1px solid; animation: slideIn 0.3s ease; display: flex; align-items: center; gap: 10px; }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .toast-success { background: rgba(61,184,122,0.12); border-color: rgba(61,184,122,0.4); color: #6edea8; }
+    .toast-error { background: rgba(224,85,85,0.12); border-color: rgba(224,85,85,0.4); color: #f08080; }
+
+    /* ---- NAV ---- */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(13,27,42,0.9); border-bottom: 1px solid var(--glass-border);
+      backdrop-filter: blur(20px); padding: 14px 0;
+    }
+    .nav-inner { max-width: 960px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-icon { width: 38px; height: 38px; background: linear-gradient(135deg,var(--accent),var(--accent2)); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .logo-text { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: #fff; }
+    .logo-sub { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+    .nav-right { display: flex; gap: 10px; align-items: center; }
+    #nav-student-info { display: none; align-items: center; gap: 10px; }
+    .student-badge { background: rgba(90,175,255,0.1); border: 1px solid rgba(90,175,255,0.3); color: #5aafff; padding: 6px 14px; border-radius: 20px; font-size: 0.82rem; font-weight: 500; }
+    .btn-sm { padding: 8px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.2s; border: 1px solid; font-family: 'DM Sans',sans-serif; }
+    .btn-ghost-sm { background: transparent; border-color: var(--glass-border); color: var(--text); }
+    .btn-ghost-sm:hover { background: var(--glass); }
+    .btn-danger-sm { background: transparent; border-color: rgba(224,85,85,0.5); color: #f08080; }
+    .btn-danger-sm:hover { background: rgba(224,85,85,0.1); }
+    .btn-print { background: linear-gradient(135deg,var(--accent),#b8922e); color: #1a1200; border: none; font-weight: 600; padding: 9px 20px; border-radius: 8px; font-size: 0.85rem; cursor: pointer; font-family: 'DM Sans',sans-serif; transition: all 0.2s; }
+    .btn-print:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,168,76,0.3); }
+
+    /* ---- MAIN ---- */
+    .main { max-width: 960px; margin: 0 auto; padding: 32px 24px; position: relative; z-index: 1; }
+
+    /* ---- AUTH PANEL ---- */
+    #auth-panel { max-width: 500px; margin: 50px auto 0; background: var(--glass); border: 1px solid var(--glass-border); border-radius: var(--radius-lg); padding: 40px; backdrop-filter: blur(12px); }
+    .auth-header { text-align: center; margin-bottom: 30px; }
+    .auth-header .icon { font-size: 42px; margin-bottom: 12px; display: block; }
+    .auth-header h2 { font-family: 'Playfair Display', serif; font-size: 1.7rem; color: #fff; margin-bottom: 6px; }
+    .auth-header p { color: var(--muted); font-size: 0.88rem; font-weight: 300; }
+
+    .tabs { display: flex; gap: 0; background: rgba(255,255,255,0.04); border-radius: 10px; padding: 4px; margin-bottom: 26px; }
+    .tab-btn { flex: 1; padding: 10px; border: none; background: transparent; color: var(--muted); font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 500; cursor: pointer; border-radius: 7px; transition: all 0.2s; }
+    .tab-btn.active { background: var(--navy2); color: #5aafff; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 0.8rem; font-weight: 500; color: var(--muted); margin-bottom: 6px; letter-spacing: 0.03em; text-transform: uppercase; }
+    input, select, textarea { width: 100%; padding: 12px 14px; border-radius: 9px; background: rgba(255,255,255,0.04); border: 1px solid var(--glass-border); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.92rem; transition: border-color 0.2s; outline: none; }
+    input:focus, select:focus, textarea:focus { border-color: rgba(90,175,255,0.5); background: rgba(255,255,255,0.07); }
+    select option { background: var(--navy2); }
+
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .btn-full { width: 100%; padding: 13px; border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.25s; border: none; letter-spacing: 0.02em; }
+    .btn-blue { background: linear-gradient(135deg, #1a6fc4, #0d5aa0); color: #fff; box-shadow: 0 4px 20px rgba(13,91,180,0.35); }
+    .btn-blue:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(13,91,180,0.5); }
+    .btn-blue:active { transform: scale(0.98); }
+    .btn-blue:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    /* ---- RESULTS SECTION ---- */
+    #results-section { display: none; }
+
+    /* STUDENT PROFILE CARD */
+    .profile-card {
+      background: var(--glass); border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg); padding: 28px 32px; margin-bottom: 28px;
+      display: flex; gap: 28px; align-items: flex-start;
+      backdrop-filter: blur(8px);
+    }
+    .passport-img {
+      width: 90px; height: 110px; border-radius: 10px; object-fit: cover;
+      border: 2px solid var(--accent); flex-shrink: 0;
+    }
+    .passport-placeholder {
+      width: 90px; height: 110px; border-radius: 10px;
+      background: var(--navy3); border: 2px solid var(--glass-border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px; flex-shrink: 0; color: var(--muted);
+    }
+    .profile-info { flex: 1; }
+    .profile-name { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #fff; margin-bottom: 4px; }
+    .profile-regid { font-size: 0.82rem; color: var(--accent2); font-weight: 500; margin-bottom: 14px; letter-spacing: 0.05em; }
+    .profile-meta { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+    .meta-item { background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 8px; padding: 10px 14px; }
+    .meta-key { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 3px; }
+    .meta-val { font-size: 0.88rem; color: var(--text); font-weight: 500; }
+
+    /* REPORT CARDS */
+    .results-heading {
+      font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #fff;
+      margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--glass-border);
+    }
+    .no-results { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 0.9rem; font-weight: 300; }
+    .no-results .icon { font-size: 40px; display: block; margin-bottom: 12px; }
+
+    /* THE ACTUAL REPORT CARD */
+    .report-card {
+      border: 1px solid var(--glass-border); border-radius: 20px;
+      overflow: hidden; margin-bottom: 32px;
+      background: var(--glass); backdrop-filter: blur(12px);
+    }
+
+    .rc-header {
+      background: linear-gradient(135deg, #0d1b2a 0%, #1a2d44 100%);
+      border-bottom: 2px solid var(--accent);
+      padding: 28px 32px;
+      display: flex; align-items: center; gap: 20px;
+    }
+    .rc-school-logo { font-size: 38px; }
+    .rc-school-info { flex: 1; }
+    .rc-school-name { font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 700; color: var(--accent2); margin-bottom: 4px; }
+    .rc-school-sub { font-size: 0.78rem; color: var(--muted); line-height: 1.6; font-weight: 300; }
+    .rc-badge-area { text-align: right; flex-shrink: 0; }
+    .rc-session-badge { background: var(--accent-dim); border: 1px solid rgba(201,168,76,0.35); color: var(--accent2); padding: 6px 14px; border-radius: 6px; font-size: 0.78rem; font-weight: 500; display: inline-block; margin-bottom: 6px; }
+    .rc-exam-title { font-size: 0.82rem; color: var(--muted); font-weight: 300; }
+
+    .rc-student-bar {
+      background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--glass-border);
+      padding: 16px 32px;
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+    }
+    .rc-student-name { font-weight: 600; font-size: 1rem; color: #fff; }
+    .rc-student-meta { font-size: 0.82rem; color: var(--muted); }
+
+    .rc-body { padding: 28px 32px; }
+
+    /* Scorecard */
+    .score-section { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 14px; margin-bottom: 28px; }
+    .score-box {
+      border-radius: 12px; padding: 18px 16px; text-align: center;
+      border: 1px solid;
+    }
+    .score-box-blue { background: rgba(13,91,180,0.1); border-color: rgba(13,91,180,0.3); }
+    .score-box-amber { background: rgba(201,168,76,0.1); border-color: rgba(201,168,76,0.3); }
+    .score-box-green { background: rgba(61,184,122,0.1); border-color: rgba(61,184,122,0.3); }
+    .score-box-purple { background: rgba(150,100,220,0.1); border-color: rgba(150,100,220,0.3); }
+    .score-box-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; font-weight: 500; }
+    .score-box-val { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; line-height: 1; }
+    .val-blue { color: #5aafff; }
+    .val-amber { color: var(--accent2); }
+    .val-green { color: #6edea8; }
+    .val-purple { color: #c084f5; }
+
+    /* Progress bar */
+    .progress-section { margin-bottom: 24px; }
+    .progress-label { display: flex; justify-content: space-between; font-size: 0.82rem; color: var(--muted); margin-bottom: 8px; }
+    .progress-bar { height: 10px; border-radius: 10px; background: rgba(255,255,255,0.08); overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 10px; transition: width 1s ease; }
+
+    /* PASS / FAIL stamp */
+    .verdict-row { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+    .verdict-stamp {
+      padding: 10px 24px; border-radius: 8px; font-size: 1.1rem; font-weight: 700;
+      letter-spacing: 0.15em; border: 2px solid;
+    }
+    .verdict-pass { background: rgba(61,184,122,0.15); border-color: var(--pass-color); color: var(--pass-color); }
+    .verdict-fail { background: rgba(224,85,85,0.13); border-color: var(--fail-color); color: var(--fail-color); }
+    .verdict-remark { font-size: 0.88rem; color: var(--muted); font-weight: 300; flex: 1; line-height: 1.55; }
+
+    /* Teacher comment */
+    .teacher-comment {
+      background: rgba(201,168,76,0.06); border: 1px solid rgba(201,168,76,0.2);
+      border-left: 3px solid var(--accent); border-radius: 8px;
+      padding: 14px 18px; margin-bottom: 16px;
+    }
+    .tc-label { font-size: 0.72rem; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; font-weight: 500; margin-bottom: 6px; }
+    .tc-text { font-size: 0.9rem; color: var(--text); line-height: 1.6; font-weight: 300; font-style: italic; }
+
+    /* RC Footer */
+    .rc-footer {
+      background: rgba(255,255,255,0.02); border-top: 1px solid var(--glass-border);
+      padding: 14px 32px; font-size: 0.75rem; color: var(--muted);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+
+    /* ---- PRINT STYLES ---- */
+    @media print {
+      body { background: #fff !important; color: #111 !important; }
+      nav, #toast-container, #overlay, .no-print { display: none !important; }
+      #results-section { display: block !important; }
+      #auth-panel { display: none !important; }
+      .report-card { border: 1px solid #ccc !important; break-inside: avoid; page-break-inside: avoid; background: #fff !important; }
+      .rc-header { background: #f0f0f0 !important; border-bottom: 2px solid #c9a84c !important; }
+      .rc-school-name { color: #8a6600 !important; }
+      * { backdrop-filter: none !important; }
+      .rc-body { background: #fff; }
+    }
+
+    /* ---- RESPONSIVE ---- */
+    @media (max-width: 640px) {
+      .score-section { grid-template-columns: 1fr 1fr; }
+      .profile-card { flex-direction: column; gap: 16px; }
+      .rc-header { flex-direction: column; text-align: center; }
+      .rc-badge-area { text-align: center; }
+      .rc-student-bar { flex-direction: column; gap: 4px; }
+      .rc-footer { flex-direction: column; gap: 4px; text-align: center; }
+      .form-grid-2 { grid-template-columns: 1fr; }
+      #auth-panel { padding: 28px 20px; }
+      .main { padding: 20px 16px; }
+    }
+  </style>
 </head>
 <body>
-<div class="loading" id="loadingOverlay">⏳ Loading...</div>
-<div class="glass" id="authContainer">
-    <h2>🎓 Student Portal</h2>
-    <div><button id="showLoginBtn" class="btn" style="margin-right:10px">Login</button><button id="showSignupBtn" class="btn" style="background:#aaa">Sign Up</button></div>
-    <div id="loginPanel">
-        <input type="text" id="loginReg" placeholder="Registration ID"><input type="password" id="loginPass" placeholder="Password"><button class="btn" id="studentLoginBtn">Login</button>
+  <div id="overlay"><div class="spinner"></div><div id="overlay-text">Please wait...</div></div>
+  <div id="toast-container"></div>
+
+  <nav>
+    <div class="nav-inner">
+      <a href="index.html" class="logo">
+        <div class="logo-icon">🎓</div>
+        <div>
+          <div class="logo-text">Genz Edutech</div>
+          <div class="logo-sub">Student Portal</div>
+        </div>
+      </a>
+      <div class="nav-right">
+        <div id="nav-student-info">
+          <span class="student-badge" id="student-name-badge">Student</span>
+          <button class="btn-print no-print" onclick="window.print()">🖨️ Print Result</button>
+          <button class="btn-sm btn-danger-sm no-print" onclick="logout()">Log Out</button>
+        </div>
+      </div>
     </div>
-    <div id="signupPanel" style="display:none">
-        <input placeholder="RegID" id="su_reg"><input placeholder="Password" id="su_pass" type="password"><input placeholder="Full Name" id="su_name"><input placeholder="Age" id="su_age"><select id="su_gender"><option>Male</option><option>Female</option></select><input placeholder="DOB (YYYY-MM-DD)" id="su_dob"><input placeholder="Parent Name" id="su_parent"><input placeholder="Parent Phone" id="su_phone"><input placeholder="Parent Email" id="su_email"><input placeholder="School Name" id="su_school"><input placeholder="State" id="su_state"><input placeholder="City/LGA" id="su_city"><input placeholder="Class Level" id="su_class"><input placeholder="Category" id="su_cat"><textarea placeholder="Address" id="su_addr"></textarea><button class="btn" id="doStudentSignup">Register</button>
+  </nav>
+
+  <div class="main">
+
+    <!-- AUTH PANEL -->
+    <div id="auth-panel">
+      <div class="auth-header">
+        <span class="icon">🎓</span>
+        <h2>Student Portal</h2>
+        <p>Log in to view your published results</p>
+      </div>
+
+      <div class="tabs">
+        <button class="tab-btn active" onclick="switchAuthTab('login')">Log In</button>
+        <button class="tab-btn" onclick="switchAuthTab('signup')">Sign Up</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div class="tab-content active" id="tab-login">
+        <div class="form-group">
+          <label>Registration ID</label>
+          <input type="text" id="login-regid" placeholder="e.g. GEI/2025/001" autocomplete="username" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="login-password" placeholder="Enter your password" autocomplete="current-password" />
+        </div>
+        <button class="btn-full btn-blue" onclick="studentLogin()">View My Results</button>
+      </div>
+
+      <!-- SIGNUP -->
+      <div class="tab-content" id="tab-signup">
+        <div class="form-group">
+          <label>Registration ID *</label>
+          <input type="text" id="su-regid" placeholder="e.g. GEI/2025/001" />
+        </div>
+        <div class="form-group">
+          <label>Password *</label>
+          <input type="password" id="su-password" placeholder="Choose a password" />
+        </div>
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input type="text" id="su-fullname" placeholder="Your full name" />
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label>Age</label>
+            <input type="number" id="su-age" placeholder="Age" />
+          </div>
+          <div class="form-group">
+            <label>Gender</label>
+            <select id="su-gender">
+              <option value="">— Select —</option>
+              <option>Male</option><option>Female</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Date of Birth</label>
+            <input type="date" id="su-dob" />
+          </div>
+          <div class="form-group">
+            <label>Class Level</label>
+            <input type="text" id="su-class" placeholder="e.g. JSS 2" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Parent/Guardian Name</label>
+          <input type="text" id="su-parentname" placeholder="Parent full name" />
+        </div>
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label>Parent Phone</label>
+            <input type="tel" id="su-parentphone" placeholder="+234..." />
+          </div>
+          <div class="form-group">
+            <label>Parent Email</label>
+            <input type="email" id="su-parentemail" placeholder="parent@email.com" />
+          </div>
+          <div class="form-group">
+            <label>School Name</label>
+            <input type="text" id="su-school" placeholder="School name" />
+          </div>
+          <div class="form-group">
+            <label>State</label>
+            <input type="text" id="su-state" placeholder="State" />
+          </div>
+          <div class="form-group">
+            <label>City / LGA</label>
+            <input type="text" id="su-city" placeholder="City or LGA" />
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <input type="text" id="su-category" placeholder="e.g. Science, Arts" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Address</label>
+          <input type="text" id="su-address" placeholder="Full home address" />
+        </div>
+        <button class="btn-full btn-blue" onclick="studentSignup()">Create Account</button>
+      </div>
     </div>
-</div>
-<div id="reportArea" style="display:none"></div>
-<script>
-    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwTnf8fxSM56pTLXIw5deMGCPulj76fNoEF-geUhQlP00Wfkl-dnbKwPCBqv2oabARlXg/exec";
-    function showLoad(show){ document.getElementById('loadingOverlay').style.display = show ? 'flex' : 'none'; }
-    function toast(m){ let d=document.createElement('div'); d.className='toast'; d.innerText=m; document.body.appendChild(d); setTimeout(()=>d.remove(),3000); }
-    function api(params, cb){ let url=WEB_APP_URL+"?"+new URLSearchParams(params).toString(); fetch(url).then(r=>r.json()).then(cb).catch(e=>toast("Network error")); }
-    document.getElementById('showLoginBtn').onclick=()=>{ document.getElementById('loginPanel').style.display='block'; document.getElementById('signupPanel').style.display='none'; };
-    document.getElementById('showSignupBtn').onclick=()=>{ document.getElementById('loginPanel').style.display='none'; document.getElementById('signupPanel').style.display='block'; };
-    document.getElementById('studentLoginBtn').onclick=()=>{
-        let reg=document.getElementById('loginReg').value, pass=document.getElementById('loginPass').value;
-        if(!reg||!pass) return toast("Enter credentials");
-        showLoad(true);
-        api({action:'studentLogin', regID:reg, password:pass}, (res)=>{
-            showLoad(false);
-            if(res.status==='success'){
-                document.getElementById('authContainer').style.display='none';
-                renderReport(res.profile, res.results, res.settings);
-            } else toast(res.message);
-        });
-    };
-    document.getElementById('doStudentSignup').onclick=()=>{
-        let data={ regID:document.getElementById('su_reg').value, password:document.getElementById('su_pass').value, fullName:document.getElementById('su_name').value, age:document.getElementById('su_age').value, gender:document.getElementById('su_gender').value, dob:document.getElementById('su_dob').value, parentName:document.getElementById('su_parent').value, parentPhone:document.getElementById('su_phone').value, parentEmail:document.getElementById('su_email').value, schoolName:document.getElementById('su_school').value, state:document.getElementById('su_state').value, cityLGA:document.getElementById('su_city').value, classLevel:document.getElementById('su_class').value, category:document.getElementById('su_cat').value, address:document.getElementById('su_addr').value };
-        if(!data.regID||!data.password) return toast("RegID & password required");
-        showLoad(true);
-        api({action:'studentSignup', ...data}, (res)=>{ showLoad(false); toast(res.message); if(res.status==='success') document.getElementById('showLoginBtn').click(); });
-    };
-    function renderReport(profile, results, settings){
-        let html=`<div class="glass"><div class="no-print"><button class="btn" onclick="window.print()">🖨️ Print / PDF</button><button class="btn" id="logoutBtn" style="background:#6c757d">Logout</button></div><div style="text-align:center"><h2>${settings.BRAND_NAME || 'Genz Edutech'}</h2><p>${settings.SCHOOL_NAME}<br>${settings.HEAD_OFFICE_ADDRESS}<br>📞 ${settings.SCHOOL_PHONE} ✉️ ${settings.SCHOOL_EMAIL}</p><hr><h3>Student Profile</h3><p><strong>${profile.fullName}</strong> (Reg: ${profile.regID})<br>Class: ${profile.classLevel} | Parent: ${profile.parentName}</p>${profile.passportUrl ? `<img src="${profile.passportUrl}" width="80" style="border-radius:50%">` : ''}</div>`;
-        results.forEach(r=>{
-            let passFail = r.studentScore >= r.passMarkNumber ? "✅ PASS" : "❌ FAIL";
-            html+=`<div class="report-card"><h3>📌 ${r.examTitle} (${r.academicSession} - ${r.term})</h3><p>📅 ${r.examDate} | Score: ${r.studentScore}/${r.maxScore} (${r.percentage.toFixed(1)}%)<br>Grade: ${r.grade} | ${r.remark}<br>${r.teacherComment ? `💬 Teacher: ${r.teacherComment}` : ''}<br><strong>${passFail}</strong> ${settings.SHOW_POSITION_ON_REPORT === 'true' && r.position ? `🏅 Position: ${r.position}` : ''}</p></div>`;
-        });
-        html+=`<footer class="no-print" style="margin-top:20px">© ${settings.SCHOOL_NAME} | Principal: ${settings.PRINCIPAL_NAME}</footer></div>`;
-        document.getElementById('reportArea').innerHTML=html; document.getElementById('reportArea').style.display='block';
-        document.getElementById('logoutBtn')?.addEventListener('click',()=>{ location.reload(); });
+
+    <!-- RESULTS SECTION -->
+    <div id="results-section">
+
+      <!-- STUDENT PROFILE -->
+      <div class="profile-card" id="profile-card">
+        <div id="passport-area"></div>
+        <div class="profile-info">
+          <div class="profile-name" id="pf-name">—</div>
+          <div class="profile-regid" id="pf-regid">—</div>
+          <div class="profile-meta" id="pf-meta"></div>
+        </div>
+      </div>
+
+      <!-- RESULTS -->
+      <div class="results-heading">📋 Academic Results</div>
+      <div id="results-container"></div>
+
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // CONFIGURATION — Replace with your Apps Script /exec URL
+    // ============================================================
+    const WEB_APP_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID_HERE/exec';
+
+    // ---- State ----
+    let currentStudent = null;
+    let currentSettings = {};
+
+    // ============================================================
+    // JSONP FETCH
+    // ============================================================
+    function apiCall(params) {
+      return new Promise((resolve, reject) => {
+        const cbName = 'cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+        const query = new URLSearchParams({ ...params, callback: cbName }).toString();
+        const script = document.createElement('script');
+        script.src = WEB_APP_URL + '?' + query;
+        window[cbName] = (data) => {
+          delete window[cbName];
+          document.body.removeChild(script);
+          resolve(data);
+        };
+        script.onerror = () => {
+          delete window[cbName];
+          document.body.removeChild(script);
+          reject(new Error('Network error — check your WEB_APP_URL.'));
+        };
+        document.body.appendChild(script);
+      });
     }
-</script>
+
+    // ============================================================
+    // LOADING OVERLAY
+    // ============================================================
+    function showOverlay(text = 'Please wait...') {
+      document.getElementById('overlay-text').textContent = text;
+      document.getElementById('overlay').classList.add('active');
+    }
+    function hideOverlay() {
+      document.getElementById('overlay').classList.remove('active');
+    }
+
+    // ============================================================
+    // TOAST
+    // ============================================================
+    function toast(msg, type = 'success') {
+      const el = document.createElement('div');
+      el.className = `toast toast-${type}`;
+      el.innerHTML = `<span>${type === 'success' ? '✅' : '❌'}</span> ${msg}`;
+      document.getElementById('toast-container').appendChild(el);
+      setTimeout(() => el.remove(), 4500);
+    }
+
+    // ============================================================
+    // AUTH TAB SWITCH
+    // ============================================================
+    function switchAuthTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'signup')));
+      document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+      document.getElementById('tab-signup').classList.toggle('active', tab === 'signup');
+    }
+
+    // ============================================================
+    // STUDENT LOGIN
+    // ============================================================
+    async function studentLogin() {
+      const regID = document.getElementById('login-regid').value.trim();
+      const password = document.getElementById('login-password').value;
+      if (!regID || !password) return toast('Please enter your Registration ID and password.', 'error');
+
+      showOverlay('Loading your results...');
+      try {
+        const res = await apiCall({ action: 'studentLogin', regID, password });
+        if (res.success) {
+          currentStudent = res.student;
+          currentSettings = res.settings || {};
+          renderResults(res.student, res.results, res.settings);
+          toast(`Welcome, ${res.student.FullName}!`);
+        } else {
+          toast(res.message, 'error');
+        }
+      } catch (e) { toast('Connection failed: ' + e.message, 'error'); }
+      hideOverlay();
+    }
+
+    // ============================================================
+    // STUDENT SIGNUP
+    // ============================================================
+    async function studentSignup() {
+      const regID = document.getElementById('su-regid').value.trim();
+      const password = document.getElementById('su-password').value;
+      const fullName = document.getElementById('su-fullname').value.trim();
+      if (!regID || !password || !fullName) return toast('Registration ID, password, and full name are required.', 'error');
+
+      showOverlay('Creating your account...');
+      try {
+        const res = await apiCall({
+          action: 'studentSignup', regID, password, fullName,
+          age: document.getElementById('su-age').value,
+          gender: document.getElementById('su-gender').value,
+          dob: document.getElementById('su-dob').value,
+          classLevel: document.getElementById('su-class').value,
+          parentName: document.getElementById('su-parentname').value,
+          parentPhone: document.getElementById('su-parentphone').value,
+          parentEmail: document.getElementById('su-parentemail').value,
+          schoolName: document.getElementById('su-school').value,
+          state: document.getElementById('su-state').value,
+          cityLGA: document.getElementById('su-city').value,
+          category: document.getElementById('su-category').value,
+          address: document.getElementById('su-address').value,
+        });
+        toast(res.message, res.success ? 'success' : 'error');
+        if (res.success) switchAuthTab('login');
+      } catch (e) { toast('Failed: ' + e.message, 'error'); }
+      hideOverlay();
+    }
+
+    // ============================================================
+    // RENDER RESULTS
+    // ============================================================
+    function renderResults(student, results, settings) {
+      // Hide auth, show results
+      document.getElementById('auth-panel').style.display = 'none';
+      document.getElementById('results-section').style.display = 'block';
+      document.getElementById('nav-student-info').style.display = 'flex';
+      document.getElementById('student-name-badge').textContent = student.FullName.split(' ')[0];
+
+      // Passport
+      const passportArea = document.getElementById('passport-area');
+      if (student.PassportUrl) {
+        passportArea.innerHTML = `<img src="${student.PassportUrl}" class="passport-img" alt="Passport" onerror="this.style.display='none'" />`;
+      } else {
+        passportArea.innerHTML = `<div class="passport-placeholder">👤</div>`;
+      }
+
+      // Profile fields
+      document.getElementById('pf-name').textContent = student.FullName;
+      document.getElementById('pf-regid').textContent = '📌 ' + student.RegID;
+
+      const metaFields = [
+        { key: 'Class', val: student.ClassLevel },
+        { key: 'Category', val: student.Category },
+        { key: 'School', val: student.SchoolName },
+        { key: 'Gender', val: student.Gender },
+        { key: 'Age', val: student.Age },
+        { key: 'State', val: student.State },
+        { key: 'LGA / City', val: student.CityLGA },
+        { key: 'Parent', val: student.ParentName },
+        { key: 'Parent Phone', val: student.ParentPhone },
+        { key: 'DOB', val: student.DOB },
+      ].filter(f => f.val);
+
+      document.getElementById('pf-meta').innerHTML = metaFields.map(f =>
+        `<div class="meta-item"><div class="meta-key">${f.key}</div><div class="meta-val">${f.val}</div></div>`
+      ).join('');
+
+      // Results
+      const container = document.getElementById('results-container');
+      if (!results || results.length === 0) {
+        container.innerHTML = `<div class="no-results"><span class="icon">📭</span>No published results yet.<br/>Check back later or contact your school.</div>`;
+        return;
+      }
+
+      const showPosition = String(settings.SHOW_POSITION_ON_REPORT) === 'true';
+      const brandName = settings.BRAND_NAME || 'Genz Edutech Innovations';
+      const schoolName = settings.SCHOOL_NAME || 'Genz Edutech Innovations';
+      const schoolAddress = settings.HEAD_OFFICE_ADDRESS || '';
+      const schoolPhone = settings.SCHOOL_PHONE || '';
+      const schoolEmail = settings.SCHOOL_EMAIL || '';
+
+      container.innerHTML = results.map(r => {
+        const pct = parseFloat(r.Percentage) || 0;
+        const score = parseFloat(r.StudentScore) || 0;
+        const max = parseFloat(r.MaxScore) || 100;
+        const pm = parseFloat(r.PassMarkNumber) || 50;
+        const passed = score >= pm;
+        const barColor = passed ? '#3db87a' : '#e05555';
+        const barPct = Math.min(100, pct);
+
+        return `
+        <div class="report-card">
+          <div class="rc-header">
+            <div class="rc-school-logo">🏫</div>
+            <div class="rc-school-info">
+              <div class="rc-school-name">${brandName}</div>
+              <div class="rc-school-sub">
+                ${schoolName}${schoolAddress ? ' · ' + schoolAddress : ''}<br/>
+                ${schoolPhone ? '📞 ' + schoolPhone : ''}${schoolPhone && schoolEmail ? ' &nbsp;|&nbsp; ' : ''}${schoolEmail ? '✉️ ' + schoolEmail : ''}
+              </div>
+            </div>
+            <div class="rc-badge-area">
+              <div class="rc-session-badge">${r.AcademicSession || '—'} · ${r.Term || '—'}</div>
+              <div class="rc-exam-title">${r.ExamTitle || 'Examination'}</div>
+            </div>
+          </div>
+
+          <div class="rc-student-bar">
+            <div>
+              <div class="rc-student-name">${student.FullName}</div>
+              <div class="rc-student-meta">Reg ID: ${student.RegID} &nbsp;|&nbsp; Class: ${student.ClassLevel || '—'} &nbsp;|&nbsp; Date: ${r.ExamDate || '—'}</div>
+            </div>
+            ${showPosition && r.Position ? `<div style="background:var(--accent-dim);border:1px solid rgba(201,168,76,0.3);color:var(--accent2);padding:8px 16px;border-radius:8px;font-size:0.85rem;font-weight:600">Position: ${r.Position}</div>` : ''}
+          </div>
+
+          <div class="rc-body">
+
+            <div class="score-section">
+              <div class="score-box score-box-blue">
+                <div class="score-box-label">Score</div>
+                <div class="score-box-val val-blue">${score}<span style="font-size:1rem;opacity:0.6">/${max}</span></div>
+              </div>
+              <div class="score-box score-box-amber">
+                <div class="score-box-label">Percentage</div>
+                <div class="score-box-val val-amber">${pct}%</div>
+              </div>
+              <div class="score-box score-box-green">
+                <div class="score-box-label">Grade</div>
+                <div class="score-box-val val-green">${r.Grade || '—'}</div>
+              </div>
+              <div class="score-box score-box-purple">
+                <div class="score-box-label">Pass Mark</div>
+                <div class="score-box-val val-purple">${pm}</div>
+              </div>
+            </div>
+
+            <div class="progress-section">
+              <div class="progress-label">
+                <span>Performance</span>
+                <span style="color:${barColor}">${pct}%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" style="width:${barPct}%;background:${barColor}"></div>
+              </div>
+            </div>
+
+            <div class="verdict-row">
+              <div class="verdict-stamp ${passed ? 'verdict-pass' : 'verdict-fail'}">${passed ? '✅ PASS' : '❌ FAIL'}</div>
+              <div class="verdict-remark">${r.Remark || 'No remark available.'}</div>
+            </div>
+
+            ${r.TeacherComment ? `<div class="teacher-comment">
+              <div class="tc-label">Teacher's Comment</div>
+              <div class="tc-text">"${r.TeacherComment}"</div>
+            </div>` : ''}
+
+          </div>
+
+          <div class="rc-footer">
+            <span>Result ID: ${r.ResultID}</span>
+            <span>${brandName} — Official Academic Result</span>
+            <span>Generated: ${new Date().toLocaleDateString('en-NG', { dateStyle: 'medium' })}</span>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    // ============================================================
+    // LOGOUT
+    // ============================================================
+    function logout() {
+      currentStudent = null;
+      currentSettings = {};
+      document.getElementById('results-section').style.display = 'none';
+      document.getElementById('auth-panel').style.display = 'block';
+      document.getElementById('nav-student-info').style.display = 'none';
+      document.getElementById('login-regid').value = '';
+      document.getElementById('login-password').value = '';
+      toast('Logged out successfully.');
+    }
+  </script>
 </body>
 </html>
