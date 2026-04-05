@@ -58,11 +58,11 @@
   <div class="shell">
     <section class="glass hero">
       <span class="badge">🌟 Bright Student Result Portal</span>
-      <h1>Signup, Login and Check Result</h1>
-      <p class="lead">Create your student profile once, then log in with your Registration ID and password to check your result professionally.</p>
+      <h1>Genz Edutech Innovations Student Portal</h1>
+      <p class="lead">Create your learner profile once, then log in with your Registration ID and password to view your result in a bright, professional report format.</p>
       <div class="actions">
         <a class="btn soft" href="./index.html">Home</a>
-        <a class="btn soft" href="./admin.html">Admin</a>
+        
       </div>
     </section>
 
@@ -199,6 +199,7 @@
 
   <script>
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbynYNmLAHhox3is5agewRvPmt3gtqi3YwUh1PQKfB3R8JQaCL1fu1nH3QUYe0760B0Y/exec';
+    const BRAND_NAME = 'Genz Edutech Innovations';
     const CATEGORY_OPTIONS = ['Lower Primary','Upper Primary','Junior High School','Senior High School','Undergraduate'];
 
     function $(id) { return document.getElementById(id); }
@@ -235,13 +236,13 @@
           clearTimeout(timer);
           delete window[cb];
           script.remove();
-          reject(new Error('Unable to reach backend.'));
+          reject(new Error('Unable to reach backend. Redeploy the Apps Script web app and set access to Anyone.'));
         };
 
         timer = setTimeout(() => {
           delete window[cb];
           script.remove();
-          reject(new Error('Backend request timed out.'));
+          reject(new Error('Backend request timed out. Confirm the latest Apps Script deployment URL is still correct.'));
         }, 20000);
 
         script.src = WEB_APP_URL + '?' + qs.toString();
@@ -308,7 +309,7 @@
       const st = data.student || {};
       const results = data.results || [];
 
-      $('rpBrand').textContent = s.BRAND_NAME || 'Genz Edutech Innovations';
+      $('rpBrand').textContent = s.BRAND_NAME || BRAND_NAME;
       $('rpOffice').textContent = [s.HEAD_OFFICE_ADDRESS, s.SCHOOL_EMAIL, s.SCHOOL_PHONE].filter(Boolean).join(' • ');
       $('rpFullName').textContent = st.FullName || '-';
       $('rpRegID').textContent = st.RegID || '-';
