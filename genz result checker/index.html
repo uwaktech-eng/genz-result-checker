@@ -1,71 +1,68 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Genz Edutech Innovations</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg1:#f7fbff; --bg2:#eef4ff; --card:rgba(255,255,255,.78); --line:rgba(82,118,255,.18);
-      --text:#17305b; --muted:#5f7394; --primary:#4f7cff; --accent:#7d5cff; --good:#18b56a; --bad:#e25555;
-      --shadow:0 20px 60px rgba(54,97,215,.12);
-    }
-    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,sans-serif;color:var(--text);
-      background:radial-gradient(circle at top left,#ffffff 0,#eef5ff 35%,#f9fbff 100%);min-height:100vh}
-    .wrap{max-width:1100px;margin:auto;padding:32px 18px 48px}
-    .hero{background:linear-gradient(135deg,rgba(255,255,255,.82),rgba(234,243,255,.72));
-      border:1px solid var(--line);border-radius:32px;padding:36px;box-shadow:var(--shadow);backdrop-filter:blur(18px)}
-    .badge{display:inline-flex;gap:8px;align-items:center;background:#eef4ff;border:1px solid var(--line);padding:8px 14px;border-radius:999px;font-size:12px;font-weight:700;color:var(--primary)}
-    h1{font-size:clamp(34px,6vw,62px);margin:18px 0 12px;line-height:1.03}
-    p{font-size:16px;line-height:1.7;color:var(--muted);max-width:750px}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:28px}
-    .card{background:var(--card);border:1px solid var(--line);border-radius:28px;padding:26px;box-shadow:var(--shadow);backdrop-filter:blur(16px)}
-    .btns{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
-    a.btn{text-decoration:none;padding:14px 18px;border-radius:16px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
-    .primary{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;box-shadow:0 14px 30px rgba(79,124,255,.24)}
-    .ghost{background:#fff;color:var(--primary);border:1px solid var(--line)}
-    .small{font-size:13px;color:var(--muted)}
-    ul{padding-left:18px;color:var(--muted);line-height:1.8}
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <section class="hero">
-      <span class="badge">✨ Bright Result Portal by Genz Edutech Innovations</span>
-      <h1>Genz Edutech Innovations Result Portal</h1>
-      <p>
-        This portal is designed by Genz Edutech Innovations for a bright, modern and professional student result experience. Students can sign up and log in to check results, while admins manage student records, settings and exam entries.
-      </p>
-      <div class="btns">
-        <a class="btn primary" href="./student.html">Open Student Portal</a>
-        <a class="btn ghost" href="./admin.html">Open Admin Dashboard</a>
-      </div>
-      <p class="small" style="margin-top:14px">If the site says it cannot reach the backend, update your Apps Script web app deployment and set access to <strong>Anyone</strong>.</p>
-    </section>
-
-    <div class="grid">
-      <div class="card">
-        <h3>Student Portal</h3>
-        <p>Signup, login, view report card, print and download PDF.</p>
-        <ul>
-          <li>Registration ID + password login</li>
-          <li>Bright report card design</li>
-          <li>Personal and school profile details</li>
-        </ul>
-      </div>
-      <div class="card">
-        <h3>Admin Dashboard</h3>
-        <p>Manage settings, student records and results from one place.</p>
-        <ul>
-          <li>Passport link in admin only</li>
-          <li>Category dropdown supported</li>
-          <li>Position display toggle</li>
-        </ul>
-      </div>
-    </div>
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"><style>
+:root{--bg:#f4f8ff;--bg2:#eef5ff;--card:rgba(255,255,255,.78);--card2:rgba(255,255,255,.92);--line:rgba(76,110,245,.16);--text:#10214a;--muted:#5f6d92;--primary:#3d6cff;--primary-2:#7b61ff;--accent:#12b886;--danger:#e03131;--warning:#f59f00;--shadow:0 20px 40px rgba(58,92,170,.10);--radius:22px}
+*{box-sizing:border-box}html,body{margin:0;padding:0;font-family:Inter,system-ui,Arial,sans-serif;color:var(--text);background:radial-gradient(circle at top left,#fefeff 0,#f6fbff 28%,#eef4ff 60%,#eaf0ff 100%)}a{text-decoration:none;color:inherit}button,input,select,textarea{font:inherit}body{min-height:100vh}.page{max-width:1220px;margin:0 auto;padding:24px}.brand{display:flex;align-items:center;gap:12px}.brand-mark{width:46px;height:46px;border-radius:15px;background:linear-gradient(135deg,var(--primary),var(--primary-2));display:grid;place-items:center;color:#fff;font-weight:800;box-shadow:var(--shadow)}.brand small{display:block;color:var(--muted);font-size:12px}.hero{background:linear-gradient(135deg,rgba(255,255,255,.92),rgba(237,244,255,.84));backdrop-filter:blur(18px);border:1px solid var(--line);border-radius:32px;padding:28px;box-shadow:var(--shadow);position:relative;overflow:hidden}.hero:before,.panel:before{content:"";position:absolute;inset:auto auto -80px -80px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,rgba(61,108,255,.12),transparent 65%)}.hero h1{margin:16px 0 10px;font-size:clamp(28px,5vw,44px);line-height:1.05}.hero p{margin:0;color:var(--muted);max-width:760px;line-height:1.6}.grid{display:grid;gap:20px}.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.panel{position:relative;background:var(--card);backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:26px;padding:22px;box-shadow:var(--shadow)}.card{background:var(--card2);border:1px solid var(--line);border-radius:20px;padding:18px;box-shadow:0 12px 24px rgba(41,76,157,.07)}.muted{color:var(--muted)}.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:20px;flex-wrap:wrap}.navpill{display:inline-flex;gap:10px;flex-wrap:wrap}.chip,.btn{border:none;border-radius:14px;padding:12px 16px;cursor:pointer;transition:.2s ease}.btn{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;font-weight:700;box-shadow:0 12px 24px rgba(77,107,232,.18)}.btn.secondary{background:#fff;color:var(--text);border:1px solid var(--line);box-shadow:none}.btn.ghost{background:rgba(255,255,255,.65);color:var(--text);border:1px solid var(--line);box-shadow:none}.btn.bad{background:linear-gradient(135deg,#ff6b6b,#fa5252)}.btn.ok{background:linear-gradient(135deg,#12b886,#20c997)}.btn.small{padding:10px 14px;border-radius:12px;font-size:14px}.pill{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;background:rgba(255,255,255,.74);border:1px solid var(--line);border-radius:999px;color:var(--muted);font-weight:600}.stat{padding:18px;border-radius:18px;background:rgba(255,255,255,.8);border:1px solid var(--line)}.stat strong{display:block;font-size:28px;margin-top:8px}.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.form-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.field{display:flex;flex-direction:column;gap:8px}.field label{font-size:13px;font-weight:700;color:#4f5f8b}.field input,.field select,.field textarea{width:100%;padding:13px 14px;border-radius:14px;border:1px solid rgba(98,120,191,.2);background:rgba(255,255,255,.95);outline:none;color:var(--text)}.field textarea{min-height:110px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(61,108,255,.45);box-shadow:0 0 0 4px rgba(61,108,255,.10)}.section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}.section-title h2,.section-title h3{margin:0}.table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;background:rgba(255,255,255,.88);border-radius:18px;overflow:hidden}.table th,.table td{padding:12px 14px;border-bottom:1px solid rgba(98,120,191,.12);text-align:left;font-size:14px;vertical-align:top}.table th{background:rgba(61,108,255,.08);color:#344777;font-size:13px;text-transform:uppercase;letter-spacing:.03em}.table tr:last-child td{border-bottom:none}.toast{position:fixed;right:18px;bottom:18px;z-index:1000;display:none;padding:14px 16px;border-radius:14px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);max-width:320px}.toast.show{display:block}.toast.ok{border-color:rgba(18,184,134,.35)}.toast.bad{border-color:rgba(224,49,49,.35)}.hidden{display:none!important}.report{background:#fff;border:1px solid rgba(120,140,200,.14);border-radius:24px;padding:22px;box-shadow:0 10px 24px rgba(80,100,160,.08)}.report-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start;border-bottom:1px dashed rgba(110,130,190,.22);padding-bottom:18px;margin-bottom:18px}.report-brand h2{margin:0 0 6px;font-size:24px}.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.kv .item{padding:12px;border-radius:16px;background:#f8fbff;border:1px solid rgba(96,120,190,.12)}.passport{width:110px;height:130px;border-radius:18px;overflow:hidden;border:1px solid rgba(96,120,190,.18);background:#f5f8ff;display:grid;place-items:center}.passport img{width:100%;height:100%;object-fit:cover}.result-banner{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:18px 0}.result-tag{padding:10px 14px;border-radius:14px;background:#f4f8ff;border:1px solid rgba(96,120,190,.14);font-weight:700}.pass{color:#0b8f68}.fail{color:#d6336c}.links{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}.center{text-align:center}.auth-switch{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}.auth-switch .tab{padding:10px 14px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.7);cursor:pointer;font-weight:700;color:var(--muted)}.auth-switch .tab.active{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;border-color:transparent}.footer-note{margin-top:18px;color:var(--muted);font-size:13px}.summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}.spacer{height:10px}@media print{body{background:#fff}.page{padding:0;max-width:none}.no-print{display:none!important}.report{box-shadow:none;border:none;border-radius:0;padding:0}a{text-decoration:none;color:inherit}}@media (max-width:920px){.grid.two,.grid.three,.summary-grid,.form-grid,.form-grid.three,.kv{grid-template-columns:1fr}.report-head{flex-direction:column}.page{padding:16px}}
+</style><title>Genz Edutech Innovations Portal</title></head><body>
+<div class="page">
+  <div class="topbar">
+    <div class="brand"><div class="brand-mark">GE</div><div><strong>Genz Edutech Innovations</strong><small>Bright digital learning and result portal</small></div></div>
+    <div class="navpill no-print"><a class="btn secondary" href="student.html">Student Portal</a><a class="btn" href="admin.html">Admin Portal</a></div>
   </div>
-</body>
-</html>
+  <section class="hero">
+    <span class="pill">Modern Result Checker Portal</span>
+    <h1>Welcome to the Genz Edutech Innovations Result System</h1>
+    <p>Use the student portal to sign up and check published results. Use the admin portal to create an account, sign in, manage learner records, upload passport links, and publish report cards with a clean printable layout.</p>
+    <div class="links no-print">
+      <a class="btn" href="student.html">Open Student Portal</a>
+      <a class="btn secondary" href="admin.html">Open Admin Portal</a>
+    </div>
+  </section>
+  <div class="spacer"></div>
+  <div class="grid three">
+    <div class="panel"><h3>Student Signup + Login</h3><p class="muted">Students register with personal and school details, then log in with registration ID and password to view results.</p></div>
+    <div class="panel"><h3>Admin Signup + Login</h3><p class="muted">Admins create an account first, then sign in to manage students, settings, and published results.</p></div>
+    <div class="panel"><h3>Professional Report Card</h3><p class="muted">Published results appear on a bright, branded report card that can be printed or saved as PDF.</p></div>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbynYNmLAHhox3is5agewRvPmt3gtqi3YwUh1PQKfB3R8JQaCL1fu1nH3QUYe0760B0Y/exec';
+function showToast(message, ok=true){
+  const toast = document.getElementById('toast');
+  if(!toast) return alert(message);
+  toast.textContent = message;
+  toast.className = 'toast show ' + (ok ? 'ok' : 'bad');
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=>toast.className='toast', 2800);
+}
+function safeId(){ return 'cb_' + Date.now() + '_' + Math.floor(Math.random()*100000); }
+function callBackend(action, payload={}, extra={}){
+  return new Promise((resolve, reject)=>{
+    const cb = safeId();
+    const params = new URLSearchParams();
+    params.set('action', action);
+    params.set('callback', cb);
+    params.set('payload', JSON.stringify(payload||{}));
+    Object.keys(extra||{}).forEach(k=>{ if(extra[k]!==undefined && extra[k]!==null) params.set(k, extra[k]); });
+    const script = document.createElement('script');
+    window[cb] = function(data){
+      cleanup();
+      resolve(data);
+    };
+    function cleanup(){
+      try{ delete window[cb]; }catch(err){ window[cb]=undefined; }
+      if(script.parentNode) script.parentNode.removeChild(script);
+      clearTimeout(timer);
+    }
+    script.onerror = function(){ cleanup(); reject(new Error('Unable to reach backend. Check your deployed Apps Script Web App URL and access settings.')); };
+    const timer = setTimeout(()=>{ cleanup(); reject(new Error('Backend request timed out.')); }, 20000);
+    script.src = WEB_APP_URL + '?' + params.toString();
+    document.body.appendChild(script);
+  });
+}
+function formatDate(v){ if(!v) return ''; const d=new Date(v); return isNaN(d)?String(v):d.toLocaleDateString(); }
+function setText(id, value){ const el=document.getElementById(id); if(el) el.textContent = value ?? ''; }
+function escapeHtml(str){ return String(str ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+</script>
+
+</body></html>
