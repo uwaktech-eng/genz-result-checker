@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Portal | Genz Result Checker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    :root {
+      --bg:#f8fbff; --card:rgba(255,255,255,.82); --line:rgba(83,122,255,.18); --text:#18315d; --muted:#62789b;
+      --primary:#4b7cff; --accent:#835bff; --good:#16ab62; --bad:#e25a5a; --shadow:0 22px 60px rgba(49,96,215,.12);
+    }
+    *{box-sizing:border-box} body{margin:0;font-family:Inter,system-ui,sans-serif;color:var(--text);
+      background:radial-gradient(circle at top left,#ffffff 0,#eef5ff 42%,#f9fbff 100%)}
+    .shell{max-width:1200px;margin:auto;padding:24px 18px 46px}
+    .glass{background:var(--card);border:1px solid var(--line);backdrop-filter:blur(18px);box-shadow:var(--shadow);border-radius:28px}
+    .hero{padding:28px}
+    .hero h1{margin:10px 0 8px;font-size:clamp(30px,5vw,52px)} .lead{color:var(--muted);margin:0;line-height:1.7}
+    .badge{display:inline-flex;padding:8px 14px;border-radius:999px;background:#eef4ff;color:var(--primary);font-size:12px;font-weight:800;border:1px solid var(--line)}
+    .layout{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+    .panel{padding:22px}
+    h2{margin:0 0 10px} h3{margin:0 0 12px} label{display:block;font-size:13px;font-weight:700;margin-bottom:7px}
+    input,select,textarea{width:100%;padding:13px 14px;border-radius:14px;border:1px solid var(--line);background:#fff;outline:none;font:inherit;color:var(--text)}
+    input:focus,select:focus,textarea:focus{border-color:rgba(75,124,255,.5);box-shadow:0 0 0 4px rgba(75,124,255,.12)}
+    textarea{min-height:90px;resize:vertical}
+    .grid{display:grid;gap:14px} .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .full{grid-column:1/-1}
+    .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+    button,.btn{border:none;cursor:pointer;border-radius:14px;padding:13px 16px;font:inherit;font-weight:800;text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+    .primary{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;box-shadow:0 16px 34px rgba(75,124,255,.24)}
+    .soft{background:#fff;color:var(--primary);border:1px solid var(--line)}
+    .muted{color:var(--muted);font-size:13px}
+    .hidden{display:none!important}
+    .toast{position:fixed;right:18px;bottom:18px;padding:14px 16px;border-radius:14px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);opacity:0;transform:translateY(10px);pointer-events:none;transition:.25s}
+    .toast.show{opacity:1;transform:translateY(0)} .toast.ok{border-color:rgba(22,171,98,.18)} .toast.bad{border-color:rgba(226,90,90,.18)}
+    .report-wrap{margin-top:18px}
+    .report-card{background:#fff;border:1px solid #eaf0ff;border-radius:28px;padding:28px;box-shadow:var(--shadow)}
+    .report-head{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start;padding-bottom:18px;border-bottom:1px solid #edf2ff}
+    .brand-title{font-size:24px;font-weight:800;margin:0} .office{font-size:13px;color:var(--muted);line-height:1.6}
+    .passport{width:100px;height:116px;border-radius:20px;object-fit:cover;border:1px solid #dfe8ff;background:#f7faff}
+    .tag{display:inline-flex;padding:8px 12px;border-radius:999px;font-size:12px;font-weight:800}
+    .pass{background:#ebfff3;color:#15965b} .fail{background:#fff0f0;color:#d24444}
+    .section-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:18px}
+    .info-card{background:#f8fbff;border:1px solid #ebf1ff;border-radius:22px;padding:18px}
+    .info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .label{font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:#7490b8}
+    .value{font-size:14px;font-weight:700;color:var(--text);margin-top:3px;line-height:1.4}
+    table{width:100%;border-collapse:collapse;margin-top:14px}
+    th,td{padding:12px 14px;border-bottom:1px solid #edf2ff;text-align:left;font-size:13px} th{background:#f8fbff;color:#627aa2;font-size:12px;text-transform:uppercase}
+    .footer-note{display:flex;justify-content:space-between;gap:16px;border-top:1px solid #edf2ff;margin-top:20px;padding-top:18px;color:var(--muted);font-size:13px}
+    @media (max-width:960px){.layout,.section-grid,.grid2,.info-grid,.report-head{grid-template-columns:1fr} .passport{width:90px;height:104px}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="glass hero">
+      <span class="badge">🌟 Bright Student Result Portal</span>
+      <h1>Signup, Login and Check Result</h1>
+      <p class="lead">Create your student profile once, then log in with your Registration ID and password to check your result professionally.</p>
+      <div class="actions">
+        <a class="btn soft" href="./index.html">Home</a>
+        <a class="btn soft" href="./admin.html">Admin</a>
+      </div>
+    </section>
+
+    <div class="layout">
+      <section class="glass panel">
+        <h2>Student Signup</h2>
+        <p class="lead">Fill in your details. Passport link is managed by admin, not here.</p>
+        <div class="grid grid2" style="margin-top:14px">
+          <div><label>Registration ID *</label><input id="su_RegID"></div>
+          <div><label>Password *</label><input id="su_Password" type="password"></div>
+          <div class="full"><label>Full Name *</label><input id="su_FullName" placeholder="e.g. Adaeze Okafor"></div>
+          <div><label>Age *</label><input id="su_Age" placeholder="e.g. 15"></div>
+          <div><label>Gender *</label>
+            <select id="su_Gender"><option value="">Select Gender</option><option>Male</option><option>Female</option></select>
+          </div>
+          <div><label>Date of Birth</label><input id="su_DOB" type="date"></div>
+          <div><label>Parent/Guardian Name</label><input id="su_ParentName"></div>
+          <div><label>Parent/Guardian Email *</label><input id="su_ParentEmail" type="email"></div>
+          <div><label>Parent/Guardian Phone *</label><input id="su_ParentPhone"></div>
+          <div><label>School Name *</label><input id="su_SchoolName"></div>
+          <div><label>State *</label><input id="su_State"></div>
+          <div><label>City / LGA *</label><input id="su_CityLGA"></div>
+          <div><label>Class *</label><input id="su_ClassLevel" placeholder="e.g. SS2, JSS1"></div>
+          <div><label>Category *</label>
+            <select id="su_Category"></select>
+          </div>
+          <div class="full"><label>Address</label><textarea id="su_Address"></textarea></div>
+        </div>
+        <div class="actions">
+          <button class="primary" id="signupBtn">Create Account</button>
+          <button class="soft" id="clearSignupBtn">Clear</button>
+        </div>
+      </section>
+
+      <section class="glass panel">
+        <h2>Student Login</h2>
+        <p class="lead">Use the same Registration ID and password you used during signup.</p>
+        <div class="grid" style="margin-top:14px">
+          <div><label>Registration ID</label><input id="li_RegID"></div>
+          <div><label>Password</label><input id="li_Password" type="password"></div>
+        </div>
+        <div class="actions">
+          <button class="primary" id="loginBtn">Check Result</button>
+          <button class="soft" id="pingBtn">Check Backend</button>
+        </div>
+        <p class="muted" style="margin-top:12px">If no result shows yet, it means admin has not published your result.</p>
+      </section>
+    </div>
+
+    <section class="report-wrap hidden" id="reportSection">
+      <div class="report-card" id="reportCard">
+        <div class="report-head">
+          <div>
+            <div class="brand-title" id="rpBrand">Genz Edutech Innovations</div>
+            <div class="office" id="rpOffice"></div>
+            <div style="margin-top:10px">
+              <span class="tag" id="rpStatusTag">Result</span>
+            </div>
+          </div>
+          <img id="rpPassport" class="passport hidden" alt="Passport">
+        </div>
+
+        <div class="section-grid">
+          <div class="info-card">
+            <h3>Learner Profile</h3>
+            <div class="info-grid">
+              <div><div class="label">Full Name</div><div class="value" id="rpFullName"></div></div>
+              <div><div class="label">Registration ID</div><div class="value" id="rpRegID"></div></div>
+              <div><div class="label">Age</div><div class="value" id="rpAge"></div></div>
+              <div><div class="label">Gender</div><div class="value" id="rpGender"></div></div>
+              <div><div class="label">Date of Birth</div><div class="value" id="rpDOB"></div></div>
+              <div><div class="label">Class</div><div class="value" id="rpClass"></div></div>
+              <div><div class="label">Category</div><div class="value" id="rpCategory"></div></div>
+              <div><div class="label">School Name</div><div class="value" id="rpSchoolName"></div></div>
+              <div><div class="label">State</div><div class="value" id="rpState"></div></div>
+              <div><div class="label">City / LGA</div><div class="value" id="rpCityLGA"></div></div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <h3>Parent / Guardian</h3>
+            <div class="info-grid">
+              <div><div class="label">Name</div><div class="value" id="rpParentName"></div></div>
+              <div><div class="label">Email</div><div class="value" id="rpParentEmail"></div></div>
+              <div><div class="label">Phone</div><div class="value" id="rpParentPhone"></div></div>
+              <div><div class="label">Address</div><div class="value" id="rpAddress"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-card" style="margin-top:18px">
+          <h3>Exam Report</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Exam</th>
+                <th>Date</th>
+                <th>Score</th>
+                <th>Percentage</th>
+                <th>Grade</th>
+                <th id="positionHead">Position</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="reportRows"></tbody>
+          </table>
+        </div>
+
+        <div class="info-card" style="margin-top:18px">
+          <h3>Teacher's Comment</h3>
+          <div class="value" id="rpComments">No comment yet.</div>
+        </div>
+
+        <div class="footer-note">
+          <div>
+            <strong id="rpSchoolFooter">School</strong><br>
+            <span id="rpSchoolContact"></span>
+          </div>
+          <div style="text-align:right">
+            <strong id="rpSessionTerm"></strong><br>
+            <span id="rpPrincipal"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="actions" style="margin-top:16px">
+        <button class="primary" id="downloadPdfBtn">Download PDF</button>
+        <button class="soft" id="printBtn">Print</button>
+      </div>
+    </section>
+
+    <div id="toast" class="toast"></div>
+  </div>
+
+  <script>
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbynYNmLAHhox3is5agewRvPmt3gtqi3YwUh1PQKfB3R8JQaCL1fu1nH3QUYe0760B0Y/exec';
+    const CATEGORY_OPTIONS = ['Lower Primary','Upper Primary','Junior High School','Senior High School','Undergraduate'];
+
+    function $(id) { return document.getElementById(id); }
+    function showToast(message, ok=true) {
+      const toast = $('toast');
+      toast.textContent = message;
+      toast.className = 'toast show ' + (ok ? 'ok' : 'bad');
+      setTimeout(() => toast.className = 'toast', 2600);
+    }
+
+    function fillCategories() {
+      $('su_Category').innerHTML = '<option value="">Select Category</option>' + CATEGORY_OPTIONS.map(v => `<option>${v}</option>`).join('');
+    }
+
+    function jsonp(action, payload={}) {
+      return new Promise((resolve, reject) => {
+        const cb = 'cb_' + Date.now() + '_' + Math.floor(Math.random()*100000);
+        const qs = new URLSearchParams({
+          action,
+          payload: JSON.stringify(payload),
+          callback: cb
+        });
+        const script = document.createElement('script');
+        let timer;
+
+        window[cb] = (data) => {
+          clearTimeout(timer);
+          delete window[cb];
+          script.remove();
+          resolve(data);
+        };
+
+        script.onerror = () => {
+          clearTimeout(timer);
+          delete window[cb];
+          script.remove();
+          reject(new Error('Unable to reach backend.'));
+        };
+
+        timer = setTimeout(() => {
+          delete window[cb];
+          script.remove();
+          reject(new Error('Backend request timed out.'));
+        }, 20000);
+
+        script.src = WEB_APP_URL + '?' + qs.toString();
+        document.body.appendChild(script);
+      });
+    }
+
+    async function pingBackend() {
+      try {
+        const res = await jsonp('ping', {});
+        showToast(res.message || 'Backend is live.', !!res.success);
+      } catch (err) {
+        showToast(err.message, false);
+      }
+    }
+
+    async function signup() {
+      try {
+        const payload = {
+          RegID:$('su_RegID').value.trim(),
+          Password:$('su_Password').value,
+          FullName:$('su_FullName').value.trim(),
+          Age:$('su_Age').value.trim(),
+          Gender:$('su_Gender').value,
+          DOB:$('su_DOB').value,
+          ParentName:$('su_ParentName').value.trim(),
+          ParentEmail:$('su_ParentEmail').value.trim(),
+          ParentPhone:$('su_ParentPhone').value.trim(),
+          SchoolName:$('su_SchoolName').value.trim(),
+          State:$('su_State').value.trim(),
+          CityLGA:$('su_CityLGA').value.trim(),
+          ClassLevel:$('su_ClassLevel').value.trim(),
+          Category:$('su_Category').value,
+          Address:$('su_Address').value.trim()
+        };
+        const res = await jsonp('studentSignup', payload);
+        if (!res.success) throw new Error(res.message || 'Signup failed.');
+        showToast(res.message || 'Signup successful.');
+        $('li_RegID').value = payload.RegID;
+        $('li_Password').value = payload.Password;
+      } catch (err) {
+        showToast(err.message, false);
+      }
+    }
+
+    async function login() {
+      try {
+        const res = await jsonp('studentLogin', {
+          regId:$('li_RegID').value.trim(),
+          password:$('li_Password').value
+        });
+        if (!res.success) throw new Error(res.message || 'Login failed.');
+        renderReport(res);
+        $('reportSection').classList.remove('hidden');
+        window.scrollTo({ top: $('reportSection').offsetTop - 20, behavior:'smooth' });
+        showToast(res.message || 'Result loaded.');
+      } catch (err) {
+        showToast(err.message, false);
+      }
+    }
+
+    function renderReport(data) {
+      const s = data.settings || {};
+      const st = data.student || {};
+      const results = data.results || [];
+
+      $('rpBrand').textContent = s.BRAND_NAME || 'Genz Edutech Innovations';
+      $('rpOffice').textContent = [s.HEAD_OFFICE_ADDRESS, s.SCHOOL_EMAIL, s.SCHOOL_PHONE].filter(Boolean).join(' • ');
+      $('rpFullName').textContent = st.FullName || '-';
+      $('rpRegID').textContent = st.RegID || '-';
+      $('rpAge').textContent = st.Age || '-';
+      $('rpGender').textContent = st.Gender || '-';
+      $('rpDOB').textContent = st.DOB || '-';
+      $('rpClass').textContent = st.ClassLevel || '-';
+      $('rpCategory').textContent = st.Category || '-';
+      $('rpSchoolName').textContent = st.SchoolName || s.SCHOOL_NAME || '-';
+      $('rpState').textContent = st.State || '-';
+      $('rpCityLGA').textContent = st.CityLGA || '-';
+      $('rpParentName').textContent = st.ParentName || '-';
+      $('rpParentEmail').textContent = st.ParentEmail || '-';
+      $('rpParentPhone').textContent = st.ParentPhone || '-';
+      $('rpAddress').textContent = st.Address || '-';
+      $('rpSchoolFooter').textContent = s.SCHOOL_NAME || st.SchoolName || 'School';
+      $('rpSchoolContact').textContent = [s.SCHOOL_EMAIL, s.SCHOOL_PHONE].filter(Boolean).join(' • ');
+      $('rpSessionTerm').textContent = [s.ACADEMIC_SESSION || '', s.TERM || ''].filter(Boolean).join(' • ');
+      $('rpPrincipal').textContent = s.PRINCIPAL_NAME ? 'Principal: ' + s.PRINCIPAL_NAME : '';
+
+      if (st.PassportUrl) {
+        $('rpPassport').src = st.PassportUrl;
+        $('rpPassport').classList.remove('hidden');
+      } else {
+        $('rpPassport').classList.add('hidden');
+      }
+
+      const showPosition = String(s.SHOW_POSITION_ON_REPORT) === 'true';
+      $('positionHead').style.display = showPosition ? '' : 'none';
+
+      const firstResult = results[0];
+      const status = firstResult?.Status || 'PENDING';
+      $('rpStatusTag').textContent = status;
+      $('rpStatusTag').className = 'tag ' + (status === 'PASS' ? 'pass' : status === 'FAIL' ? 'fail' : '');
+
+      $('reportRows').innerHTML = results.length ? results.map(r => `
+        <tr>
+          <td>${escapeHtml(r.ExamTitle)}</td>
+          <td>${escapeHtml(r.ExamDate)}</td>
+          <td>${r.StudentScore} / ${r.MaxScore}</td>
+          <td>${r.Percentage}%</td>
+          <td>${escapeHtml(r.Grade)}</td>
+          <td style="display:${showPosition ? '' : 'none'}">${escapeHtml(r.Position || '-')}</td>
+          <td><span class="tag ${r.Status === 'PASS' ? 'pass' : 'fail'}">${escapeHtml(r.Status)}</span></td>
+        </tr>`).join('') : `<tr><td colspan="${showPosition ? 7 : 6}" class="muted">No published result yet.</td></tr>`;
+
+      $('rpComments').textContent = results.map(r => [r.Remark, r.TeacherComment].filter(Boolean).join(' — ')).filter(Boolean).join('\n\n') || 'No comment yet.';
+    }
+
+    function downloadPdf() {
+      const element = $('reportCard');
+      const name = (($('rpFullName').textContent || 'student-result').replace(/\s+/g,'-').toLowerCase()) + '-report.pdf';
+      html2pdf().set({
+        margin: 8,
+        filename: name,
+        image: { type:'jpeg', quality:0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit:'mm', format:'a4', orientation:'portrait' }
+      }).from(element).save();
+    }
+
+    function clearSignup() {
+      ['su_RegID','su_Password','su_FullName','su_Age','su_Gender','su_DOB','su_ParentName','su_ParentEmail','su_ParentPhone','su_SchoolName','su_State','su_CityLGA','su_ClassLevel','su_Category','su_Address'].forEach(id => $(id).value = '');
+    }
+
+    function escapeHtml(v) {
+      return String(v ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    $('signupBtn').onclick = signup;
+    $('clearSignupBtn').onclick = clearSignup;
+    $('loginBtn').onclick = login;
+    $('pingBtn').onclick = pingBackend;
+    $('downloadPdfBtn').onclick = downloadPdf;
+    $('printBtn').onclick = () => window.print();
+
+    fillCategories();
+  </script>
+</body>
+</html>

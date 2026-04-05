@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard | Genz Result Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#f7fbff; --bg2:#edf4ff; --card:rgba(255,255,255,.82); --line:rgba(86,123,255,.18);
+      --text:#17305b; --muted:#61789c; --primary:#4b7bff; --accent:#7a5cff; --good:#18b56a; --bad:#e45757;
+      --shadow:0 20px 60px rgba(53,100,220,.12);
+    }
+    *{box-sizing:border-box} html{scroll-behavior:smooth} body{margin:0;font-family:Inter,system-ui,sans-serif;color:var(--text);
+      background:radial-gradient(circle at top left,#ffffff 0,#f0f6ff 42%,#fbfdff 100%)}
+    .shell{max-width:1220px;margin:auto;padding:22px}
+    .glass{background:var(--card);backdrop-filter:blur(18px);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:26px}
+    .top{padding:20px 22px;display:flex;gap:14px;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;margin-bottom:18px}
+    .brand strong{display:block;font-size:22px} .brand span{font-size:13px;color:var(--muted)}
+    .grid{display:grid;gap:18px}
+    .login-card{max-width:520px;margin:30px auto;padding:28px}
+    .hidden{display:none!important}
+    h2{margin:0 0 8px} h3{margin:0 0 12px} p.lead{margin:0;color:var(--muted)}
+    .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+    .stat{padding:18px}
+    .stat .num{font-size:28px;font-weight:800} .stat .lbl{font-size:13px;color:var(--muted)}
+    .layout{display:grid;grid-template-columns:1.18fr .82fr;gap:18px;align-items:start}
+    .panel{padding:20px}
+    .forms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+    .full{grid-column:1/-1}
+    label{display:block;font-size:13px;font-weight:700;margin-bottom:7px}
+    input,select,textarea{width:100%;padding:13px 14px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.94);outline:none;font:inherit;color:var(--text)}
+    textarea{min-height:96px;resize:vertical}
+    input:focus,select:focus,textarea:focus{border-color:rgba(75,123,255,.5);box-shadow:0 0 0 4px rgba(75,123,255,.12)}
+    .row2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px}
+    button,.btn{border:none;cursor:pointer;border-radius:14px;padding:13px 16px;font:inherit;font-weight:800}
+    .primary{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;box-shadow:0 16px 34px rgba(75,123,255,.25)}
+    .soft{background:#fff;color:var(--primary);border:1px solid var(--line)}
+    .danger{background:#fff0f0;color:var(--bad);border:1px solid rgba(228,87,87,.18)}
+    .table-wrap{overflow:auto;border-radius:18px;border:1px solid var(--line);background:#fff}
+    table{width:100%;border-collapse:collapse;min-width:760px}
+    th,td{padding:12px 14px;border-bottom:1px solid #eef2fb;text-align:left;font-size:13px;vertical-align:top}
+    th{background:#f6f9ff;font-size:12px;letter-spacing:.02em;text-transform:uppercase;color:#5d76a2}
+    .pill{display:inline-block;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:800}
+    .ok{background:#ecfff4;color:#16935a} .off{background:#fff2f2;color:#ce4040}
+    .tiny{font-size:12px;color:var(--muted)} .mt{margin-top:18px}
+    .toast{position:fixed;right:18px;bottom:18px;padding:14px 16px;border-radius:14px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow);opacity:0;transform:translateY(10px);pointer-events:none;transition:.25s}
+    .toast.show{opacity:1;transform:translateY(0)} .toast.ok{border-color:rgba(24,181,106,.18)} .toast.bad{border-color:rgba(228,87,87,.18)}
+    .footer-note{text-align:center;color:var(--muted);font-size:12px;padding:12px 0 28px}
+    @media (max-width:960px){.layout{grid-template-columns:1fr} .forms{grid-template-columns:1fr} .row2,.row3{grid-template-columns:1fr} .top{position:static;flex-direction:column;align-items:flex-start}}
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="top glass">
+      <div class="brand">
+        <strong>Genz Admin Dashboard</strong>
+        <span>Bright, modern and connected to your Google Sheet backend</span>
+      </div>
+      <div class="actions">
+        <a class="btn soft" href="./index.html">Home</a>
+        <a class="btn soft" href="./student.html">Student Portal</a>
+        <button class="btn danger hidden" id="logoutBtn">Log out</button>
+      </div>
+    </div>
+
+    <section id="loginView" class="glass login-card">
+      <h2>Admin Login</h2>
+      <p class="lead">Use the default admin account first, then begin your setup.</p>
+      <div class="grid mt">
+        <div><label>Username</label><input id="loginUsername" value="admin" /></div>
+        <div><label>Password</label><input id="loginPassword" type="password" value="admin12345" /></div>
+      </div>
+      <div class="actions">
+        <button class="primary" id="loginBtn">Login</button>
+        <button class="soft" id="pingBtn">Check Backend</button>
+      </div>
+      <p class="tiny mt">Default login: <strong>admin</strong> / <strong>admin12345</strong></p>
+    </section>
+
+    <section id="appView" class="hidden">
+      <div class="stats">
+        <div class="glass stat"><div class="num" id="statStudents">0</div><div class="lbl">Students</div></div>
+        <div class="glass stat"><div class="num" id="statResults">0</div><div class="lbl">Results</div></div>
+        <div class="glass stat"><div class="num" id="statPublished">0</div><div class="lbl">Published Results</div></div>
+      </div>
+
+      <div class="layout mt">
+        <div class="grid">
+          <section class="glass panel">
+            <h3>Portal Settings</h3>
+            <p class="lead">Brand, school details and report configuration.</p>
+            <div class="forms mt">
+              <div><label>Brand Name</label><input id="BRAND_NAME"></div>
+              <div><label>School Name</label><input id="SCHOOL_NAME"></div>
+              <div class="full"><label>Head Office Address</label><input id="HEAD_OFFICE_ADDRESS"></div>
+              <div><label>School Phone</label><input id="SCHOOL_PHONE"></div>
+              <div><label>School Email</label><input id="SCHOOL_EMAIL"></div>
+              <div><label>Principal Name</label><input id="PRINCIPAL_NAME"></div>
+              <div><label>Academic Session</label><input id="ACADEMIC_SESSION"></div>
+              <div><label>Term</label><input id="TERM"></div>
+              <div><label>Default Exam Title</label><input id="EXAM_TITLE"></div>
+              <div><label>Pass Mark Number</label><input id="PASS_MARK_NUMBER" type="number"></div>
+              <div><label>Pass Mark Percentage</label><input id="PASS_MARK_PERCENTAGE" type="number"></div>
+              <div><label>Show Position On Report</label>
+                <select id="SHOW_POSITION_ON_REPORT">
+                  <option value="true">On</option>
+                  <option value="false">Off</option>
+                </select>
+              </div>
+            </div>
+            <div class="actions"><button class="primary" id="saveSettingsBtn">Save Settings</button></div>
+          </section>
+
+          <section class="glass panel">
+            <h3>Create / Update Student</h3>
+            <p class="lead">Passport link is managed here in admin only.</p>
+            <div class="forms mt">
+              <div><label>Registration ID</label><input id="stu_RegID"></div>
+              <div><label>Password <span class="tiny">(leave blank to keep old one when editing)</span></label><input id="stu_Password" type="password"></div>
+              <div class="full"><label>Full Name</label><input id="stu_FullName"></div>
+              <div><label>Age</label><input id="stu_Age"></div>
+              <div><label>Gender</label>
+                <select id="stu_Gender"><option value="">Select Gender</option><option>Male</option><option>Female</option></select>
+              </div>
+              <div><label>Date of Birth</label><input id="stu_DOB" type="date"></div>
+              <div><label>Parent/Guardian Name</label><input id="stu_ParentName"></div>
+              <div><label>Parent/Guardian Email</label><input id="stu_ParentEmail" type="email"></div>
+              <div><label>Parent/Guardian Phone</label><input id="stu_ParentPhone"></div>
+              <div><label>School Name</label><input id="stu_SchoolName"></div>
+              <div><label>State</label><input id="stu_State"></div>
+              <div><label>City / LGA</label><input id="stu_CityLGA"></div>
+              <div><label>Class</label><input id="stu_ClassLevel"></div>
+              <div><label>Category</label>
+                <select id="stu_Category"></select>
+              </div>
+              <div class="full"><label>Address</label><textarea id="stu_Address"></textarea></div>
+              <div class="full"><label>Passport Image Link</label><input id="stu_PassportUrl" placeholder="https://..."></div>
+              <div><label>Active</label>
+                <select id="stu_Active"><option value="true">Active</option><option value="false">Inactive</option></select>
+              </div>
+            </div>
+            <div class="actions">
+              <button class="primary" id="saveStudentBtn">Save Student</button>
+              <button class="soft" id="clearStudentBtn">Clear Student Form</button>
+            </div>
+          </section>
+
+          <section class="glass panel">
+            <h3>Create / Update Result</h3>
+            <p class="lead">Each result will reflect on the student report card.</p>
+            <div class="forms mt">
+              <div><label>Result ID <span class="tiny">(optional when updating)</span></label><input id="res_ResultID"></div>
+              <div><label>Registration ID</label><input id="res_RegID"></div>
+              <div><label>Exam Title</label><input id="res_ExamTitle"></div>
+              <div><label>Exam Date</label><input id="res_ExamDate" type="date"></div>
+              <div><label>Overall Exam Score</label><input id="res_MaxScore" type="number"></div>
+              <div><label>Student Score</label><input id="res_StudentScore" type="number"></div>
+              <div><label>Pass Mark Number</label><input id="res_PassMarkNumber" type="number"></div>
+              <div><label>Pass Mark Percentage</label><input id="res_PassMarkPercentage" type="number"></div>
+              <div><label>Position</label><input id="res_Position" placeholder="1st, 2nd, 3rd..."></div>
+              <div><label>Academic Session</label><input id="res_AcademicSession"></div>
+              <div><label>Term</label><input id="res_Term"></div>
+              <div><label>Published</label>
+                <select id="res_Published"><option value="true">Yes</option><option value="false">No</option></select>
+              </div>
+              <div class="full"><label>Teacher Comment</label><textarea id="res_TeacherComment"></textarea></div>
+            </div>
+            <div class="actions">
+              <button class="primary" id="saveResultBtn">Save Result</button>
+              <button class="soft" id="clearResultBtn">Clear Result Form</button>
+            </div>
+          </section>
+        </div>
+
+        <div class="grid">
+          <section class="glass panel">
+            <h3>Students</h3>
+            <p class="lead">Click a row to load it into the student form.</p>
+            <div class="table-wrap mt">
+              <table>
+                <thead><tr><th>Reg ID</th><th>Name</th><th>Class</th><th>Category</th><th>Status</th></tr></thead>
+                <tbody id="studentsBody"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="glass panel">
+            <h3>Results</h3>
+            <p class="lead">Click a row to load it into the result form.</p>
+            <div class="table-wrap mt">
+              <table>
+                <thead><tr><th>Reg ID</th><th>Exam</th><th>Score</th><th>%</th><th>Published</th></tr></thead>
+                <tbody id="resultsBody"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <div id="toast" class="toast"></div>
+    <div class="footer-note">Frontend hosted on GitHub / Vercel. Backend powered by Google Apps Script + Google Sheets.</div>
+  </div>
+
+  <script>
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbynYNmLAHhox3is5agewRvPmt3gtqi3YwUh1PQKfB3R8JQaCL1fu1nH3QUYe0760B0Y/exec';
+    const state = { token: localStorage.getItem('genz_admin_token') || '', bootstrap: null };
+    const categories = ['Lower Primary','Upper Primary','Junior High School','Senior High School','Undergraduate'];
+
+    function $(id) { return document.getElementById(id); }
+    function showToast(message, ok=true) {
+      const toast = $('toast');
+      toast.textContent = message;
+      toast.className = 'toast show ' + (ok ? 'ok' : 'bad');
+      setTimeout(() => toast.className = 'toast', 2600);
+    }
+
+    function fillCategorySelects() {
+      const select = $('stu_Category');
+      select.innerHTML = '<option value="">Select Category</option>' + categories.map(v => `<option>${v}</option>`).join('');
+    }
+
+    function jsonp(action, payload={}) {
+      return new Promise((resolve, reject) => {
+        const cb = 'cb_' + Date.now() + '_' + Math.floor(Math.random()*100000);
+        const qs = new URLSearchParams({
+          action,
+          payload: JSON.stringify(payload),
+          callback: cb
+        });
+        const script = document.createElement('script');
+        let timer;
+
+        window[cb] = (data) => {
+          clearTimeout(timer);
+          delete window[cb];
+          script.remove();
+          resolve(data);
+        };
+
+        script.onerror = () => {
+          clearTimeout(timer);
+          delete window[cb];
+          script.remove();
+          reject(new Error('Unable to reach backend.'));
+        };
+
+        timer = setTimeout(() => {
+          delete window[cb];
+          script.remove();
+          reject(new Error('Backend request timed out.'));
+        }, 20000);
+
+        script.src = WEB_APP_URL + '?' + qs.toString();
+        document.body.appendChild(script);
+      });
+    }
+
+    async function pingBackend() {
+      try {
+        const res = await jsonp('ping', {});
+        showToast(res.message || 'Backend is live.', !!res.success);
+      } catch (err) {
+        showToast(err.message, false);
+      }
+    }
+
+    async function login() {
+      try {
+        const res = await jsonp('adminLogin', {
+          username: $('loginUsername').value.trim(),
+          password: $('loginPassword').value
+        });
+        if (!res.success) return showToast(res.message || 'Login failed.', false);
+        state.token = res.token;
+        localStorage.setItem('genz_admin_token', state.token);
+        $('logoutBtn').classList.remove('hidden');
+        await loadBootstrap();
+        $('loginView').classList.add('hidden');
+        $('appView').classList.remove('hidden');
+        showToast('Login successful.');
+      } catch (err) {
+        showToast(err.message, false);
+      }
+    }
+
+    async function loadBootstrap() {
+      const res = await jsonp('getAdminBootstrap', { token: state.token });
+      if (!res.success) throw new Error(res.message || 'Could not load admin dashboard.');
+      state.bootstrap = res;
+      renderDashboard();
+    }
+
+    function renderDashboard() {
+      const b = state.bootstrap;
+      $('statStudents').textContent = b.summary.studentCount || 0;
+      $('statResults').textContent = b.summary.resultCount || 0;
+      $('statPublished').textContent = b.summary.publishedCount || 0;
+
+      ['BRAND_NAME','SCHOOL_NAME','HEAD_OFFICE_ADDRESS','SCHOOL_PHONE','SCHOOL_EMAIL','PRINCIPAL_NAME','ACADEMIC_SESSION','TERM','EXAM_TITLE','PASS_MARK_NUMBER','PASS_MARK_PERCENTAGE','SHOW_POSITION_ON_REPORT']
+        .forEach(key => { if ($(key)) $(key).value = b.settings[key] ?? ''; });
+
+      $('res_AcademicSession').value = b.settings.ACADEMIC_SESSION || '';
+      $('res_Term').value = b.settings.TERM || '';
+      $('res_ExamTitle').value = b.settings.EXAM_TITLE || '';
+      $('res_PassMarkNumber').value = b.settings.PASS_MARK_NUMBER || '';
+      $('res_PassMarkPercentage').value = b.settings.PASS_MARK_PERCENTAGE || '';
+
+      renderStudentsTable(b.students || []);
+      renderResultsTable(b.results || []);
+    }
+
+    function renderStudentsTable(rows) {
+      $('studentsBody').innerHTML = rows.map(r => `
+        <tr onclick='loadStudentToForm(${JSON.stringify(r).replace(/'/g,"&#39;")})'>
+          <td>${escapeHtml(r.RegID)}</td>
+          <td>${escapeHtml(r.FullName)}</td>
+          <td>${escapeHtml(r.ClassLevel || '')}</td>
+          <td>${escapeHtml(r.Category || '')}</td>
+          <td><span class="pill ${r.Active ? 'ok' : 'off'}">${r.Active ? 'Active' : 'Inactive'}</span></td>
+        </tr>`).join('') || `<tr><td colspan="5" class="tiny">No students yet.</td></tr>`;
+    }
+
+    function renderResultsTable(rows) {
+      $('resultsBody').innerHTML = rows.map(r => `
+        <tr onclick='loadResultToForm(${JSON.stringify(r).replace(/'/g,"&#39;")})'>
+          <td>${escapeHtml(r.RegID)}</td>
+          <td>${escapeHtml(r.ExamTitle)}</td>
+          <td>${r.StudentScore} / ${r.MaxScore}</td>
+          <td>${r.Percentage}%</td>
+          <td><span class="pill ${r.Published ? 'ok' : 'off'}">${r.Published ? 'Yes' : 'No'}</span></td>
+        </tr>`).join('') || `<tr><td colspan="5" class="tiny">No results yet.</td></tr>`;
+    }
+
+    function loadStudentToForm(item) {
+      Object.entries({
+        stu_RegID:item.RegID, stu_FullName:item.FullName, stu_Age:item.Age, stu_Gender:item.Gender, stu_DOB:item.DOB,
+        stu_ParentName:item.ParentName, stu_ParentEmail:item.ParentEmail, stu_ParentPhone:item.ParentPhone,
+        stu_SchoolName:item.SchoolName, stu_State:item.State, stu_CityLGA:item.CityLGA, stu_ClassLevel:item.ClassLevel,
+        stu_Category:item.Category, stu_Address:item.Address, stu_PassportUrl:item.PassportUrl, stu_Active:String(item.Active)
+      }).forEach(([id,val]) => { if ($(id)) $(id).value = val ?? ''; });
+      $('stu_Password').value = '';
+      window.scrollTo({ top: $('saveStudentBtn').closest('.panel').offsetTop - 20, behavior:'smooth' });
+    }
+
+    function loadResultToForm(item) {
+      Object.entries({
+        res_ResultID:item.ResultID, res_RegID:item.RegID, res_ExamTitle:item.ExamTitle, res_ExamDate:item.ExamDate,
+        res_MaxScore:item.MaxScore, res_StudentScore:item.StudentScore, res_PassMarkNumber:item.PassMarkNumber,
+        res_PassMarkPercentage:item.PassMarkPercentage, res_Position:item.Position, res_AcademicSession:item.AcademicSession,
+        res_Term:item.Term, res_Published:String(item.Published), res_TeacherComment:item.TeacherComment
+      }).forEach(([id,val]) => { if ($(id)) $(id).value = val ?? ''; });
+      window.scrollTo({ top: $('saveResultBtn').closest('.panel').offsetTop - 20, behavior:'smooth' });
+    }
+
+    async function saveSettings() {
+      try {
+        const payload = {
+          token: state.token,
+          BRAND_NAME:$('BRAND_NAME').value.trim(),
+          SCHOOL_NAME:$('SCHOOL_NAME').value.trim(),
+          HEAD_OFFICE_ADDRESS:$('HEAD_OFFICE_ADDRESS').value.trim(),
+          SCHOOL_PHONE:$('SCHOOL_PHONE').value.trim(),
+          SCHOOL_EMAIL:$('SCHOOL_EMAIL').value.trim(),
+          PRINCIPAL_NAME:$('PRINCIPAL_NAME').value.trim(),
+          ACADEMIC_SESSION:$('ACADEMIC_SESSION').value.trim(),
+          TERM:$('TERM').value.trim(),
+          EXAM_TITLE:$('EXAM_TITLE').value.trim(),
+          PASS_MARK_NUMBER:$('PASS_MARK_NUMBER').value.trim(),
+          PASS_MARK_PERCENTAGE:$('PASS_MARK_PERCENTAGE').value.trim(),
+          SHOW_POSITION_ON_REPORT:$('SHOW_POSITION_ON_REPORT').value
+        };
+        const res = await jsonp('saveSettings', payload);
+        if (!res.success) throw new Error(res.message);
+        showToast(res.message || 'Settings saved.');
+        await loadBootstrap();
+      } catch (err) {
+        showToast(err.message, false);
+      }
+    }
+
+    async function saveStudent() {
+      try {
+        const payload = {
+          token: state.token,
+          RegID:$('stu_RegID').value.trim(),
+          Password:$('stu_Password').value,
+          FullName:$('stu_FullName').value.trim(),
+          Age:$('stu_Age').value.trim(),
+          Gender:$('stu_Gender').value,
+          DOB:$('stu_DOB').value,
+          ParentName:$('stu_ParentName').value.trim(),
+          ParentEmail:$('stu_ParentEmail').value.trim(),
+          ParentPhone:$('stu_ParentPhone').value.trim(),
+          SchoolName:$('stu_SchoolName').value.trim(),
+          State:$('stu_State').value.trim(),
+          CityLGA:$('stu_CityLGA').value.trim(),
+          ClassLevel:$('stu_ClassLevel').value.trim(),
+          Category:$('stu_Category').value,
+          Address:$('stu_Address').value.trim(),
+          PassportUrl:$('stu_PassportUrl').value.trim(),
+          Active:$('stu_Active').value
+        };
+        const res = await jsonp('saveStudent', payload);
+        if (!res.success) throw new Error(res.message);
+        showToast(res.message || 'Student saved.');
+        clearStudentForm();
+        await loadBootstrap();
+      } catch (err) {
+        showToast(err.message, false);
+      }
+    }
+
+    async function saveResult() {
+      try {
+        const payload = {
+          token: state.token,
+          ResultID:$('res_ResultID').value.trim(),
+          RegID:$('res_RegID').value.trim(),
+          ExamTitle:$('res_ExamTitle').value.trim(),
+          ExamDate:$('res_ExamDate').value,
+          MaxScore:$('res_MaxScore').value,
+          StudentScore:$('res_StudentScore').value,
+          PassMarkNumber:$('res_PassMarkNumber').value,
+          PassMarkPercentage:$('res_PassMarkPercentage').value,
+          Position:$('res_Position').value.trim(),
+          AcademicSession:$('res_AcademicSession').value.trim(),
+          Term:$('res_Term').value.trim(),
+          Published:$('res_Published').value,
+          TeacherComment:$('res_TeacherComment').value.trim()
+        };
+        const res = await jsonp('saveResult', payload);
+        if (!res.success) throw new Error(res.message);
+        showToast(res.message || 'Result saved.');
+        clearResultForm();
+        await loadBootstrap();
+      } catch (err) {
+        showToast(err.message, false);
+      }
+    }
+
+    function clearStudentForm() {
+      ['stu_RegID','stu_Password','stu_FullName','stu_Age','stu_Gender','stu_DOB','stu_ParentName','stu_ParentEmail','stu_ParentPhone','stu_SchoolName','stu_State','stu_CityLGA','stu_ClassLevel','stu_Category','stu_Address','stu_PassportUrl'].forEach(id => $(id).value = '');
+      $('stu_Active').value = 'true';
+    }
+
+    function clearResultForm() {
+      ['res_ResultID','res_RegID','res_ExamDate','res_MaxScore','res_StudentScore','res_Position','res_TeacherComment'].forEach(id => $(id).value = '');
+      if (state.bootstrap?.settings) {
+        $('res_ExamTitle').value = state.bootstrap.settings.EXAM_TITLE || '';
+        $('res_PassMarkNumber').value = state.bootstrap.settings.PASS_MARK_NUMBER || '';
+        $('res_PassMarkPercentage').value = state.bootstrap.settings.PASS_MARK_PERCENTAGE || '';
+        $('res_AcademicSession').value = state.bootstrap.settings.ACADEMIC_SESSION || '';
+        $('res_Term').value = state.bootstrap.settings.TERM || '';
+      }
+      $('res_Published').value = 'true';
+    }
+
+    function logout() {
+      localStorage.removeItem('genz_admin_token');
+      state.token = '';
+      $('appView').classList.add('hidden');
+      $('loginView').classList.remove('hidden');
+      $('logoutBtn').classList.add('hidden');
+      showToast('Logged out.');
+    }
+
+    function escapeHtml(v) {
+      return String(v ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    $('loginBtn').onclick = login;
+    $('pingBtn').onclick = pingBackend;
+    $('saveSettingsBtn').onclick = saveSettings;
+    $('saveStudentBtn').onclick = saveStudent;
+    $('saveResultBtn').onclick = saveResult;
+    $('clearStudentBtn').onclick = clearStudentForm;
+    $('clearResultBtn').onclick = clearResultForm;
+    $('logoutBtn').onclick = logout;
+
+    fillCategorySelects();
+
+    if (state.token) {
+      loadBootstrap().then(() => {
+        $('loginView').classList.add('hidden');
+        $('appView').classList.remove('hidden');
+        $('logoutBtn').classList.remove('hidden');
+      }).catch(() => {
+        localStorage.removeItem('genz_admin_token');
+        state.token = '';
+      });
+    }
+  </script>
+</body>
+</html>
