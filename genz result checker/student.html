@@ -106,8 +106,7 @@
         </div>
         <div class="actions">
           <button class="primary" id="loginBtn">Check Result</button>
-          <button class="soft" id="pingBtn">Check Backend</button>
-        </div>
+                  </div>
         <p class="muted" style="margin-top:12px">If no result shows yet, it means admin has not published your result.</p>
       </section>
     </div>
@@ -236,7 +235,7 @@
           clearTimeout(timer);
           delete window[cb];
           script.remove();
-          reject(new Error('Unable to reach backend. Redeploy the Apps Script web app and set access to Anyone.'));
+          reject(new Error('Unable to reach backend. Confirm the current WEB_APP_URL in this page matches your latest Apps Script /exec URL and that the web app access is set to Anyone.'));
         };
 
         timer = setTimeout(() => {
@@ -382,7 +381,6 @@
     $('signupBtn').onclick = signup;
     $('clearSignupBtn').onclick = clearSignup;
     $('loginBtn').onclick = login;
-    $('pingBtn').onclick = pingBackend;
     $('downloadPdfBtn').onclick = downloadPdf;
     $('printBtn').onclick = () => window.print();
 
