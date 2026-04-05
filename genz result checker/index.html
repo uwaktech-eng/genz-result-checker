@@ -1,503 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Genz Edutech Innovations — Result Checker Portal</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --navy: #0d1b2a;
-      --navy2: #1b2e45;
-      --accent: #c9a84c;
-      --accent2: #e8c97a;
-      --glass: rgba(255,255,255,0.06);
-      --glass-border: rgba(255,255,255,0.12);
-      --text: #e8e8f0;
-      --muted: #8a9ab5;
-      --card-bg: rgba(255,255,255,0.05);
-      --shadow: 0 20px 60px rgba(0,0,0,0.4);
-    }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--navy);
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* ---- BACKGROUND GRID ---- */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(201,168,76,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(201,168,76,0.03) 1px, transparent 1px);
-      background-size: 60px 60px;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* ---- HERO GLOW ---- */
-    .glow-circle {
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(90px);
-      pointer-events: none;
-      z-index: 0;
-    }
-    .glow-1 { width: 500px; height: 500px; background: rgba(201,168,76,0.08); top: -100px; left: -100px; }
-    .glow-2 { width: 400px; height: 400px; background: rgba(13,91,180,0.1); bottom: 10%; right: -80px; }
-
-    .container { max-width: 1120px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
-
-    /* ---- NAV ---- */
-    nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      background: rgba(13,27,42,0.85);
-      border-bottom: 1px solid var(--glass-border);
-      padding: 16px 0;
-    }
-    .nav-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      max-width: 1120px;
-      margin: 0 auto;
-      padding: 0 24px;
-    }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .logo-icon {
-      width: 42px;
-      height: 42px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-    }
-    .logo-text { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 700; letter-spacing: 0.02em; }
-    .logo-sub { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
-
-    .nav-links { display: flex; gap: 12px; }
-
-    /* ---- BUTTONS ---- */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 11px 24px;
-      border-radius: 8px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.9rem;
-      font-weight: 500;
-      cursor: pointer;
-      text-decoration: none;
-      transition: all 0.2s ease;
-      border: none;
-      letter-spacing: 0.02em;
-    }
-    .btn-ghost {
-      background: transparent;
-      border: 1px solid var(--glass-border);
-      color: var(--text);
-    }
-    .btn-ghost:hover {
-      background: var(--glass);
-      border-color: var(--accent);
-      color: var(--accent);
-      transform: translateY(-1px);
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent), #b8922e);
-      color: #1a1200;
-      font-weight: 600;
-      box-shadow: 0 4px 20px rgba(201,168,76,0.3);
-    }
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 30px rgba(201,168,76,0.45);
-    }
-    .btn-outline {
-      background: transparent;
-      border: 1.5px solid var(--accent);
-      color: var(--accent);
-    }
-    .btn-outline:hover {
-      background: var(--accent);
-      color: #1a1200;
-      transform: translateY(-2px);
-    }
-    .btn:active { transform: scale(0.97); }
-
-    /* ---- HERO ---- */
-    .hero {
-      padding: 100px 0 80px;
-      text-align: center;
-      position: relative;
-      z-index: 1;
-    }
-    .hero-badge {
-      display: inline-block;
-      background: rgba(201,168,76,0.12);
-      border: 1px solid rgba(201,168,76,0.3);
-      color: var(--accent2);
-      font-size: 0.78rem;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      padding: 7px 18px;
-      border-radius: 100px;
-      margin-bottom: 28px;
-    }
-    .hero h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(2.4rem, 6vw, 4rem);
-      font-weight: 700;
-      line-height: 1.18;
-      margin-bottom: 20px;
-      background: linear-gradient(135deg, #fff 30%, var(--accent2) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .hero p {
-      font-size: 1.1rem;
-      color: var(--muted);
-      max-width: 600px;
-      margin: 0 auto 44px;
-      line-height: 1.7;
-      font-weight: 300;
-    }
-    .hero-ctas {
-      display: flex;
-      gap: 16px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-    .hero-ctas .btn { padding: 14px 32px; font-size: 1rem; }
-
-    /* ---- DIVIDER ---- */
-    .divider {
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--glass-border), transparent);
-      margin: 70px 0;
-    }
-
-    /* ---- FEATURES ---- */
-    .section-label {
-      font-size: 0.75rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--accent);
-      font-weight: 500;
-      margin-bottom: 12px;
-    }
-    .section-title {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
-      font-weight: 700;
-      margin-bottom: 14px;
-      background: linear-gradient(135deg, #fff, #ccd6ea);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .section-sub { color: var(--muted); font-size: 1rem; max-width: 500px; line-height: 1.7; font-weight: 300; }
-
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
-      margin-top: 48px;
-    }
-    .feature-card {
-      background: var(--card-bg);
-      border: 1px solid var(--glass-border);
-      border-radius: 16px;
-      padding: 32px 28px;
-      transition: all 0.3s ease;
-      backdrop-filter: blur(10px);
-    }
-    .feature-card:hover {
-      border-color: rgba(201,168,76,0.4);
-      background: rgba(255,255,255,0.08);
-      transform: translateY(-4px);
-      box-shadow: 0 12px 40px rgba(201,168,76,0.1);
-    }
-    .feature-icon {
-      width: 52px;
-      height: 52px;
-      background: rgba(201,168,76,0.12);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      margin-bottom: 20px;
-    }
-    .feature-card h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 10px; color: #fff; }
-    .feature-card p { font-size: 0.9rem; color: var(--muted); line-height: 1.65; font-weight: 300; }
-
-    /* ---- PORTALS ---- */
-    .portals-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      margin-top: 48px;
-    }
-    .portal-card {
-      border-radius: 20px;
-      padding: 44px 36px;
-      text-decoration: none;
-      display: block;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-    .portal-card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      transition: opacity 0.3s;
-      border-radius: 20px;
-    }
-    .portal-card:hover { transform: translateY(-6px); }
-    .portal-card:hover::before { opacity: 1; }
-    .portal-student {
-      background: linear-gradient(135deg, rgba(13,91,180,0.2), rgba(13,91,180,0.08));
-      border: 1px solid rgba(13,91,180,0.4);
-    }
-    .portal-student::before { background: linear-gradient(135deg, rgba(13,91,180,0.15), transparent); }
-    .portal-student:hover { border-color: rgba(13,91,180,0.7); box-shadow: 0 16px 50px rgba(13,91,180,0.2); }
-    .portal-admin {
-      background: linear-gradient(135deg, rgba(201,168,76,0.15), rgba(201,168,76,0.05));
-      border: 1px solid rgba(201,168,76,0.35);
-    }
-    .portal-admin::before { background: linear-gradient(135deg, rgba(201,168,76,0.12), transparent); }
-    .portal-admin:hover { border-color: rgba(201,168,76,0.65); box-shadow: 0 16px 50px rgba(201,168,76,0.18); }
-    .portal-emoji { font-size: 40px; margin-bottom: 18px; display: block; }
-    .portal-card h3 { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: #fff; margin-bottom: 10px; }
-    .portal-card p { color: var(--muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 24px; font-weight: 300; }
-    .portal-link {
-      font-size: 0.85rem;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-    }
-    .portal-student .portal-link { color: #5aafff; }
-    .portal-admin .portal-link { color: var(--accent2); }
-
-    /* ---- STATS ---- */
-    .stats-row {
-      display: flex;
-      gap: 0;
-      border: 1px solid var(--glass-border);
-      border-radius: 16px;
-      overflow: hidden;
-      margin-top: 48px;
-      background: var(--card-bg);
-    }
-    .stat-item {
-      flex: 1;
-      padding: 32px 24px;
-      text-align: center;
-      border-right: 1px solid var(--glass-border);
-    }
-    .stat-item:last-child { border-right: none; }
-    .stat-num {
-      font-family: 'Playfair Display', serif;
-      font-size: 2.2rem;
-      font-weight: 700;
-      color: var(--accent2);
-      display: block;
-    }
-    .stat-label { font-size: 0.82rem; color: var(--muted); margin-top: 6px; font-weight: 300; }
-
-    /* ---- FOOTER ---- */
-    footer {
-      margin-top: 80px;
-      border-top: 1px solid var(--glass-border);
-      padding: 40px 0;
-      text-align: center;
-      position: relative;
-      z-index: 1;
-    }
-    footer p { color: var(--muted); font-size: 0.85rem; line-height: 1.7; font-weight: 300; }
-    footer strong { color: var(--accent2); font-weight: 500; }
-
-    /* ---- RESPONSIVE ---- */
-    @media (max-width: 700px) {
-      .nav-links { gap: 8px; }
-      .btn { padding: 10px 18px; font-size: 0.85rem; }
-      .portals-grid { grid-template-columns: 1fr; }
-      .stats-row { flex-direction: column; }
-      .stat-item { border-right: none; border-bottom: 1px solid var(--glass-border); }
-      .stat-item:last-child { border-bottom: none; }
-      .portal-card { padding: 32px 24px; }
-    }
-
-    /* ---- ANIMATIONS ---- */
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .hero-badge { animation: fadeUp 0.5s ease both; }
-    .hero h1 { animation: fadeUp 0.5s ease 0.1s both; }
-    .hero p { animation: fadeUp 0.5s ease 0.2s both; }
-    .hero-ctas { animation: fadeUp 0.5s ease 0.3s both; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genz Edutech Innovations - Portal</title>
+    <style>
+        :root { --primary: #0f172a; --accent: #3b82f6; --bg: #f8fafc; --text: #334155; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: var(--bg); color: var(--text); overflow-x: hidden; }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding: 20px 5%; display: flex; justify-content: space-between; align-items: center; position: fixed; width: 100%; top: 0; z-index: 100;
+        }
+        .brand { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+        .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 100px 20px 50px; background: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%); }
+        .hero h1 { font-size: 3rem; margin-bottom: 20px; color: var(--primary); }
+        .hero p { font-size: 1.2rem; margin-bottom: 40px; max-width: 600px; color: #475569; }
+        .btn-group { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+        .btn { padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1.1rem; transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-primary { background: var(--accent); color: white; border: 2px solid var(--accent); }
+        .btn-primary:hover { background: #2563eb; transform: translateY(-2px); }
+        .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+        .btn-outline:hover { background: var(--primary); color: white; transform: translateY(-2px); }
+        .features { display: flex; gap: 30px; padding: 80px 5%; justify-content: center; flex-wrap: wrap; }
+        .card { background: white; padding: 30px; border-radius: 16px; width: 300px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05); text-align: center; transition: transform 0.3s; }
+        .card:hover { transform: translateY(-5px); }
+        .card h3 { margin-bottom: 15px; color: var(--primary); }
+    </style>
 </head>
 <body>
-  <div class="glow-circle glow-1"></div>
-  <div class="glow-circle glow-2"></div>
+    <nav class="glass-nav">
+        <div class="brand">Genz Edutech Innovations</div>
+    </nav>
 
-  <nav>
-    <div class="nav-inner">
-      <div class="logo">
-        <div class="logo-icon">🎓</div>
-        <div>
-          <div class="logo-text">Genz Edutech</div>
-          <div class="logo-sub">Innovations</div>
+    <header class="hero">
+        <h1>Welcome to the Educational Portal</h1>
+        <p>A modern, fast, and secure way to manage and view student academic performance. Choose your destination below.</p>
+        <div class="btn-group">
+            <a href="student.html" class="btn btn-primary">Student Portal</a>
+            <a href="admin.html" class="btn btn-outline">Admin Portal</a>
         </div>
-      </div>
-      <div class="nav-links">
-        <a href="student.html" class="btn btn-ghost">Student Portal</a>
-        <a href="admin.html" class="btn btn-primary">Admin Login</a>
-      </div>
-    </div>
-  </nav>
+    </header>
 
-  <section class="hero">
-    <div class="container">
-      <div class="hero-badge">🏆 Academic Result Checker Portal</div>
-      <h1>Your Results,<br/>Beautifully Presented</h1>
-      <p>A modern, secure portal for students to access their academic results anytime. Built for Genz Edutech Innovations — trusted by schools across Nigeria.</p>
-      <div class="hero-ctas">
-        <a href="student.html" class="btn btn-primary">📋 Check My Result</a>
-        <a href="admin.html" class="btn btn-outline">⚙️ Admin Portal</a>
-      </div>
-    </div>
-  </section>
-
-  <div class="container">
-    <div class="divider"></div>
-
-    <!-- PORTALS -->
-    <div style="text-align:center">
-      <div class="section-label">Access Portals</div>
-      <div class="section-title">Two Portals, One Platform</div>
-      <p class="section-sub" style="margin:0 auto">Students check results. Admins manage everything. Clean, fast, and secure.</p>
-    </div>
-
-    <div class="portals-grid">
-      <a href="student.html" class="portal-card portal-student">
-        <span class="portal-emoji">🎓</span>
-        <h3>Student Portal</h3>
-        <p>Sign up with your Registration ID, log in securely, and view your published results in a beautiful report card format. Print or save as PDF.</p>
-        <div class="portal-link">Enter Student Portal →</div>
-      </a>
-      <a href="admin.html" class="portal-card portal-admin">
-        <span class="portal-emoji">🛡️</span>
-        <h3>Admin Portal</h3>
-        <p>Create and manage student records, upload results, configure portal settings, and control what students can see — all from one dashboard.</p>
-        <div class="portal-link">Enter Admin Portal →</div>
-      </a>
-    </div>
-
-    <div class="divider"></div>
-
-    <!-- FEATURES -->
-    <div style="text-align:center">
-      <div class="section-label">Features</div>
-      <div class="section-title">Everything You Need</div>
-      <p class="section-sub" style="margin:0 auto">A complete, no-code result management system powered by Google Sheets.</p>
-    </div>
-
-    <div class="features-grid">
-      <div class="feature-card">
-        <div class="feature-icon">🔐</div>
-        <h3>Secure Authentication</h3>
-        <p>SHA-256 password hashing, session tokens, and role-based access control keep student data safe at all times.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">📊</div>
-        <h3>Google Sheets Backend</h3>
-        <p>No complex database setup. All data lives in a Google Sheet you own and control. Easy to audit, edit, and backup.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🎨</div>
-        <h3>Beautiful Report Cards</h3>
-        <p>Results display in elegant, printable report card format — complete with grades, remarks, percentages, and teacher comments.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">📱</div>
-        <h3>Mobile Responsive</h3>
-        <p>Fully responsive design works perfectly on Android phones, tablets, and desktop computers.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🚀</div>
-        <h3>Instant Deployment</h3>
-        <p>Deploy the frontend to GitHub Pages or Vercel for free. Backend runs on Google Apps Script — no server costs.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">📋</div>
-        <h3>Publish Control</h3>
-        <p>Admins decide when results go live. Students only see published results — no accidental early access.</p>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <!-- STATS -->
-    <div style="text-align:center">
-      <div class="section-label">Platform</div>
-      <div class="section-title">Built for Scale</div>
-    </div>
-    <div class="stats-row">
-      <div class="stat-item">
-        <span class="stat-num">∞</span>
-        <div class="stat-label">Students Supported</div>
-      </div>
-      <div class="stat-item">
-        <span class="stat-num">100%</span>
-        <div class="stat-label">Free to Deploy</div>
-      </div>
-      <div class="stat-item">
-        <span class="stat-num">5</span>
-        <div class="stat-label">Data Sheets Managed</div>
-      </div>
-      <div class="stat-item">
-        <span class="stat-num">8</span>
-        <div class="stat-label">Grade Bands</div>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-  </div>
-
-  <footer>
-    <div class="container">
-      <p><strong>Genz Edutech Innovations</strong> — Result Checker Portal</p>
-      <p style="margin-top:8px">Powered by Google Apps Script + Google Sheets &nbsp;|&nbsp; Frontend hosted on GitHub/Vercel</p>
-      <p style="margin-top:8px; font-size:0.78rem; opacity:0.5;">© 2025 Genz Edutech Innovations. All rights reserved.</p>
-    </div>
-  </footer>
+    <section class="features">
+        <div class="card">
+            <h3>Secure Access</h3>
+            <p>State-of-the-art encryption ensures your data and results remain private and secure.</p>
+        </div>
+        <div class="card">
+            <h3>Instant Reports</h3>
+            <p>View, download, and print beautifully formatted report cards instantly upon publication.</p>
+        </div>
+        <div class="card">
+            <h3>Cloud Synced</h3>
+            <p>Powered by Google's robust infrastructure ensuring 99.9% uptime and reliability.</p>
+        </div>
+    </section>
 </body>
 </html>
