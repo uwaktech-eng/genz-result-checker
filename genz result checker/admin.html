@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin Dashboard | Genz Result Portal</title>
+  <title>Admin Dashboard | Genz Edutech Innovations</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -58,28 +58,26 @@
   <div class="shell">
     <div class="top glass">
       <div class="brand">
-        <strong>Genz Admin Dashboard</strong>
-        <span>Bright, modern and connected to your Google Sheet backend</span>
+        <strong>Genz Edutech Innovations</strong>
+        <span>Admin dashboard for student records, results and portal settings</span>
       </div>
       <div class="actions">
         <a class="btn soft" href="./index.html">Home</a>
-        <a class="btn soft" href="./student.html">Student Portal</a>
         <button class="btn danger hidden" id="logoutBtn">Log out</button>
       </div>
     </div>
 
     <section id="loginView" class="glass login-card">
       <h2>Admin Login</h2>
-      <p class="lead">Use the default admin account first, then begin your setup.</p>
+      <p class="lead">Sign in to manage learners, results and portal settings for Genz Edutech Innovations.</p>
       <div class="grid mt">
-        <div><label>Username</label><input id="loginUsername" value="admin" /></div>
-        <div><label>Password</label><input id="loginPassword" type="password" value="admin12345" /></div>
+        <div><label>Username</label><input id="loginUsername" autocomplete="username" /></div>
+        <div><label>Password</label><input id="loginPassword" type="password" autocomplete="current-password" /></div>
       </div>
       <div class="actions">
         <button class="primary" id="loginBtn">Login</button>
         <button class="soft" id="pingBtn">Check Backend</button>
       </div>
-      <p class="tiny mt">Default login: <strong>admin</strong> / <strong>admin12345</strong></p>
     </section>
 
     <section id="appView" class="hidden">
@@ -209,6 +207,7 @@
 
   <script>
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbynYNmLAHhox3is5agewRvPmt3gtqi3YwUh1PQKfB3R8JQaCL1fu1nH3QUYe0760B0Y/exec';
+    const BRAND_NAME = 'Genz Edutech Innovations';
     const state = { token: localStorage.getItem('genz_admin_token') || '', bootstrap: null };
     const categories = ['Lower Primary','Upper Primary','Junior High School','Senior High School','Undergraduate'];
 
@@ -247,13 +246,13 @@
           clearTimeout(timer);
           delete window[cb];
           script.remove();
-          reject(new Error('Unable to reach backend.'));
+          reject(new Error('Unable to reach backend. Redeploy the Apps Script web app and set access to Anyone.'));
         };
 
         timer = setTimeout(() => {
           delete window[cb];
           script.remove();
-          reject(new Error('Backend request timed out.'));
+          reject(new Error('Backend request timed out. Confirm the latest Apps Script deployment URL is still correct.'));
         }, 20000);
 
         script.src = WEB_APP_URL + '?' + qs.toString();
@@ -476,6 +475,9 @@
 
     $('loginBtn').onclick = login;
     $('pingBtn').onclick = pingBackend;
+
+    if ($('loginUsername') && !$('loginUsername').value) $('loginUsername').placeholder = 'Enter admin username';
+    if ($('loginPassword')) $('loginPassword').placeholder = 'Enter admin password';
     $('saveSettingsBtn').onclick = saveSettings;
     $('saveStudentBtn').onclick = saveStudent;
     $('saveResultBtn').onclick = saveResult;
