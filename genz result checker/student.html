@@ -3,517 +3,595 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Student Portal | Genz Edutech Innovations</title>
+  <title>Student Result Portal | Genz Edutech Innovations</title>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
     :root{
-      --bg:#07111f;
-      --bg2:#0d1d34;
-      --card:rgba(255,255,255,0.12);
-      --line:rgba(255,255,255,0.14);
-      --text:#f3f7ff;
-      --muted:#c5d3ea;
-      --accent:#7c5cff;
-      --accent2:#2ec5ff;
-      --success:#27c48f;
-      --danger:#ff6b7a;
-      --shadow:0 20px 60px rgba(0,0,0,.28);
-      --radius:22px;
+      --bg:#f4f7ff;--bg2:#edf3ff;--panel:rgba(255,255,255,.82);--line:#dfe8f7;--text:#13223c;--muted:#5f738f;
+      --primary:#4d5bff;--primary2:#21b8ff;--success:#1ba972;--danger:#dd5f76;--shadow:0 22px 54px rgba(43,68,118,.12);--radius:24px
     }
     *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(124,92,255,.28), transparent 35%),
-        radial-gradient(circle at bottom right, rgba(46,197,255,.20), transparent 35%),
-        linear-gradient(160deg, var(--bg), var(--bg2));
-      min-height:100vh;
-    }
-    .wrap{max-width:1180px;margin:0 auto;padding:22px}
-    .glass{
-      background:var(--card);backdrop-filter:blur(18px);
-      border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
-    }
-    .topbar{padding:16px 18px;margin-bottom:18px}
-    .brand{font-weight:800}
+    body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:
+      radial-gradient(circle at top left, rgba(77,91,255,.14), transparent 30%),
+      radial-gradient(circle at top right, rgba(33,184,255,.12), transparent 28%),
+      linear-gradient(180deg,var(--bg),var(--bg2));color:var(--text)}
+    .wrap{max-width:1160px;margin:0 auto;padding:22px}
+    .glass{background:var(--panel);border:1px solid rgba(255,255,255,.7);border-radius:var(--radius);backdrop-filter:blur(18px);box-shadow:var(--shadow)}
+    .topbar{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap;padding:16px 18px;margin-bottom:18px}
+    .brand{font-weight:900}
     .muted{color:var(--muted)}
-    .auth-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-    .card{padding:22px}
-    .tabs{display:flex;gap:10px;margin-bottom:16px}
-    .tab{
-      flex:1;padding:12px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.06);
-      color:var(--text);cursor:pointer;font-weight:700
-    }
-    .tab.active{background:linear-gradient(135deg,var(--accent),var(--accent2));border-color:transparent}
-    .field{margin-bottom:14px}
-    label{display:block;margin-bottom:8px;font-size:14px;color:#e8f0ff}
-    input,select,textarea{
-      width:100%;padding:13px 14px;border-radius:14px;border:1px solid var(--line);
-      background:rgba(255,255,255,.07);color:var(--text);outline:none
-    }
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .row-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-    .btn{
-      border:none;border-radius:14px;padding:12px 16px;font-weight:700;cursor:pointer;
-      transition:.22s ease;display:inline-flex;align-items:center;justify-content:center;gap:8px
-    }
+    .btn{border:none;border-radius:14px;padding:12px 16px;font-weight:800;cursor:pointer;transition:.2s ease;display:inline-flex;align-items:center;justify-content:center;gap:8px}
     .btn:hover{transform:translateY(-1px)}
-    .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
-    .btn-secondary{background:rgba(255,255,255,.07);color:var(--text);border:1px solid var(--line)}
-    .hidden{display:none !important}
-    .report-shell{display:grid;gap:18px}
-    .profile-card{padding:22px}
-    .report-card{padding:0;overflow:hidden}
-    .report-header{
-      padding:22px;background:linear-gradient(135deg, rgba(124,92,255,.28), rgba(46,197,255,.18));
-      border-bottom:1px solid rgba(255,255,255,.08)
-    }
-    .report-body{padding:22px}
-    .school-title{font-size:28px;font-weight:900;margin:0 0 6px}
-    .sub{color:#e8f2ff}
-    .student-box{
-      display:grid;grid-template-columns:120px 1fr;gap:18px;margin-top:18px;align-items:start
-    }
-    .avatar{
-      width:120px;height:140px;border-radius:18px;border:1px solid var(--line);
-      background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;overflow:hidden
-    }
-    .avatar img{width:100%;height:100%;object-fit:cover}
+    .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff}
+    .btn-soft{background:rgba(255,255,255,.7);border:1px solid var(--line);color:var(--text)}
+    .btn-success{background:rgba(27,169,114,.13);border:1px solid rgba(27,169,114,.2);color:#0f7f54}
+    .btn-danger{background:rgba(221,95,118,.12);border:1px solid rgba(221,95,118,.18);color:#a53049}
+    .grid{display:grid;gap:18px}
+    .grid-2{grid-template-columns:1fr 1fr}
+    .grid-3{grid-template-columns:repeat(3,1fr)}
+    .auth-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:18px}
+    .card{padding:22px}
+    .field{margin-bottom:14px}
+    label{display:block;margin-bottom:8px;font-weight:800;font-size:14px}
+    input,select,textarea{width:100%;padding:13px 14px;border-radius:14px;border:1px solid var(--line);background:#fff;color:var(--text);outline:none}
+    textarea{min-height:96px;resize:vertical}
+    .tabs{display:flex;gap:10px;margin-bottom:16px}
+    .tab{flex:1;padding:12px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.7);cursor:pointer;font-weight:800}
+    .tab.active{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff;border-color:transparent}
+    .hidden{display:none!important}
+    .status{min-height:18px;font-size:14px}
+    .ok{color:#0d8a56}.error{color:#bb2649}
+    .inline-note{padding:12px 14px;border-radius:16px;background:#eef8ff;border:1px solid #cfe9ff;color:#275d90;font-size:14px}
+    .profile-grid{display:grid;grid-template-columns:110px 1fr;gap:18px;align-items:start}
+    .passport{width:110px;height:132px;border-radius:16px;border:1px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .passport img{width:100%;height:100%;object-fit:cover}
     .info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-    .info-item{padding:12px 14px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.05)}
-    .info-label{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#bfd0ea}
-    .info-value{font-weight:700;margin-top:4px}
-    .result-list{display:grid;gap:16px;margin-top:18px}
-    .result-item{
-      border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:18px;background:rgba(255,255,255,.05)
-    }
-    .result-top{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
-    .result-title{font-size:20px;font-weight:800}
-    .pill{display:inline-block;padding:7px 12px;border-radius:999px;font-size:12px;font-weight:800}
-    .pass{background:rgba(39,196,143,.14);color:#d8fff0}
-    .fail{background:rgba(255,107,122,.14);color:#ffe3e7}
-    .score-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
-    .score-box{padding:12px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08)}
-    .score-label{font-size:12px;color:#bfd0ea;text-transform:uppercase}
-    .score-value{font-size:20px;font-weight:900;margin-top:6px}
-    #toast{
-      position:fixed;right:18px;bottom:18px;z-index:1001;min-width:260px;max-width:360px;
-      padding:14px 16px;border-radius:16px;border:1px solid var(--line);backdrop-filter:blur(18px);
-      box-shadow:var(--shadow);display:none
-    }
-    #toast.show{display:block}
-    .toast-success{background:rgba(39,196,143,.16);color:#eafff6}
-    .toast-error{background:rgba(255,107,122,.16);color:#fff1f3}
-    .overlay{
-      position:fixed;inset:0;background:rgba(4,11,22,.68);display:none;align-items:center;justify-content:center;
-      z-index:1000;backdrop-filter:blur(8px)
-    }
+    .info-item{padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.7);border:1px solid var(--line)}
+    .info-label{font-size:12px;text-transform:uppercase;color:#6b7e97;letter-spacing:.08em}
+    .info-value{font-weight:800;margin-top:6px}
+    .report-shell{display:grid;gap:18px}
+    .report-card{overflow:hidden}
+    .report-head{padding:24px;background:linear-gradient(135deg, rgba(77,91,255,.16), rgba(33,184,255,.14));border-bottom:1px solid var(--line)}
+    .report-title{font-size:1.7rem;font-weight:900;margin:0}
+    .report-sub{margin-top:6px;color:#456281}
+    .subject-table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px;background:#fff;margin-top:18px}
+    table{width:100%;border-collapse:collapse;min-width:900px}
+    th,td{padding:12px;border-bottom:1px solid #edf2fa;text-align:left;font-size:14px}
+    th{background:#f7fbff}
+    .tag{display:inline-flex;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:900}
+    .tag-pass{background:#e8fff5;color:#128053}.tag-fail{background:#fff0f3;color:#b83d5c}.tag-pending{background:#fff7e8;color:#b37212}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .summary-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:18px}
+    .summary-box{padding:14px;border-radius:16px;background:rgba(255,255,255,.72);border:1px solid var(--line)}
+    .summary-label{font-size:12px;color:#637792;text-transform:uppercase;letter-spacing:.08em}
+    .summary-value{font-size:1.2rem;font-weight:900;margin-top:6px}
+    .signature-wrap{margin-top:20px;display:grid;grid-template-columns:1fr 180px;gap:18px;align-items:end}
+    .signature-box{border-top:1px solid #c5d3e6;padding-top:8px;text-align:center}
+    .signature-box img{max-width:160px;max-height:60px;display:block;margin:0 auto 8px}
+    .overlay{position:fixed;inset:0;background:rgba(7,16,29,.58);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(8px)}
     .overlay.show{display:flex}
-    .loader-box{width:min(92vw,380px);padding:24px;text-align:center}
-    .spinner{
-      width:52px;height:52px;border-radius:50%;margin:0 auto 14px;
-      border:4px solid rgba(255,255,255,.15);border-top-color:#fff;animation:spin 1s linear infinite
-    }
+    .loader-box{padding:24px;width:min(90vw,360px);text-align:center}
+    .spinner{width:52px;height:52px;border-radius:50%;margin:0 auto 14px;border:4px solid rgba(255,255,255,.3);border-top-color:#fff;animation:spin 1s linear infinite}
+    #toast{position:fixed;right:18px;bottom:18px;z-index:1001;padding:14px 16px;border-radius:16px;display:none;max-width:360px;border:1px solid #dfe8f7;box-shadow:var(--shadow)}
+    #toast.show{display:block}.toast-success{background:#edfff6;color:#0d7f50}.toast-error{background:#fff0f3;color:#b52e4e}
     @keyframes spin{to{transform:rotate(360deg)}}
-    @media print{
-      body{background:#fff;color:#111}
-      .topbar, #authSection, .print-hide, #toast, .overlay{display:none !important}
-      .glass{background:#fff !important;border:1px solid #ddd !important;box-shadow:none !important}
-      .report-header{background:#f5f7fb !important;color:#111}
-      .result-item,.score-box,.info-item{background:#fff !important}
-    }
     @media (max-width:980px){
-      .auth-grid,.row,.row-3,.student-box,.info-grid,.score-grid{grid-template-columns:1fr}
+      .auth-grid,.grid-2,.grid-3,.summary-strip,.info-grid,.signature-wrap,.profile-grid{grid-template-columns:1fr}
+      .wrap{padding:16px}
+    }
+    @media print{
+      body{background:#fff}
+      .print-hide,#authView,.topbar,#toast,.overlay{display:none!important}
+      .glass{box-shadow:none!important;background:#fff!important;border:1px solid #ddd!important}
     }
   </style>
 </head>
 <body>
+  <div class="overlay" id="overlay"><div class="glass loader-box"><div class="spinner"></div><div id="overlayText">Loading...</div></div></div>
+  <div id="toast"></div>
+
   <div class="wrap">
     <div class="glass topbar">
-      <div class="brand">Genz Edutech Innovations</div>
-      <div class="muted">Student Result Portal</div>
+      <div>
+        <div class="brand" id="brandHeader">Genz Edutech Innovations</div>
+        <div class="muted">Student Result Portal</div>
+      </div>
+      <div class="actions">
+        <a class="btn btn-soft" href="index.html">Home</a>
+        <button class="btn btn-soft hidden" id="logoutBtn" type="button">Logout</button>
+      </div>
     </div>
 
-    <section id="authSection" class="auth-grid">
+    <section id="authView" class="auth-grid">
       <div class="glass card">
         <div class="tabs">
           <button class="tab active" data-auth-tab="login">Student Login</button>
           <button class="tab" data-auth-tab="signup">Student Signup</button>
+          <button class="tab" data-auth-tab="reset">Forgot Password</button>
         </div>
 
         <form id="loginForm">
-          <h2 style="margin:0 0 10px">Check your result</h2>
-          <p class="muted">Use your Registration ID and password to open your published report.</p>
-          <div class="field">
-            <label>Registration ID</label>
-            <input name="regId" placeholder="Enter Registration ID" required />
+          <h2 style="margin:0 0 10px">Sign in</h2>
+          <p class="muted">Log in first, then enter the <strong>exam code</strong> given by the admin to view and download your published result.</p>
+          <div class="grid grid-2">
+            <div class="field"><label>Registration ID</label><input name="regId" required /></div>
+            <div class="field"><label>Password</label><input type="password" name="password" required /></div>
           </div>
-          <div class="field">
-            <label>Password</label>
-            <input type="password" name="password" placeholder="Enter password" required />
-          </div>
-          <button class="btn btn-primary" type="submit" style="width:100%">Load Result</button>
+          <button class="btn btn-primary" style="width:100%" type="submit">Login</button>
         </form>
 
         <form id="signupForm" class="hidden">
           <h2 style="margin:0 0 10px">Create student account</h2>
-          <div class="row">
+          <div class="grid grid-2">
             <div class="field"><label>Registration ID</label><input name="regId" required /></div>
-            <div class="field"><label>Password</label><input name="password" type="password" required /></div>
+            <div class="field"><label>Password</label><input type="password" name="password" required /></div>
           </div>
-          <div class="row">
+          <div class="grid grid-2">
             <div class="field"><label>Full Name</label><input name="fullName" required /></div>
-            <div class="field"><label>School Name</label><input name="schoolName" required /></div>
+            <div class="field"><label>School Name</label><input name="schoolName" /></div>
           </div>
-          <div class="row-3">
+          <div class="grid grid-3">
             <div class="field"><label>Age</label><input name="age" /></div>
-            <div class="field"><label>Gender</label><input name="gender" /></div>
-            <div class="field"><label>DOB</label><input name="dob" type="date" /></div>
+            <div class="field"><label>Gender</label><select name="gender"><option value="">Select</option><option>Male</option><option>Female</option></select></div>
+            <div class="field"><label>Date of Birth</label><input type="date" name="dob" /></div>
           </div>
-          <div class="row">
+          <div class="grid grid-2">
             <div class="field"><label>Parent Name</label><input name="parentName" /></div>
             <div class="field"><label>Parent Phone</label><input name="parentPhone" /></div>
           </div>
-          <div class="row">
+          <div class="grid grid-2">
             <div class="field"><label>Parent Email</label><input name="parentEmail" type="email" /></div>
             <div class="field"><label>State</label><input name="state" /></div>
           </div>
-          <div class="row-3">
+          <div class="grid grid-3">
             <div class="field"><label>City / LGA</label><input name="cityLGA" /></div>
-            <div class="field"><label>Class Level</label><input name="classLevel" required /></div>
-            <div class="field"><label>Category</label><input name="category" /></div>
+            <div class="field"><label>Class / Level</label><select name="classLevel" id="signupClassLevel"></select></div>
+            <div class="field"><label>Category</label><select name="category" id="signupCategory"></select></div>
           </div>
-          <div class="field">
-            <label>Address</label>
-            <input name="address" />
+          <div class="field"><label>Address</label><textarea name="address"></textarea></div>
+          <button class="btn btn-primary" style="width:100%" type="submit">Create Account</button>
+        </form>
+
+        <form id="resetRequestForm" class="hidden">
+          <h2 style="margin:0 0 10px">Forgot password</h2>
+          <p class="muted">Use your Registration ID or parent email address to request a reset code.</p>
+          <div class="field"><label>Registration ID or Parent Email</label><input name="identifier" required /></div>
+          <button class="btn btn-primary" style="width:100%" type="submit">Send Reset Code</button>
+        </form>
+        <form id="resetApplyForm" class="hidden" style="margin-top:16px">
+          <div class="grid grid-3">
+            <div class="field"><label>Registration ID</label><input name="identifier" required /></div>
+            <div class="field"><label>Reset Code</label><input name="code" required /></div>
+            <div class="field"><label>New Password</label><input type="password" name="newPassword" required /></div>
           </div>
-          <button class="btn btn-primary" type="submit" style="width:100%">Create Student Account</button>
+          <button class="btn btn-success" style="width:100%" type="submit">Reset Password</button>
         </form>
       </div>
 
       <div class="glass card">
-        <h2 style="margin:0 0 10px">Before you test</h2>
-        <p class="muted">
-          Make sure the Apps Script web app has been deployed as <strong>Anyone</strong> and that the real
-          <strong>/exec</strong> URL has been pasted into the WEB_APP_URL constant below.
-        </p>
-        <div class="glass" style="padding:18px;margin-top:16px">
-          <strong>Important</strong>
-          <p class="muted">Students will only see results where <strong>Published = true</strong>. If a result does not appear, check the Published value from the admin portal.</p>
+        <h2 style="margin:0 0 10px">How result access works</h2>
+        <div class="inline-note" id="portalNote">After login, enter the exam code given by the admin. You will only see results that are both <strong>published</strong> and <strong>activated for view</strong>.</div>
+        <div class="grid" style="margin-top:16px">
+          <div class="glass card" style="padding:16px">
+            <strong>Download as PDF</strong>
+            <p class="muted">The student portal exports the report as a real PDF file using high-quality canvas rendering.</p>
+          </div>
+          <div class="glass card" style="padding:16px">
+            <strong>History filters</strong>
+            <p class="muted">If multiple terms or sessions exist under the same exam code, you can filter the loaded report.</p>
+          </div>
         </div>
       </div>
     </section>
 
-    <section id="reportSection" class="hidden report-shell">
-      <div class="glass profile-card print-hide" style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap">
-        <div>
-          <div style="font-weight:900;font-size:22px">Student Result Loaded</div>
-          <div class="muted">Review your published report blocks below.</div>
+    <section id="appView" class="hidden report-shell">
+      <div class="glass card print-hide">
+        <div class="grid grid-3">
+          <div class="field"><label>Exam Code</label><input id="examCodeInput" placeholder="Enter the exam code given by the admin" /></div>
+          <div class="field"><label>Academic Session Filter</label><select id="sessionFilter"><option value="">All sessions</option></select></div>
+          <div class="field"><label>Term Filter</label><select id="termFilter"><option value="">All terms</option></select></div>
         </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn btn-secondary" id="backBtn">Back to Login</button>
-          <button class="btn btn-primary" id="printBtn">Print / Download PDF</button>
+        <div class="actions">
+          <button class="btn btn-primary" id="loadResultBtn" type="button">Load Result</button>
+          <button class="btn btn-soft" id="downloadPdfBtn" type="button">Download PDF</button>
         </div>
+        <div class="status" id="resultLoadStatus"></div>
       </div>
 
-      <div class="glass report-card">
-        <div class="report-header">
-          <div class="school-title" id="brandName">Genz Edutech Innovations</div>
-          <div class="sub" id="schoolName">Result Portal</div>
-          <div class="sub" id="schoolAddress"></div>
-          <div class="sub"><span id="schoolPhone"></span> <span id="schoolEmail"></span></div>
+      <div class="glass card print-hide">
+        <div class="toolbar">
+          <h2 style="margin:0 0 10px">Available exam codes</h2>
+          <div class="muted">Only exam codes activated by the admin will appear here after login.</div>
+        </div>
+        <div class="actions" id="examCodeChips"></div>
+      </div>
+
+      <div class="glass card report-card" id="reportCapture">
+        <div class="report-head">
+          <h1 class="report-title" id="brandName">Genz Edutech Innovations</h1>
+          <div class="report-sub" id="schoolName">Result Portal</div>
+          <div class="report-sub" id="schoolAddress"></div>
+          <div class="report-sub"><span id="schoolPhone"></span> <span id="schoolEmail"></span></div>
         </div>
 
-        <div class="report-body">
-          <div class="student-box">
-            <div class="avatar" id="passportBox">No Passport</div>
+        <div class="card" style="padding-top:22px">
+          <div class="profile-grid">
+            <div class="passport" id="passportBox">No passport</div>
             <div>
               <div class="info-grid" id="studentInfoGrid"></div>
             </div>
           </div>
 
-          <div class="result-list" id="resultList"></div>
+          <div class="summary-strip" id="summaryStrip"></div>
+
+          <div class="subject-table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Exam Code</th>
+                  <th>Subject</th>
+                  <th>Score</th>
+                  <th>Percentage</th>
+                  <th>Grade</th>
+                  <th>Rank</th>
+                  <th>Status</th>
+                  <th>Published Date</th>
+                </tr>
+              </thead>
+              <tbody id="resultTableBody"></tbody>
+            </table>
+          </div>
+
+          <div class="grid grid-2" style="margin-top:18px">
+            <div class="glass card" style="padding:16px">
+              <strong>Exam details</strong>
+              <div class="info-grid" id="examMetaGrid" style="margin-top:12px"></div>
+            </div>
+            <div class="glass card" style="padding:16px">
+              <strong>Teacher comments / remarks</strong>
+              <div id="remarksList" style="margin-top:12px"></div>
+            </div>
+          </div>
+
+          <div class="signature-wrap">
+            <div class="inline-note">
+              This result was generated from the official Genz Edutech Innovations result portal. The published date and exam code shown above are part of the official record for this report.
+            </div>
+            <div class="signature-box" id="signatureBox">
+              <div class="muted">No signature added</div>
+            </div>
+          </div>
         </div>
       </div>
     </section>
   </div>
 
-  <div class="overlay" id="overlay">
-    <div class="glass loader-box">
-      <div class="spinner"></div>
-      <div id="overlayText" style="font-weight:800;font-size:18px">Loading...</div>
-      <div class="muted" style="margin-top:6px">Please wait</div>
-    </div>
-  </div>
-
-  <div id="toast"></div>
-
   <script>
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxkqab1CGlVVZ1No0Q5XF3vg6QMgDF7avYLAvaV5DhW_fR8AASqhn_O8lx3nAgXDG_NtQ/exec';
+    const STUDENT_TOKEN_KEY = 'gei_student_token_v3';
 
-    const overlay = document.getElementById('overlay');
-    const overlayText = document.getElementById('overlayText');
-    const toast = document.getElementById('toast');
-    const authSection = document.getElementById('authSection');
-    const reportSection = document.getElementById('reportSection');
+    let publicData = {settings:{},classOptions:[],categoryOptions:[],subjectOptions:[]};
+    let currentStudent = null;
+    let currentResults = [];
+    let currentSettings = {};
 
-    function showLoading(text){
-      overlayText.textContent = text || 'Loading...';
-      overlay.classList.add('show');
-    }
-    function hideLoading(){
-      overlay.classList.remove('show');
-    }
+    const $ = id => document.getElementById(id);
+    const overlay = $('overlay');
+    const overlayText = $('overlayText');
+    const toast = $('toast');
+
+    function showLoading(text='Loading...'){ overlayText.textContent = text; overlay.classList.add('show'); }
+    function hideLoading(){ overlay.classList.remove('show'); }
     function showToast(message, type='success'){
       toast.textContent = message;
       toast.className = '';
       toast.id = 'toast';
       toast.classList.add('show', type === 'error' ? 'toast-error' : 'toast-success');
-      setTimeout(() => toast.classList.remove('show'), 3500);
+      setTimeout(()=> toast.classList.remove('show'), 3500);
     }
+    function token(){ return localStorage.getItem(STUDENT_TOKEN_KEY) || ''; }
+    function setToken(v){ localStorage.setItem(STUDENT_TOKEN_KEY, v); }
+    function clearToken(){ localStorage.removeItem(STUDENT_TOKEN_KEY); }
+    function esc(v){ return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
-    function apiRequest(params = {}, loadingText = 'Loading...', method = 'POST'){
-      return new Promise(async (resolve, reject) => {
-        if (!WEB_APP_URL || WEB_APP_URL.includes('PASTE_YOUR_APPS_SCRIPT_EXEC_URL_HERE')) {
-          reject(new Error('Please paste your Apps Script /exec URL into WEB_APP_URL first.'));
-          return;
+    async function apiRequest(action, payload={}, method='POST', loadingText='Loading...'){
+      if (!WEB_APP_URL || WEB_APP_URL.includes('PASTE_YOUR_APPS_SCRIPT_EXEC_URL_HERE')) throw new Error('Please paste your Apps Script /exec URL into WEB_APP_URL.');
+      showLoading(loadingText);
+      try{
+        payload = payload || {};
+        if (!payload.token && action !== 'studentLogin' && action !== 'studentSignup' && action !== 'requestPasswordReset' && action !== 'resetPassword' && action !== 'getPublicBootstrap') payload.token = token();
+        let res;
+        if (method === 'GET'){
+          const url = new URL(WEB_APP_URL);
+          url.searchParams.set('action', action);
+          Object.keys(payload).forEach(key => {
+            const value = payload[key];
+            if (value !== undefined && value !== null) url.searchParams.set(key, typeof value === 'object' ? JSON.stringify(value) : String(value));
+          });
+          res = await fetch(url.toString(), {method:'GET'});
+        } else {
+          const form = new URLSearchParams();
+          form.set('action', action);
+          form.set('payload', JSON.stringify(payload));
+          res = await fetch(WEB_APP_URL, {
+            method:'POST',
+            headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+            body:form.toString()
+          });
         }
-
-        showLoading(loadingText);
-
-        try {
-          let response;
-          if (method === 'GET') {
-            const url = new URL(WEB_APP_URL);
-            Object.keys(params).forEach(key => {
-              if (params[key] !== undefined && params[key] !== null) {
-                url.searchParams.set(key, params[key]);
-              }
-            });
-            url.searchParams.set('_ts', Date.now());
-            response = await fetch(url.toString(), { method: 'GET' });
-          } else {
-            const form = new URLSearchParams();
-            form.set('action', params.action || '');
-            const payload = Object.assign({}, params);
-            delete payload.action;
-            form.set('payload', JSON.stringify(payload));
-            response = await fetch(WEB_APP_URL, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-              body: form.toString()
-            });
-          }
-
-          const text = await response.text();
-          let parsed;
-          try {
-            parsed = JSON.parse(text);
-          } catch (err) {
-            throw new Error('Server returned non-JSON response. Check Apps Script deployment and URL.');
-          }
-
-          hideLoading();
-          if (!parsed) {
-            reject(new Error('Empty response from backend.'));
-            return;
-          }
-          if (parsed.ok === false) {
-            reject(new Error(parsed.message || 'Backend returned an error.'));
-            return;
-          }
-          resolve(parsed);
-        } catch (err) {
-          hideLoading();
-          reject(new Error(err.message || 'Connection failed: Network error — check your WEB_APP_URL or Apps Script deployment.'));
-        }
-      });
+        const text = await res.text();
+        let json;
+        try{ json = JSON.parse(text); }catch(err){ throw new Error('Server returned non-JSON response.'); }
+        if (!json.ok) throw new Error(json.message || 'Request failed.');
+        return json;
+      } finally {
+        hideLoading();
+      }
     }
 
     function serializeForm(form){
-      const fd = new FormData(form);
-      const obj = {};
-      for (const [key, value] of fd.entries()) obj[key] = value;
-      return obj;
+      const data = {};
+      new FormData(form).forEach((value,key)=> data[key] = value);
+      return data;
     }
 
-    function setAuthTab(tabName){
-      document.querySelectorAll('[data-auth-tab]').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.authTab === tabName);
-      });
-      document.getElementById('loginForm').classList.toggle('hidden', tabName !== 'login');
-      document.getElementById('signupForm').classList.toggle('hidden', tabName !== 'signup');
+    function setAuthTab(name){
+      document.querySelectorAll('[data-auth-tab]').forEach(btn => btn.classList.toggle('active', btn.dataset.authTab === name));
+      $('loginForm').classList.toggle('hidden', name !== 'login');
+      $('signupForm').classList.toggle('hidden', name !== 'signup');
+      $('resetRequestForm').classList.toggle('hidden', name !== 'reset');
+      $('resetApplyForm').classList.toggle('hidden', name !== 'reset');
     }
 
-    document.querySelectorAll('[data-auth-tab]').forEach(btn => {
-      btn.addEventListener('click', () => setAuthTab(btn.dataset.authTab));
-    });
+    function fillOptions(el, options, placeholder='Select'){
+      el.innerHTML = `<option value="">${placeholder}</option>` + options.map(opt => `<option value="${esc(opt)}">${esc(opt)}</option>`).join('');
+    }
 
-    document.getElementById('signupForm').addEventListener('submit', function(e){
-      e.preventDefault();
-      const data = serializeForm(this);
-      apiRequest({
-        action: 'studentSignup',
-        ...data
-      }, 'Creating student account...')
-      .then(res => {
-        showToast(res.message || 'Student account created.');
-        this.reset();
-        setAuthTab('login');
-      })
-      .catch(err => showToast(err.message, 'error'));
-    });
+    async function loadPublicBootstrap(){
+      const res = await apiRequest('getPublicBootstrap', {}, 'GET', 'Loading portal...');
+      publicData = res.data;
+      currentSettings = res.data.settings || {};
+      $('brandHeader').textContent = currentSettings.BRAND_NAME || 'Genz Edutech Innovations';
+      $('portalNote').innerHTML = currentSettings.PORTAL_NOTICE || 'Use your exam code to load results.';
+      fillOptions($('signupClassLevel'), publicData.classOptions || [], 'Select class / level');
+      fillOptions($('signupCategory'), publicData.categoryOptions || [], 'Select category');
+    }
 
-    document.getElementById('loginForm').addEventListener('submit', function(e){
-      e.preventDefault();
-      const data = serializeForm(this);
-      apiRequest({
-        action: 'studentLogin',
-        regId: data.regId,
-        password: data.password
-      }, 'Loading result...')
-      .then(res => {
-        renderReport(res.settings || {}, res.student || {}, res.results || []);
-        authSection.classList.add('hidden');
-        reportSection.classList.remove('hidden');
-        showToast(res.message || 'Result loaded.');
-      })
-      .catch(err => showToast(err.message, 'error'));
-    });
-
-    document.getElementById('backBtn').addEventListener('click', function(){
-      reportSection.classList.add('hidden');
-      authSection.classList.remove('hidden');
-    });
-
-    document.getElementById('printBtn').addEventListener('click', function(){
-      window.print();
-    });
-
-    function renderReport(settings, student, results){
-      document.getElementById('brandName').textContent = settings.BRAND_NAME || 'Genz Edutech Innovations';
-      document.getElementById('schoolName').textContent = settings.SCHOOL_NAME || 'Result Portal';
-      document.getElementById('schoolAddress').textContent = settings.HEAD_OFFICE_ADDRESS || '';
-      document.getElementById('schoolPhone').textContent = settings.SCHOOL_PHONE || '';
-      document.getElementById('schoolEmail').textContent = settings.SCHOOL_EMAIL || '';
-
-      const passportBox = document.getElementById('passportBox');
-      if (student.passportUrl) {
-        passportBox.innerHTML = `<img src="${escapeAttribute(student.passportUrl)}" alt="Passport" />`;
-      } else {
-        passportBox.textContent = 'No Passport';
+    async function validateSavedSession(){
+      const t = token();
+      if (!t) return false;
+      try{
+        const res = await apiRequest('validateSession', {token:t}, 'POST', 'Checking session...');
+        return res.data && res.data.role === 'student';
+      }catch(err){
+        clearToken();
+        return false;
       }
+    }
 
-      const showPosition = String(settings.SHOW_POSITION_ON_REPORT || 'true').toLowerCase() === 'true';
+    async function loadAvailableExamCodes(){
+      const res = await apiRequest('loadStudentExamCodes', {}, 'GET', 'Loading available exam codes...');
+      $('examCodeChips').innerHTML = res.data.length
+        ? res.data.map(item => `<button class="btn btn-soft" type="button" onclick="pickExamCode('${esc(item.examCode)}')">${esc(item.examCode)} • ${esc(item.term || '')}</button>`).join('')
+        : `<div class="muted">No active exam code has been assigned to your account yet.</div>`;
+    }
+
+    window.pickExamCode = function(code){
+      $('examCodeInput').value = code;
+    }
+
+    function renderStudentProfile(student){
+      const passportBox = $('passportBox');
+      if (student.passportUrl) passportBox.innerHTML = `<img src="${esc(student.passportUrl)}" alt="Passport" />`;
+      else passportBox.textContent = 'No passport';
 
       const info = [
-        ['Full Name', student.fullName],
-        ['Registration ID', student.regId],
-        ['Class Level', student.classLevel],
-        ['Category', student.category],
-        ['School Name', student.schoolName],
-        ['Gender', student.gender],
-        ['Age', student.age],
-        ['Date of Birth', student.dob],
-        ['Parent Name', student.parentName],
-        ['Parent Phone', student.parentPhone],
-        ['Parent Email', student.parentEmail],
-        ['State', student.state],
-        ['City / LGA', student.cityLGA],
-        ['Address', student.address]
+        ['Full Name', student.fullName], ['Registration ID', student.regId], ['Class Level', student.classLevel],
+        ['Category', student.category], ['School Name', student.schoolName], ['Gender', student.gender],
+        ['Age', student.age], ['Date of Birth', student.dob], ['Parent Name', student.parentName],
+        ['Parent Phone', student.parentPhone], ['Parent Email', student.parentEmail], ['State', student.state],
+        ['City / LGA', student.cityLGA], ['Address', student.address]
       ];
-
-      document.getElementById('studentInfoGrid').innerHTML = info.map(item => `
-        <div class="info-item">
-          <div class="info-label">${escapeHtml(item[0])}</div>
-          <div class="info-value">${escapeHtml(item[1] || '—')}</div>
-        </div>
+      $('studentInfoGrid').innerHTML = info.map(([label,value]) => `
+        <div class="info-item"><div class="info-label">${esc(label)}</div><div class="info-value">${esc(value || '—')}</div></div>
       `).join('');
+    }
 
-      const resultList = document.getElementById('resultList');
-      if (!results.length) {
-        resultList.innerHTML = `
-          <div class="result-item">
-            <div class="result-title">No published result found</div>
-            <p class="muted">Your account is active, but no published result has been made available yet.</p>
-          </div>
-        `;
+    function renderReport(resultData){
+      currentStudent = resultData.student;
+      currentResults = resultData.results || [];
+      currentSettings = resultData.settings || currentSettings;
+
+      $('brandName').textContent = currentSettings.BRAND_NAME || 'Genz Edutech Innovations';
+      $('schoolName').textContent = currentSettings.SCHOOL_NAME || 'Result Portal';
+      $('schoolAddress').textContent = currentSettings.HEAD_OFFICE_ADDRESS || '';
+      $('schoolPhone').textContent = currentSettings.SCHOOL_PHONE || '';
+      $('schoolEmail').textContent = currentSettings.SCHOOL_EMAIL || '';
+
+      renderStudentProfile(resultData.student);
+
+      const prevSession = $('sessionFilter').value;
+      const prevTerm = $('termFilter').value;
+      const sessions = resultData.sessions || [...new Set((resultData.results || []).map(r => r.academicSession).filter(Boolean))];
+      const terms = resultData.terms || [...new Set((resultData.results || []).map(r => r.term).filter(Boolean))];
+      fillOptions($('sessionFilter'), sessions, 'All sessions');
+      fillOptions($('termFilter'), terms, 'All terms');
+      if (prevSession && sessions.includes(prevSession)) $('sessionFilter').value = prevSession;
+      if (prevTerm && terms.includes(prevTerm)) $('termFilter').value = prevTerm;
+
+      const loadedSession = $('sessionFilter').value;
+      const loadedTerm = $('termFilter').value;
+
+      const filtered = currentResults.filter(r => (!loadedSession || r.academicSession === loadedSession) && (!loadedTerm || r.term === loadedTerm));
+
+      const totalSubjects = filtered.length;
+      const passed = filtered.filter(r => String(r.resultStatus).toUpperCase() === 'PASS').length;
+      const avg = totalSubjects ? (filtered.reduce((sum,r)=> sum + Number(r.percentage || 0), 0) / totalSubjects).toFixed(2) : '0.00';
+      const publishedDate = filtered[0]?.publishedAt || '—';
+      $('summaryStrip').innerHTML = [
+        ['Exam Code', resultData.examCode || '—'],
+        ['Subjects', totalSubjects],
+        ['Passed', passed],
+        ['Average %', avg],
+        ['Published', publishedDate]
+      ].map(item => `<div class="summary-box"><div class="summary-label">${esc(item[0])}</div><div class="summary-value">${esc(item[1])}</div></div>`).join('');
+
+      $('resultTableBody').innerHTML = filtered.length ? filtered.map(r => `
+        <tr>
+          <td>${esc(r.examCode)}</td>
+          <td>${esc(r.subject)}</td>
+          <td>${esc(r.studentScore || '—')} / ${esc(r.maxScore || '—')}</td>
+          <td>${esc(r.percentage || '—')}%</td>
+          <td>${esc(r.grade || '—')}</td>
+          <td>${esc(r.positionText || '—')}</td>
+          <td><span class="tag ${String(r.resultStatus).toUpperCase()==='PASS'?'tag-pass':String(r.resultStatus).toUpperCase()==='FAIL'?'tag-fail':'tag-pending'}">${esc(r.resultStatus || 'PENDING')}</span></td>
+          <td>${esc(r.publishedAt || '—')}</td>
+        </tr>
+      `).join('') : `<tr><td colspan="8" class="muted">No result rows were found for the selected filters.</td></tr>`;
+
+      const first = filtered[0] || currentResults[0] || {};
+      $('examMetaGrid').innerHTML = [
+        ['Exam Code', first.examCode], ['Exam Title', first.examTitle], ['Academic Session', first.academicSession],
+        ['Term', first.term], ['Exam Date', first.examDate], ['Pass Mark Number', first.passMarkNumber],
+        ['Pass Mark Percentage', first.passMarkPercentage + '%'], ['Published Date', first.publishedAt]
+      ].map(([label,value]) => `<div class="info-item"><div class="info-label">${esc(label)}</div><div class="info-value">${esc(value || '—')}</div></div>`).join('');
+
+      $('remarksList').innerHTML = filtered.length ? filtered.map(r => `
+        <div class="info-item" style="margin-bottom:10px">
+          <div class="info-label">${esc(r.subject)}</div>
+          <div class="info-value">${esc(r.remark || '—')}</div>
+          <div class="muted" style="margin-top:6px">${esc(r.teacherComment || 'No teacher comment')}</div>
+        </div>
+      `).join('') : `<div class="muted">No remarks available.</div>`;
+
+      const signatureUrl = first.signatureUrl || currentSettings.SIGNATURE_URL || '';
+      const signatureName = currentSettings.SIGNATURE_NAME || 'Authorized Signatory';
+      $('signatureBox').innerHTML = signatureUrl
+        ? `<img src="${esc(signatureUrl)}" alt="Signature" /><div>${esc(signatureName)}</div>`
+        : `<div class="muted">No signature added</div><div>${esc(signatureName)}</div>`;
+    }
+
+    async function loadResult(){
+      try{
+        const examCode = $('examCodeInput').value.trim();
+        if (!examCode) throw new Error('Enter the exam code given by the admin.');
+        const res = await apiRequest('loadStudentResults', {
+          examCode: examCode,
+          academicSession: $('sessionFilter').value,
+          term: $('termFilter').value
+        }, 'POST', 'Loading result...');
+        renderReport(res.data);
+        $('resultLoadStatus').textContent = res.message;
+        $('resultLoadStatus').className = 'status ok';
+        showToast(res.message);
+      }catch(err){
+        $('resultLoadStatus').textContent = err.message;
+        $('resultLoadStatus').className = 'status error';
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function downloadPdf(){
+      if (!currentStudent || !currentResults.length) {
+        showToast('Load a result first before downloading the PDF.', 'error');
         return;
       }
+      showLoading('Generating high-quality PDF...');
+      try{
+        const target = $('reportCapture');
+        const canvas = await html2canvas(target, {scale:2, useCORS:true, backgroundColor:'#ffffff'});
+        const imgData = canvas.toDataURL('image/png');
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pageW = pdf.internal.pageSize.getWidth();
+        const pageH = pdf.internal.pageSize.getHeight();
+        const imgW = pageW;
+        const imgH = canvas.height * imgW / canvas.width;
+        let heightLeft = imgH;
+        let position = 0;
 
-      resultList.innerHTML = results.map(result => `
-        <div class="result-item">
-          <div class="result-top">
-            <div>
-              <div class="result-title">${escapeHtml(result.examTitle || 'Result')}</div>
-              <div class="muted">${escapeHtml(result.academicSession || '')} ${escapeHtml(result.term || '')} ${result.examDate ? '• ' + escapeHtml(result.examDate) : ''}</div>
-            </div>
-            <div><span class="pill ${String(result.status).toUpperCase() === 'PASS' ? 'pass' : 'fail'}">${escapeHtml(result.status || '')}</span></div>
-          </div>
-
-          <div class="score-grid">
-            <div class="score-box">
-              <div class="score-label">Score</div>
-              <div class="score-value">${escapeHtml(String(result.studentScore ?? ''))}</div>
-            </div>
-            <div class="score-box">
-              <div class="score-label">Percentage</div>
-              <div class="score-value">${escapeHtml(String(result.percentage ?? ''))}%</div>
-            </div>
-            <div class="score-box">
-              <div class="score-label">Grade</div>
-              <div class="score-value">${escapeHtml(result.grade || '')}</div>
-            </div>
-            <div class="score-box">
-              <div class="score-label">Pass Mark</div>
-              <div class="score-value">${escapeHtml(String(result.passMarkPercentage ?? ''))}%</div>
-            </div>
-          </div>
-
-          <div class="info-grid" style="margin-top:14px">
-            <div class="info-item">
-              <div class="info-label">Remark</div>
-              <div class="info-value">${escapeHtml(result.remark || '—')}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">Teacher Comment</div>
-              <div class="info-value">${escapeHtml(result.teacherComment || '—')}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">Max Score</div>
-              <div class="info-value">${escapeHtml(String(result.maxScore ?? ''))}</div>
-            </div>
-            <div class="info-item">
-              <div class="info-label">Pass Mark Number</div>
-              <div class="info-value">${escapeHtml(String(result.passMarkNumber ?? ''))}</div>
-            </div>
-            ${showPosition ? `
-            <div class="info-item">
-              <div class="info-label">Position</div>
-              <div class="info-value">${escapeHtml(result.position || '—')}</div>
-            </div>` : ''}
-          </div>
-        </div>
-      `).join('');
+        pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH, undefined, 'FAST');
+        heightLeft -= pageH;
+        while (heightLeft > 0) {
+          position = heightLeft - imgH;
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH, undefined, 'FAST');
+          heightLeft -= pageH;
+        }
+        const code = currentResults[0]?.examCode || 'result';
+        const safeName = `${currentStudent.fullName || 'student'}_${code}_result.pdf`.replace(/[^a-z0-9_\-.]+/gi,'_');
+        pdf.save(safeName);
+        showToast('PDF downloaded successfully.');
+      }catch(err){
+        showToast('Failed to generate the PDF.', 'error');
+      }finally{
+        hideLoading();
+      }
     }
 
-    function escapeHtml(value){
-      return String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-    }
+    $('loadResultBtn').addEventListener('click', loadResult);
+    $('downloadPdfBtn').addEventListener('click', downloadPdf);
+    $('sessionFilter').addEventListener('change', () => { if (currentResults.length) renderReport({student:currentStudent,results:currentResults,settings:currentSettings,examCode: currentResults[0]?.examCode, sessions:[...new Set(currentResults.map(r=>r.academicSession))], terms:[...new Set(currentResults.map(r=>r.term))]}); });
+    $('termFilter').addEventListener('change', () => { if (currentResults.length) renderReport({student:currentStudent,results:currentResults,settings:currentSettings,examCode: currentResults[0]?.examCode, sessions:[...new Set(currentResults.map(r=>r.academicSession))], terms:[...new Set(currentResults.map(r=>r.term))]}); });
 
-    function escapeAttribute(value){
-      return String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/"/g, '&quot;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-    }
+    document.querySelectorAll('[data-auth-tab]').forEach(btn => btn.addEventListener('click', ()=> setAuthTab(btn.dataset.authTab)));
+
+    $('loginForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      try{
+        const res = await apiRequest('studentLogin', serializeForm(e.target), 'POST', 'Signing in...');
+        setToken(res.data.token);
+        $('authView').classList.add('hidden');
+        $('appView').classList.remove('hidden');
+        $('logoutBtn').classList.remove('hidden');
+        await loadAvailableExamCodes();
+        showToast(res.message);
+      }catch(err){ showToast(err.message, 'error'); }
+    });
+
+    $('signupForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      try{
+        const res = await apiRequest('studentSignup', serializeForm(e.target), 'POST', 'Creating account...');
+        showToast(res.message);
+        e.target.reset();
+        setAuthTab('login');
+      }catch(err){ showToast(err.message, 'error'); }
+    });
+
+    $('resetRequestForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      try{
+        const data = serializeForm(e.target);
+        const res = await apiRequest('requestPasswordReset', {role:'student', identifier:data.identifier}, 'POST', 'Sending reset code...');
+        showToast(res.message);
+      }catch(err){ showToast(err.message, 'error'); }
+    });
+
+    $('resetApplyForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      try{
+        const data = serializeForm(e.target);
+        const res = await apiRequest('resetPassword', {role:'student', ...data}, 'POST', 'Resetting password...');
+        showToast(res.message);
+        setAuthTab('login');
+      }catch(err){ showToast(err.message, 'error'); }
+    });
+
+    $('logoutBtn').addEventListener('click', () => { clearToken(); location.reload(); });
+
+    (async function init(){
+      setAuthTab('login');
+      await loadPublicBootstrap();
+      const ok = await validateSavedSession();
+      if (ok){
+        $('authView').classList.add('hidden');
+        $('appView').classList.remove('hidden');
+        $('logoutBtn').classList.remove('hidden');
+        await loadAvailableExamCodes();
+      }
+    })();
   </script>
 </body>
 </html>
