@@ -3,356 +3,142 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Genz Edutech Innovations | Result Checker Portal</title>
-  <meta name="description" content="Modern result checker portal for students and administrators." />
+  <title>Genz Edutech Innovations | Result Checker</title>
   <style>
-    :root {
-      --bg: #0b1020;
-      --bg-soft: rgba(255,255,255,0.08);
-      --panel: rgba(255,255,255,0.12);
-      --border: rgba(255,255,255,0.18);
-      --text: #e8eefc;
-      --muted: #b7c2e1;
-      --primary: #7c8cff;
-      --primary-2: #8ef2ff;
-      --success: #4ade80;
-      --shadow: 0 20px 60px rgba(0,0,0,0.35);
-      --radius: 22px;
+    :root{
+      --bg:#07111f;
+      --bg2:#0d1d34;
+      --card:rgba(255,255,255,0.12);
+      --line:rgba(255,255,255,0.14);
+      --text:#f3f7ff;
+      --muted:#c5d3ea;
+      --accent:#7c5cff;
+      --accent2:#2ec5ff;
+      --success:#27c48f;
+      --danger:#ff6b7a;
+      --shadow:0 20px 60px rgba(0,0,0,.28);
+      --radius:22px;
     }
-
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: Inter, Arial, sans-serif;
-      color: var(--text);
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--text);
       background:
-        radial-gradient(circle at top left, rgba(124,140,255,0.32), transparent 30%),
-        radial-gradient(circle at top right, rgba(142,242,255,0.18), transparent 25%),
-        linear-gradient(135deg, #070b16 0%, #10162b 45%, #0a1020 100%);
+        radial-gradient(circle at top left, rgba(124,92,255,.28), transparent 35%),
+        radial-gradient(circle at bottom right, rgba(46,197,255,.20), transparent 35%),
+        linear-gradient(160deg, var(--bg), var(--bg2));
+      min-height:100vh;
     }
-
-    .container {
-      width: min(1150px, calc(100% - 32px));
-      margin: 0 auto;
+    .wrap{max-width:1100px;margin:0 auto;padding:24px}
+    .nav{
+      display:flex;justify-content:space-between;align-items:center;gap:16px;
+      padding:14px 18px;margin-top:8px;
+      background:var(--card);backdrop-filter:blur(16px);
+      border:1px solid var(--line);border-radius:18px;
+      box-shadow:var(--shadow);
     }
-
-    .nav {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      backdrop-filter: blur(20px);
-      background: rgba(7, 11, 22, 0.65);
-      border-bottom: 1px solid rgba(255,255,255,0.08);
+    .brand{font-weight:800;letter-spacing:.2px}
+    .hero{
+      display:grid;grid-template-columns:1.2fr .8fr;gap:24px;align-items:center;
+      padding:48px 0 28px;
     }
-
-    .nav-inner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 0;
-      gap: 20px;
+    .glass{
+      background:var(--card);backdrop-filter:blur(18px);
+      border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
     }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-weight: 800;
-      letter-spacing: .2px;
+    .hero-card{padding:34px}
+    h1{font-size:clamp(2rem,4vw,3.4rem);line-height:1.05;margin:0 0 12px}
+    p{color:var(--muted);line-height:1.65}
+    .badge{
+      display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:999px;
+      background:rgba(255,255,255,.08);border:1px solid var(--line);margin-bottom:14px;font-size:14px
     }
-
-    .brand-badge {
-      width: 42px;
-      height: 42px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, var(--primary), var(--primary-2));
-      display: grid;
-      place-items: center;
-      color: #081120;
-      font-weight: 900;
-      box-shadow: var(--shadow);
+    .dot{width:10px;height:10px;border-radius:50%;background:var(--success);box-shadow:0 0 18px var(--success)}
+    .actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:22px}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      padding:14px 18px;border-radius:14px;text-decoration:none;font-weight:700;
+      border:1px solid transparent;transition:.22s ease;cursor:pointer;
     }
-
-    .nav-links {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
+    .btn:hover{transform:translateY(-1px)}
+    .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white}
+    .btn-secondary{background:rgba(255,255,255,.06);border-color:var(--line);color:var(--text)}
+    .panel{
+      min-height:320px;padding:28px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden
     }
-
-    .btn {
-      appearance: none;
-      border: none;
-      text-decoration: none;
-      cursor: pointer;
-      color: white;
-      background: linear-gradient(135deg, var(--primary), #5c72ff);
-      padding: 13px 18px;
-      border-radius: 14px;
-      font-weight: 700;
-      transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
-      box-shadow: 0 10px 30px rgba(92,114,255,.35);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
+    .orb{
+      position:absolute;border-radius:50%;filter:blur(8px);opacity:.9
     }
-
-    .btn.secondary {
-      background: rgba(255,255,255,0.08);
-      box-shadow: none;
-      border: 1px solid rgba(255,255,255,0.12);
+    .orb.one{width:170px;height:170px;background:rgba(124,92,255,.44);top:18px;left:20px}
+    .orb.two{width:150px;height:150px;background:rgba(46,197,255,.34);bottom:26px;right:18px}
+    .screen{
+      position:relative;width:100%;max-width:340px;background:rgba(255,255,255,.1);
+      border:1px solid var(--line);border-radius:20px;padding:18px
     }
-
-    .btn:hover { transform: translateY(-2px); }
-
-    .hero {
-      padding: 80px 0 44px;
-      display: grid;
-      grid-template-columns: 1.2fr .8fr;
-      gap: 28px;
-      align-items: center;
-    }
-
-    .hero-card,
-    .glass {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      backdrop-filter: blur(18px);
-      box-shadow: var(--shadow);
-    }
-
-    .hero-copy {
-      padding: 34px;
-    }
-
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      color: var(--primary-2);
-      background: rgba(142,242,255,.08);
-      border: 1px solid rgba(142,242,255,.18);
-      padding: 9px 12px;
-      border-radius: 999px;
-      margin-bottom: 18px;
-    }
-
-    h1 {
-      font-size: clamp(2.2rem, 5vw, 4rem);
-      line-height: 1.03;
-      margin: 0 0 14px;
-    }
-
-    .lead {
-      color: var(--muted);
-      font-size: 1.05rem;
-      line-height: 1.7;
-      margin-bottom: 28px;
-    }
-
-    .hero-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 14px;
-    }
-
-    .hero-side {
-      padding: 26px;
-      display: grid;
-      gap: 16px;
-    }
-
-    .mini-stat {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 18px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,.1);
-      border-radius: 18px;
-    }
-
-    .mini-stat strong { font-size: 1.25rem; }
-
-    .section {
-      padding: 20px 0 56px;
-    }
-
-    .section-title {
-      font-size: 1.8rem;
-      margin-bottom: 16px;
-    }
-
-    .muted { color: var(--muted); }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 18px;
-    }
-
-    .feature {
-      padding: 24px;
-    }
-
-    .feature h3 {
-      margin: 12px 0 10px;
-      font-size: 1.05rem;
-    }
-
-    .icon {
-      width: 52px;
-      height: 52px;
-      border-radius: 16px;
-      display: grid;
-      place-items: center;
-      background: rgba(124,140,255,.16);
-      border: 1px solid rgba(124,140,255,.2);
-      font-size: 22px;
-    }
-
-    .cta {
-      padding: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-      flex-wrap: wrap;
-      margin-bottom: 60px;
-    }
-
-    .footer {
-      color: var(--muted);
-      padding: 0 0 30px;
-      text-align: center;
-    }
-
-    @media (max-width: 900px) {
-      .hero { grid-template-columns: 1fr; }
-      .grid { grid-template-columns: 1fr 1fr; }
-    }
-
-    @media (max-width: 640px) {
-      .nav-inner { align-items: flex-start; flex-direction: column; }
-      .grid { grid-template-columns: 1fr; }
-      .hero-copy, .hero-side, .feature, .cta { padding: 22px; }
-      .btn { width: 100%; }
-      .hero-actions { flex-direction: column; }
+    .bar{height:12px;border-radius:999px;background:rgba(255,255,255,.12);margin:10px 0}
+    .bar.big{height:64px;border-radius:18px}
+    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:16px 0 38px}
+    .feature{padding:22px}
+    .feature h3{margin:10px 0 8px;font-size:18px}
+    .foot{text-align:center;color:var(--muted);padding-bottom:26px}
+    @media (max-width:900px){
+      .hero{grid-template-columns:1fr}
+      .cards{grid-template-columns:1fr}
     }
   </style>
 </head>
 <body>
-  <nav class="nav">
-    <div class="container nav-inner">
-      <div class="brand">
-        <div class="brand-badge">GE</div>
-        <div>
-          <div>Genz Edutech Innovations</div>
-          <small class="muted">Result Checker Portal</small>
-        </div>
-      </div>
-      <div class="nav-links">
-        <a class="btn secondary" href="student.html">Student Portal</a>
-        <a class="btn" href="admin.html">Admin Portal</a>
-      </div>
+  <div class="wrap">
+    <div class="nav">
+      <div class="brand">Genz Edutech Innovations</div>
+      <div style="color:var(--muted);font-size:14px">Result Checker Portal</div>
     </div>
-  </nav>
 
-  <main class="container">
     <section class="hero">
-      <div class="hero-card hero-copy">
-        <div class="eyebrow">● Secure • Elegant • Responsive</div>
-        <h1>Beautiful result checking for students and admins.</h1>
-        <p class="lead">
-          A polished school portal built for Genz Edutech Innovations. Students can sign up, log in with their Registration ID,
-          and view only published results in a clean report-card layout. Admins can manage settings, student records, and results.
+      <div class="glass hero-card">
+        <div class="badge"><span class="dot"></span> Secure School Result Access</div>
+        <h1>Modern result checking for admins and students.</h1>
+        <p>
+          This portal lets administrators manage student records and publish results, while students can log in
+          privately to view only their published report cards in a clean printable format.
         </p>
-        <div class="hero-actions">
-          <a class="btn" href="student.html">Open Student Portal</a>
-          <a class="btn secondary" href="admin.html">Open Admin Portal</a>
+        <div class="actions">
+          <a class="btn btn-primary" href="student.html">Open Student Portal</a>
+          <a class="btn btn-secondary" href="admin.html">Open Admin Portal</a>
         </div>
       </div>
 
-      <div class="glass hero-side">
-        <div class="mini-stat">
-          <div>
-            <div class="muted">Portal Type</div>
-            <strong>Result Checker</strong>
-          </div>
-          <div>🎓</div>
-        </div>
-        <div class="mini-stat">
-          <div>
-            <div class="muted">Frontend</div>
-            <strong>HTML • CSS • JS</strong>
-          </div>
-          <div>💻</div>
-        </div>
-        <div class="mini-stat">
-          <div>
-            <div class="muted">Backend</div>
-            <strong>Apps Script + Sheets</strong>
-          </div>
-          <div>☁️</div>
+      <div class="glass panel">
+        <div class="orb one"></div>
+        <div class="orb two"></div>
+        <div class="screen">
+          <div class="bar" style="width:42%"></div>
+          <div class="bar big"></div>
+          <div class="bar" style="width:100%"></div>
+          <div class="bar" style="width:78%"></div>
+          <div class="bar" style="width:86%"></div>
+          <div class="bar big" style="height:90px"></div>
         </div>
       </div>
     </section>
 
-    <section class="section">
-      <h2 class="section-title">What this portal offers</h2>
-      <p class="muted" style="margin-bottom:18px;">Everything is designed to be easy to deploy, easy to manage, and smooth to use on mobile and desktop.</p>
-      <div class="grid">
-        <div class="glass feature">
-          <div class="icon">🔐</div>
-          <h3>Admin account system</h3>
-          <p class="muted">Admins can sign up, log in, manage settings, save student records, and publish results securely.</p>
-        </div>
-        <div class="glass feature">
-          <div class="icon">🧾</div>
-          <h3>Elegant report cards</h3>
-          <p class="muted">Each student result appears in a polished report-card block with score, grade, remark, and teacher comment.</p>
-        </div>
-        <div class="glass feature">
-          <div class="icon">📱</div>
-          <h3>Responsive design</h3>
-          <p class="muted">Works well across Android phones, tablets, and desktop browsers with smooth transitions and button states.</p>
-        </div>
-        <div class="glass feature">
-          <div class="icon">🗂️</div>
-          <h3>Google Sheets database</h3>
-          <p class="muted">All records are stored in clearly organized tabs created automatically by the Apps Script backend.</p>
-        </div>
-        <div class="glass feature">
-          <div class="icon">🚀</div>
-          <h3>Static hosting friendly</h3>
-          <p class="muted">Deploy the frontend on GitHub Pages or Vercel without needing Node.js or a complex server setup.</p>
-        </div>
-        <div class="glass feature">
-          <div class="icon">🖨️</div>
-          <h3>Print to PDF</h3>
-          <p class="muted">Students can print their result report directly from the browser and save it as PDF when needed.</p>
-        </div>
+    <section class="cards">
+      <div class="glass feature">
+        <h3>Admin Access</h3>
+        <p>Create an admin account, sign in, manage settings, create students, and publish results from one dashboard.</p>
+      </div>
+      <div class="glass feature">
+        <h3>Student Access</h3>
+        <p>Students sign up or log in with Registration ID and password to view their own published results only.</p>
+      </div>
+      <div class="glass feature">
+        <h3>Printable Report Card</h3>
+        <p>Each published result appears in a polished report-card layout with marks, grade, remark, and teacher comment.</p>
       </div>
     </section>
 
-    <section class="glass cta">
-      <div>
-        <h2 style="margin:0 0 8px;">Open the portal</h2>
-        <div class="muted">Choose the area you want to access.</div>
-      </div>
-      <div class="hero-actions">
-        <a class="btn" href="student.html">Student Portal</a>
-        <a class="btn secondary" href="admin.html">Admin Portal</a>
-      </div>
-    </section>
-
-    <div class="footer">© 2026 Genz Edutech Innovations • Result Checker Portal</div>
-  </main>
+    <div class="foot">Built for Genz Edutech Innovations</div>
+  </div>
 </body>
 </html>
