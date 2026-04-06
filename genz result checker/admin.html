@@ -562,7 +562,8 @@
       showLoading(loadingText);
       try{
         payload = payload || {};
-        if (!payload.token && action !== 'adminLogin' && action !== 'adminSignup' && action !== 'requestPasswordReset' && action !== 'resetPassword' && action !== 'getPublicBootstrap') {
+        const noTokenActions = ['adminLogin', 'requestPasswordReset', 'resetPassword', 'getPublicBootstrap'];
+        if (!payload.token && !noTokenActions.includes(action)) {
           payload.token = token();
         }
         let res;
