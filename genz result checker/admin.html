@@ -10,7 +10,8 @@
       --text:#f4f8ff;--muted:#b8c7de;--primary:#6f63ff;--primary2:#22c7ff;--success:#19b47a;--danger:#ff6f86;--warn:#ffb84c;
       --shadow:0 24px 60px rgba(0,0,0,.28);--radius:22px
     }
-    *{box-sizing:border-box}
+    *{box-sizing:border-box;min-width:0}
+    html,body{max-width:100%;overflow-x:hidden}
     body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:
       radial-gradient(circle at top left, rgba(111,99,255,.22), transparent 30%),
       radial-gradient(circle at top right, rgba(34,199,255,.16), transparent 28%),
@@ -34,7 +35,7 @@
     .nav-title{font-size:12px;text-transform:uppercase;color:#93a9c7;letter-spacing:.08em;margin-bottom:8px}
     .nav-btn{width:100%;text-align:left;background:transparent;color:var(--text);border:1px solid transparent;padding:12px 14px;border-radius:14px;margin-bottom:8px;cursor:pointer;font-weight:700}
     .nav-btn.active,.nav-btn:hover{background:rgba(255,255,255,.08);border-color:var(--line)}
-    .content{padding:22px}
+    .content{padding:22px;max-width:100%;overflow-x:hidden}
     .topbar{display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
     .hamburger{display:none;width:46px;height:46px;border-radius:14px}
     .glass{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);backdrop-filter:blur(18px);box-shadow:var(--shadow)}
@@ -57,9 +58,9 @@
     .summary-value{font-size:1.75rem;font-weight:900;margin-top:8px}
     .section{display:none}
     .section.active{display:block}
-    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.05)}
-    table{width:100%;border-collapse:collapse;min-width:1000px}
-    th,td{padding:12px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;vertical-align:top;font-size:14px}
+    .table-wrap{overflow:auto;max-width:100%;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.05)}
+    table{width:100%;border-collapse:collapse;min-width:720px;table-layout:auto}
+    th,td{padding:12px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;vertical-align:top;font-size:14px;word-break:break-word}
     th{position:sticky;top:0;background:rgba(14,22,39,.98);z-index:1}
     .toolbar{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
     .toolbar .actions{display:flex;gap:10px;flex-wrap:wrap}
@@ -92,6 +93,8 @@
       .summary-grid,.grid-4{grid-template-columns:1fr 1fr}
       .grid-3{grid-template-columns:1fr 1fr}
     }
+    .selection-info{margin-top:10px;font-size:13px;color:var(--muted)}
+    .logo-thumb{width:54px;height:54px;border-radius:14px;border:1px solid var(--line);object-fit:cover;background:rgba(255,255,255,.08)}
     @media (max-width:980px){
       .shell{grid-template-columns:1fr}
       .sidebar{position:fixed;left:-310px;top:0;width:280px;z-index:1002;transition:.25s ease}
@@ -99,7 +102,9 @@
       .content{padding:18px}
       .hamburger{display:inline-flex}
       .auth-shell,.grid-2,.grid-3,.grid-4,.summary-grid,.subject-boxes{grid-template-columns:1fr}
+      table{min-width:640px}
     }
+    @media (max-width:640px){.toolbar .actions{width:100%}.toolbar .actions input,.toolbar .actions select{width:100%}}
   </style>
 </head>
 <body>
@@ -123,7 +128,7 @@
       </form>
 
       <form id="signupForm" class="hidden">
-        <h2 class="panel-title">Create admin account</h2>
+        <h2 class="panel-title">Create admin account</h2><p class="muted">This public signup is only for the first setup admin. After that, only the principal admin can create sub-admins from inside the dashboard.</p>
         <div class="grid grid-2">
           <div class="field"><label>Display Name</label><input name="displayName" required /></div>
           <div class="field"><label>Username</label><input name="username" required /></div>
@@ -267,7 +272,7 @@
               </div>
               <div class="grid grid-3">
                 <div class="field"><label>City / LGA</label><input name="cityLGA" /></div>
-                <div class="field"><label>Class Level</label><input name="classLevel" id="studentClassLevel" placeholder="e.g. Year 5, JSS 2, 200 Level" /></div>
+                <div class="field"><label>Class Level</label><input name="classLevel" id="studentClassLevel" placeholder="e.g. Year 6 / JSS 2 / SS 3" /></div>
                 <div class="field"><label>Category</label><select name="category" id="studentCategory"></select></div>
               </div>
               <div class="field"><label>Address</label><textarea name="address"></textarea></div>
@@ -291,13 +296,29 @@
 
           <div class="glass card">
             <h2 class="panel-title">Import students from CSV</h2>
-            <div class="inline-note">Required headers: regId,password,fullName,schoolName,classLevel,category. Other columns can follow your sheet field names.</div>
+            <div class="inline-note">Required headers: regId,password,fullName,schoolName,classLevel,category,passportUrl. Other columns can follow your sheet field names.</div>
             <div class="field" style="margin-top:14px"><label>Student CSV File</label><input type="file" id="studentsCsvFile" accept=".csv" /></div>
             <div class="actions">
               <button class="btn btn-primary" type="button" id="importStudentsBtn">Import Students CSV</button>
               <button class="btn btn-soft" type="button" id="downloadStudentTemplateBtn">Download Student CSV Template</button>
             </div>
             <div class="status" id="studentImportStatus"></div>
+          </div>
+       
+          <div class="glass card">
+            <h2 class="panel-title">Bulk passport image update</h2>
+            <div class="inline-note">Select students below, then apply one image URL to all selected. Google Drive share links are accepted and converted automatically.</div>
+            <div class="field" style="margin-top:14px"><label>Passport URL or Google Drive Share Link</label><input id="bulkPassportUrl" placeholder="Paste image URL or Google Drive file link" /></div>
+            <div class="actions">
+              <button class="btn btn-primary" type="button" id="applyPassportBtn">Apply to Selected Students</button>
+              <button class="btn btn-soft" type="button" id="clearStudentSelectionBtn">Clear Student Selection</button>
+            </div>
+            <div class="field" style="margin-top:14px"><label>Passport CSV File</label><input type="file" id="passportCsvFile" accept=".csv" /></div>
+            <div class="actions">
+              <button class="btn btn-soft" type="button" id="importPassportCsvBtn">Import Passport CSV</button>
+              <button class="btn btn-soft" type="button" id="downloadPassportTemplateBtn">Download Passport CSV Template</button>
+            </div>
+            <div class="status" id="passportBulkStatus"></div>
           </div>
         </div>
 
@@ -308,16 +329,19 @@
               <div class="muted">Activate, archive, delete, restore, or delete forever.</div>
             </div>
             <div class="actions">
-              <input id="studentSearch" placeholder="Search by name, reg ID, class, or category" style="min-width:280px" />
+              <input id="studentSearch" placeholder="Search by name, reg ID, class, or category" style="min-width:280px;max-width:100%" />
               <select id="studentFilterState">
                 <option value="all">All states</option>
                 <option value="active">Active only</option>
                 <option value="archived">Archived only</option>
                 <option value="deleted">Deleted only</option>
               </select>
+              <button class="btn btn-soft" type="button" id="selectVisibleStudentsBtn">Select Visible</button>
+              <button class="btn btn-soft" type="button" id="clearStudentSelectionToolbarBtn">Clear Selection</button>
             </div>
           </div>
-          <div class="table-wrap"><table><thead><tr><th>Reg ID</th><th>Full Name</th><th>Class</th><th>Category</th><th>Email / Phone</th><th>Status</th><th>Actions</th></tr></thead><tbody id="studentsBody"></tbody></table></div>
+          <div class="selection-info" id="studentSelectionInfo">No student selected.</div>
+          <div class="table-wrap"><table><thead><tr><th>Select</th><th>Reg ID</th><th>Full Name</th><th>Class</th><th>Category</th><th>Passport</th><th>Email / Phone</th><th>Status</th><th>Actions</th></tr></thead><tbody id="studentsBody"></tbody></table></div>
         </div>
       </section>
 
@@ -333,8 +357,8 @@
 
             <form id="resultForm">
               <div class="grid grid-4">
-                <div class="field"><label>Target</label><select name="targetMode" id="targetMode"><option value="single">Selected student</option><option value="all">All active students</option></select></div>
-                <div class="field"><label>Registration ID</label><select name="selectedRegId" id="resultRegIdSelect"><option value="">Select student</option></select></div>
+                <div class="field"><label>Target</label><select name="targetMode" id="targetMode"><option value="single">Single student</option><option value="selected">Checked student list</option><option value="all">All active students</option></select></div>
+                <div class="field"><label>Registration ID</label><select name="selectedRegId" id="resultRegIdSelect"><option value="">Select student</option></select><div class="small muted">Or use checked students from the student list.</div></div>
                 <div class="field"><label>Or type Reg ID manually</label><input name="manualRegId" id="manualRegId" /></div>
                 <div class="field"><label>Exam Code</label><input name="examCode" required placeholder="e.g. GEI-TERM1-2026" /></div>
               </div>
@@ -405,14 +429,33 @@
       </section>
 
       <section id="adminsSection" class="section">
-        <div class="glass card">
-          <div class="toolbar">
-            <div>
-              <h2 class="panel-title">Admin accounts</h2>
-              <div class="muted">Activate, archive, restore, delete, or delete forever. One active admin must always remain.</div>
-            </div>
+        <div class="grid grid-2">
+          <div class="glass card">
+            <h2 class="panel-title">Create sub-admin</h2>
+            <div class="inline-note">Only the principal admin can create, deactivate, archive, restore, or delete sub-admin accounts. Public signup is only for the very first setup admin.</div>
+            <form id="subadminForm">
+              <div class="grid grid-2">
+                <div class="field"><label>Display Name</label><input name="displayName" required /></div>
+                <div class="field"><label>Username</label><input name="username" required /></div>
+              </div>
+              <div class="grid grid-2">
+                <div class="field"><label>Email</label><input name="email" type="email" required /></div>
+                <div class="field"><label>Phone</label><input name="phone" /></div>
+              </div>
+              <div class="field"><label>Password</label><input name="password" type="password" required /></div>
+              <button class="btn btn-primary" type="submit">Create Sub-admin</button>
+              <div class="status" id="subadminStatus"></div>
+            </form>
           </div>
-          <div class="table-wrap"><table><thead><tr><th>Username</th><th>Name</th><th>Email / Phone</th><th>Status</th><th>Actions</th></tr></thead><tbody id="adminsBody"></tbody></table></div>
+          <div class="glass card">
+            <div class="toolbar">
+              <div>
+                <h2 class="panel-title">Admin accounts</h2>
+                <div class="muted">The principal admin badge identifies the main controller for all sub-admin access.</div>
+              </div>
+            </div>
+            <div class="table-wrap"><table><thead><tr><th>Username</th><th>Name</th><th>Email / Phone</th><th>Status</th><th>Actions</th></tr></thead><tbody id="adminsBody"></tbody></table></div>
+          </div>
         </div>
       </section>
 
@@ -425,7 +468,8 @@
               <div class="field"><label>Subject</label><input id="bulkEmailSubject" /></div>
             </div>
             <div class="field"><label>Message</label><textarea id="bulkEmailMessage"></textarea></div>
-            <button class="btn btn-primary" id="sendBulkEmailBtn" type="button">Send Bulk Email</button>
+            <div class="actions"><button class="btn btn-primary" id="sendBulkEmailBtn" type="button">Send Bulk Email</button><button class="btn btn-soft" id="checkMailAuthBtn" type="button">Check Mail Permission</button></div>
+            <div class="inline-note" style="margin-top:10px">If Apps Script says mail permission is missing, run <strong>authorizeMailAccess()</strong> once in the Apps Script editor, approve the permission, then redeploy the web app.</div>
             <div class="status" id="bulkEmailStatus"></div>
           </div>
 
@@ -464,14 +508,16 @@
               <div class="field"><label>Pass Mark Percentage</label><input name="PASS_MARK_PERCENTAGE" type="number" /></div>
               <div class="field"><label>Signature Name</label><input name="SIGNATURE_NAME" /></div>
               <div class="field"><label>Signature URL</label><input name="SIGNATURE_URL" /></div>
+              <div class="field"><label>Brand Logo URL</label><input name="BRAND_LOGO_URL" placeholder="Image URL or Google Drive share link" /></div>
             </div>
             <div class="field"><label>Portal Notice</label><textarea name="PORTAL_NOTICE"></textarea></div>
             <div class="grid grid-3">
-              <div class="field"><label>Class / Level Options (comma separated)</label><textarea name="CLASS_OPTIONS"></textarea></div>
+              <div class="field"><label>Class / Level Options (comma separated, optional)</label><textarea name="CLASS_OPTIONS"></textarea></div>
               <div class="field"><label>Category Options (comma separated)</label><textarea name="CATEGORY_OPTIONS"></textarea></div>
-              <div class="field"><label>Subject Options (comma separated)</label><textarea name="SUBJECT_OPTIONS"></textarea></div>
+              <div class="field"><label>Subject Options (comma separated)</label><textarea name="SUBJECT_OPTIONS" id="subjectOptionsField"></textarea></div>
             </div>
-            <div class="actions">
+            <div class="grid grid-2"><div class="field"><label>Add Subject Manually</label><input id="newSubjectInput" placeholder="e.g. Agricultural Science" /></div><div class="field"><label>Delete Selected Subjects</label><div class="actions"><button class="btn btn-soft" type="button" id="openSubjectPickerBtn">Pick Subjects Below</button><button class="btn btn-danger" type="button" id="deleteSelectedSubjectsBtn">Delete Selected Subjects</button></div></div></div><div id="subjectPickerBox" class="subject-boxes" style="margin-bottom:14px"></div><div class="actions">
+              <button class="btn btn-soft" type="button" id="addSubjectBtn">Add Subject</button>
               <button class="btn btn-primary" type="submit">Save Settings</button>
             </div>
             <div class="status" id="settingsStatus"></div>
@@ -485,7 +531,8 @@
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxkqab1CGlVVZ1No0Q5XF3vg6QMgDF7avYLAvaV5DhW_fR8AASqhn_O8lx3nAgXDG_NtQ/exec';
     const ADMIN_TOKEN_KEY = 'gei_admin_token_v3';
 
-    let bootstrapData = {settings:{},students:[],results:[],admins:[],classOptions:[],categoryOptions:[],subjectOptions:[],examCodes:[]};
+    let bootstrapData = {settings:{},students:[],results:[],admins:[],classOptions:[],categoryOptions:[],subjectOptions:[],examCodes:[],currentAdmin:{}};
+    let selectedStudentIds = new Set();
 
     const $ = id => document.getElementById(id);
     const overlay = $('overlay');
@@ -582,6 +629,47 @@
       setTimeout(()=> URL.revokeObjectURL(a.href), 500);
     }
 
+    function normalizeImageUrl(url){
+      url = String(url || '').trim();
+      if (!url) return '';
+      let match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/i);
+      if (!match) match = url.match(/[?&]id=([a-zA-Z0-9_-]+)/i);
+      if (!match) match = url.match(/\/uc\?export=view&id=([a-zA-Z0-9_-]+)/i);
+      if (match) return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+      return url;
+    }
+
+    function updateStudentSelectionInfo(){
+      const box = $('studentSelectionInfo');
+      if (box) box.textContent = selectedStudentIds.size ? `${selectedStudentIds.size} student(s) selected.` : 'No student selected.';
+    }
+
+    function toggleStudentSelection(regId, checked){
+      const key = String(regId || '').toUpperCase();
+      if (checked) selectedStudentIds.add(key); else selectedStudentIds.delete(key);
+      updateStudentSelectionInfo();
+    }
+    window.toggleStudentSelection = toggleStudentSelection;
+
+    function selectVisibleStudents(){
+      const q = $('studentSearch').value.trim().toLowerCase();
+      const filter = $('studentFilterState').value;
+      bootstrapData.students.filter(s => {
+        const hay = `${s.regId} ${s.fullName} ${s.classLevel} ${s.category}`.toLowerCase();
+        if (q && !hay.includes(q)) return false;
+        if (filter === 'active' && (!s.active || s.archived || s.deleted)) return false;
+        if (filter === 'archived' && !s.archived) return false;
+        if (filter === 'deleted' && !s.deleted) return false;
+        return true;
+      }).forEach(s => selectedStudentIds.add(String(s.regId).toUpperCase()));
+      renderStudents();
+    }
+
+    function clearStudentSelection(){
+      selectedStudentIds.clear();
+      renderStudents();
+    }
+
     function setAuthTab(name){
       document.querySelectorAll('[data-auth-tab]').forEach(btn => btn.classList.toggle('active', btn.dataset.authTab === name));
       $('loginForm').classList.toggle('hidden', name !== 'login');
@@ -591,7 +679,40 @@
     }
 
     function fillOptions(selectEl, options, placeholder='Select'){
+      if (!selectEl) return;
+      if (String(selectEl.tagName || '').toLowerCase() !== 'select') return;
       selectEl.innerHTML = `<option value="">${placeholder}</option>` + options.map(opt => `<option value="${esc(opt)}">${esc(opt)}</option>`).join('');
+    }
+
+    function renderSubjectPicker(){
+      const list = bootstrapData.subjectOptions || [];
+      $('subjectPickerBox').innerHTML = list.map(subject => `<label class="chip-check" style="padding:12px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.05)"><input type="checkbox" class="subjectDeleteToggle" value="${esc(subject)}" /> ${esc(subject)}</label>`).join('');
+    }
+
+    function syncSubjectOptionsFieldFromData(){
+      const field = $('subjectOptionsField');
+      if (field) field.value = (bootstrapData.subjectOptions || []).join(',');
+      renderSubjectPicker();
+    }
+
+    function addSubjectOption(){
+      const input = $('newSubjectInput');
+      const val = String(input.value || '').trim();
+      if (!val) return showToast('Enter a subject name first.', 'error');
+      const list = bootstrapData.subjectOptions || [];
+      if (!list.some(x => String(x).toLowerCase() === val.toLowerCase())) list.push(val);
+      bootstrapData.subjectOptions = list.sort((a,b)=>String(a).localeCompare(String(b)));
+      syncSubjectOptionsFieldFromData();
+      input.value = '';
+      renderSubjectBoxes();
+    }
+
+    function deleteSelectedSubjects(){
+      const remove = [...document.querySelectorAll('.subjectDeleteToggle:checked')].map(el => el.value);
+      if (!remove.length) return showToast('Select at least one subject to delete.', 'error');
+      bootstrapData.subjectOptions = (bootstrapData.subjectOptions || []).filter(subject => !remove.includes(subject));
+      syncSubjectOptionsFieldFromData();
+      renderSubjectBoxes();
     }
 
     function renderSubjectBoxes(prefill = null){
@@ -623,11 +744,14 @@
       if (!selectedSubjects.length) throw new Error('Select at least one subject.');
       const regId = (formData.targetMode === 'single') ? (formData.manualRegId.trim() || formData.selectedRegId.trim()) : '';
       if (formData.targetMode === 'single' && !regId) throw new Error('Select or type a student Registration ID.');
+      if (formData.targetMode === 'selected' && !selectedStudentIds.size) throw new Error('Check at least one student in the student list first.');
       if (!formData.examCode.trim()) throw new Error('Exam code is required.');
 
       const targets = formData.targetMode === 'all'
         ? bootstrapData.students.filter(s => s.active && !s.archived && !s.deleted).map(s => s.regId)
-        : [regId];
+        : (formData.targetMode === 'selected'
+          ? Array.from(selectedStudentIds)
+          : [regId]);
 
       const entries = [];
       targets.forEach(targetRegId => {
@@ -652,7 +776,7 @@
             term: formData.term,
             published: publishedEl ? publishedEl.value : 'false',
             viewActive: viewEl ? viewEl.value : 'false',
-            signatureUrl: formData.signatureUrl
+            signatureUrl: normalizeImageUrl(formData.signatureUrl)
           });
         });
       });
@@ -703,15 +827,17 @@
 
       $('studentsBody').innerHTML = rows.map(s => `
         <tr>
+          <td><input type="checkbox" ${selectedStudentIds.has(String(s.regId).toUpperCase()) ? 'checked' : ''} onchange="toggleStudentSelection('${esc(s.regId)}', this.checked)" /></td>
           <td>${esc(s.regId)}</td>
           <td>${esc(s.fullName)}</td>
-          <td>${esc(s.classLevel)}</td>
-          <td>${esc(s.category)}</td>
-          <td>${esc(s.parentEmail || '—')}<br>${esc(s.parentPhone || '')}</td>
+          <td>${esc(s.classLevel || '—')}</td>
+          <td>${esc(s.category || '—')}</td>
+          <td>${s.passportUrl ? `<img src="${esc(normalizeImageUrl(s.passportUrl))}" alt="Passport" class="logo-thumb" />` : '<span class="muted">No image</span>'}</td>
+          <td>${esc(s.parentEmail || '—')}<br><span class="muted small">${esc(s.parentPhone || '—')}</span></td>
           <td>${statusBadge(s)}</td>
           <td>
             <div class="actions">
-              <button class="btn btn-soft small-btn" onclick="editStudent('${esc(s.regId)}')">Edit</button>
+              <button class="btn btn-soft" onclick="editStudent('${esc(s.regId)}')">Edit</button>
               <button class="btn btn-soft" onclick="changeStudentState('${esc(s.regId)}','${s.active ? 'deactivate':'activate'}')">${s.active ? 'Deactivate':'Activate'}</button>
               <button class="btn btn-warn" onclick="changeStudentState('${esc(s.regId)}','${s.archived ? 'restore':'archive'}')">${s.archived ? 'Restore':'Archive'}</button>
               <button class="btn btn-danger" onclick="changeStudentState('${esc(s.regId)}','${s.deleted ? 'restore':'delete'}')">${s.deleted ? 'Restore':'Delete'}</button>
@@ -719,7 +845,8 @@
             </div>
           </td>
         </tr>
-      `).join('') || `<tr><td colspan="7" class="muted">No students found.</td></tr>`;
+      `).join('') || `<tr><td colspan="9" class="muted">No students found.</td></tr>`;
+      updateStudentSelectionInfo();
     }
 
     window.editStudent = function(regId){
@@ -837,22 +964,26 @@
     }
 
     function renderAdmins(){
-      $('adminsBody').innerHTML = bootstrapData.admins.map(a => `
+      const current = bootstrapData.currentAdmin || {};
+      $('adminsBody').innerHTML = bootstrapData.admins.map(a => {
+        const principalBadge = a.isPrincipal ? '<span class="tag" style="color:#dff8ff">Principal Admin</span>' : '<span class="tag">Sub-admin</span>';
+        const locked = !current.isPrincipal || a.isPrincipal;
+        return `
         <tr>
-          <td>${esc(a.username)}</td>
+          <td>${esc(a.username)}<br>${principalBadge}</td>
           <td>${esc(a.displayName)}</td>
           <td>${esc(a.email || '—')}<br>${esc(a.phone || '')}</td>
           <td>${statusBadge(a)}</td>
           <td>
             <div class="actions">
-              <button class="btn btn-soft" onclick="changeAdminState('${esc(a.username)}','${a.active ? 'deactivate':'activate'}')">${a.active ? 'Deactivate':'Activate'}</button>
-              <button class="btn btn-warn" onclick="changeAdminState('${esc(a.username)}','${a.archived ? 'restore':'archive'}')">${a.archived ? 'Restore':'Archive'}</button>
-              <button class="btn btn-danger" onclick="changeAdminState('${esc(a.username)}','${a.deleted ? 'restore':'delete'}')">${a.deleted ? 'Restore':'Delete'}</button>
-              <button class="btn btn-danger" onclick="changeAdminState('${esc(a.username)}','harddelete')">Delete Forever</button>
+              <button class="btn btn-soft" onclick="changeAdminState('${esc(a.username)}','${a.active ? 'deactivate':'activate'}')" ${locked ? 'disabled' : ''}>${a.active ? 'Deactivate':'Activate'}</button>
+              <button class="btn btn-warn" onclick="changeAdminState('${esc(a.username)}','${a.archived ? 'restore':'archive'}')" ${locked ? 'disabled' : ''}>${a.archived ? 'Restore':'Archive'}</button>
+              <button class="btn btn-danger" onclick="changeAdminState('${esc(a.username)}','${a.deleted ? 'restore':'delete'}')" ${locked ? 'disabled' : ''}>${a.deleted ? 'Restore':'Delete'}</button>
+              <button class="btn btn-danger" onclick="changeAdminState('${esc(a.username)}','harddelete')" ${locked ? 'disabled' : ''}>Delete Forever</button>
             </div>
           </td>
-        </tr>
-      `).join('') || `<tr><td colspan="5" class="muted">No admins found.</td></tr>`;
+        </tr>`;
+      }).join('') || `<tr><td colspan="5" class="muted">No admins found.</td></tr>`;
     }
 
     window.changeAdminState = async function(username, state){
@@ -869,8 +1000,7 @@
       const res = await apiRequest('getAdminBootstrap', {}, 'GET', 'Loading dashboard...');
       bootstrapData = res.data;
       $('welcomeText').textContent = `Signed in • ${res.data.settings.BRAND_NAME || 'Genz Edutech Innovations'}`;
-      $('studentClassLevel').value = $('studentClassLevel').value || '';
-      fillOptions($('studentCategory'), ['Lower Primary','Upper Primary','Junior High School','Senior High School','Undergraduate'], 'Select category');
+      $('studentCategory').innerHTML = `<option value="">Select category</option>` + (res.data.categoryOptions || []).map(opt => `<option value="${esc(opt)}">${esc(opt)}</option>`).join('');
       fillOptions($('resultRegIdSelect'), res.data.students.filter(s => !s.deleted).map(s => s.regId), 'Select student');
       $('resultAcademicSession').value = res.data.settings.ACADEMIC_SESSION || '';
       $('resultTerm').value = res.data.settings.TERM || '';
@@ -880,6 +1010,7 @@
       renderResults();
       renderAdmins();
       bindSettings();
+      syncSubjectOptionsFieldFromData();
     }
 
     function bindSettings(){
@@ -888,6 +1019,7 @@
         const field = form.querySelector(`[name="${key}"]`);
         if (field) field.value = bootstrapData.settings[key] ?? '';
       });
+      syncSubjectOptionsFieldFromData();
     }
 
     function activateSection(id){
@@ -898,7 +1030,8 @@
 
     function previewPassport(url){
       const box = $('passportPreview');
-      if (url && /^https?:\/\//i.test(url.trim())) box.innerHTML = `<img src="${esc(url)}" alt="Passport" />`;
+      const finalUrl = normalizeImageUrl(url);
+      if (finalUrl && /^https?:\/\//i.test(finalUrl.trim())) box.innerHTML = `<img src="${esc(finalUrl)}" alt="Passport" />`;
       else box.textContent = 'No image';
     }
 
@@ -979,6 +1112,9 @@
       previewPassport('');
     });
     $('passportUrlInput').addEventListener('input', e => previewPassport(e.target.value));
+    $('selectVisibleStudentsBtn').addEventListener('click', selectVisibleStudents);
+    $('clearStudentSelectionToolbarBtn').addEventListener('click', clearStudentSelection);
+    $('clearStudentSelectionBtn').addEventListener('click', clearStudentSelection);
 
     $('importStudentsBtn').addEventListener('click', async () => {
       try{
@@ -997,8 +1133,44 @@
       }
     });
 
+    $('applyPassportBtn').addEventListener('click', async () => {
+      try{
+        if (!selectedStudentIds.size) throw new Error('Check at least one student first.');
+        const res = await apiRequest('bulkUpdatePassports', {regIds:[...selectedStudentIds], passportUrl:$('bulkPassportUrl').value}, 'POST', 'Updating passport URLs...');
+        $('passportBulkStatus').textContent = `${res.message} Updated: ${res.data.updated}`;
+        $('passportBulkStatus').className = 'status ok';
+        showToast(res.message);
+        await loadBootstrap();
+      }catch(err){
+        $('passportBulkStatus').textContent = err.message;
+        $('passportBulkStatus').className = 'status error';
+        showToast(err.message, 'error');
+      }
+    });
+
+    $('importPassportCsvBtn').addEventListener('click', async () => {
+      try{
+        const file = $('passportCsvFile').files[0];
+        if (!file) throw new Error('Choose a passport CSV file first.');
+        const rows = parseCsv(await file.text());
+        const res = await apiRequest('importPassportsCsv', {rows}, 'POST', 'Importing passport URLs...');
+        $('passportBulkStatus').textContent = `${res.message} Updated: ${res.data.updated}`;
+        $('passportBulkStatus').className = 'status ok';
+        showToast(res.message);
+        await loadBootstrap();
+      }catch(err){
+        $('passportBulkStatus').textContent = err.message;
+        $('passportBulkStatus').className = 'status error';
+        showToast(err.message, 'error');
+      }
+    });
+
+    $('downloadPassportTemplateBtn').addEventListener('click', () => {
+      downloadText('student_passport_template.csv', 'regId,passportUrl\n');
+    });
+
     $('downloadStudentTemplateBtn').addEventListener('click', () => {
-      downloadText('student_template.csv', 'regId,password,fullName,schoolName,classLevel,category,age,gender,dob,parentName,parentPhone,parentEmail,state,cityLGA,address\n');
+      downloadText('student_template.csv', 'regId,password,fullName,schoolName,classLevel,category,age,gender,dob,parentName,parentPhone,parentEmail,state,cityLGA,address,passportUrl\n');
     });
 
     $('resultForm').addEventListener('submit', async e => {
@@ -1067,9 +1239,30 @@
     $('resultSearchTerm').addEventListener('input', renderResults);
     $('resultStateFilter').addEventListener('change', renderResults);
 
+    $('subadminForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      try{
+        const res = await apiRequest('adminSignup', serializeForm(e.target), 'POST', 'Creating sub-admin...');
+        $('subadminStatus').textContent = res.message;
+        $('subadminStatus').className = 'status ok';
+        showToast(res.message);
+        e.target.reset();
+        await loadBootstrap();
+      }catch(err){
+        $('subadminStatus').textContent = err.message;
+        $('subadminStatus').className = 'status error';
+        showToast(err.message, 'error');
+      }
+    });
+
+    $('addSubjectBtn').addEventListener('click', addSubjectOption);
+    $('deleteSelectedSubjectsBtn').addEventListener('click', deleteSelectedSubjects);
+    $('openSubjectPickerBtn').addEventListener('click', renderSubjectPicker);
+
     $('settingsForm').addEventListener('submit', async e => {
       e.preventDefault();
       try{
+        $('subjectOptionsField').value = (bootstrapData.subjectOptions || []).join(',');
         const res = await apiRequest('saveSettings', serializeForm(e.target), 'POST', 'Saving settings...');
         $('settingsStatus').textContent = res.message;
         $('settingsStatus').className = 'status ok';
@@ -1084,14 +1277,29 @@
 
     $('sendBulkEmailBtn').addEventListener('click', async () => {
       try{
+        const selected = $('bulkEmailTarget').value === 'students' ? [...selectedStudentIds] : [];
         const res = await apiRequest('sendBulkEmail', {
           target: $('bulkEmailTarget').value,
           subject: $('bulkEmailSubject').value,
-          message: $('bulkEmailMessage').value
+          message: $('bulkEmailMessage').value,
+          selected
         }, 'POST', 'Sending bulk email...');
         $('bulkEmailStatus').textContent = `${res.message} Recipients: ${res.data.recipients}`;
         $('bulkEmailStatus').className = 'status ok';
         showToast(res.message);
+      }catch(err){
+        $('bulkEmailStatus').textContent = err.message;
+        $('bulkEmailStatus').className = 'status error';
+        showToast(err.message, 'error');
+      }
+    });
+
+    $('checkMailAuthBtn').addEventListener('click', async () => {
+      try{
+        const res = await apiRequest('authorizeMailStatus', {}, 'POST', 'Checking mail permission...');
+        $('bulkEmailStatus').textContent = res.message;
+        $('bulkEmailStatus').className = 'status ' + (res.data.authorized ? 'ok' : 'error');
+        showToast(res.message, res.data.authorized ? 'success' : 'error');
       }catch(err){
         $('bulkEmailStatus').textContent = err.message;
         $('bulkEmailStatus').className = 'status error';
