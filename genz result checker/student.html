@@ -3,449 +3,516 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Student Result Portal | Genz Edutech Innovations</title>
+  <title>Student Portal | Genz Edutech Innovations</title>
   <style>
-    :root {
-      --bg: #07101d;
-      --panel: rgba(255,255,255,.1);
-      --panel-2: rgba(255,255,255,.06);
-      --border: rgba(255,255,255,.14);
-      --text: #ecf2ff;
-      --muted: #b9c5df;
-      --primary: #6f84ff;
-      --primary-2: #8cf1ff;
-      --success: #22c55e;
-      --danger: #fb7185;
-      --shadow: 0 20px 60px rgba(0,0,0,.35);
-      --radius: 20px;
+    :root{
+      --bg:#07111f;
+      --bg2:#0d1d34;
+      --card:rgba(255,255,255,0.12);
+      --line:rgba(255,255,255,0.14);
+      --text:#f3f7ff;
+      --muted:#c5d3ea;
+      --accent:#7c5cff;
+      --accent2:#2ec5ff;
+      --success:#27c48f;
+      --danger:#ff6b7a;
+      --shadow:0 20px 60px rgba(0,0,0,.28);
+      --radius:22px;
     }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: Inter, Arial, sans-serif;
-      color: var(--text);
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--text);
       background:
-        radial-gradient(circle at top left, rgba(111,132,255,.35), transparent 30%),
-        radial-gradient(circle at top right, rgba(140,241,255,.16), transparent 25%),
-        linear-gradient(135deg, #050913, #0b1322 45%, #0a1020);
+        radial-gradient(circle at top left, rgba(124,92,255,.28), transparent 35%),
+        radial-gradient(circle at bottom right, rgba(46,197,255,.20), transparent 35%),
+        linear-gradient(160deg, var(--bg), var(--bg2));
+      min-height:100vh;
     }
-    .container { width: min(1180px, calc(100% - 28px)); margin: 0 auto; }
-    .glass {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      backdrop-filter: blur(18px);
-      box-shadow: var(--shadow);
+    .wrap{max-width:1180px;margin:0 auto;padding:22px}
+    .glass{
+      background:var(--card);backdrop-filter:blur(18px);
+      border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
     }
-    .header { padding: 26px 0 20px; }
-    .intro { padding: 24px; }
-    .intro h1 { margin: 0 0 8px; font-size: clamp(1.8rem, 4vw, 3rem); }
-    .muted { color: var(--muted); }
-
-    .auth-wrap {
-      display: grid; grid-template-columns: 1fr .95fr; gap: 20px; margin-bottom: 20px;
+    .topbar{padding:16px 18px;margin-bottom:18px}
+    .brand{font-weight:800}
+    .muted{color:var(--muted)}
+    .auth-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    .card{padding:22px}
+    .tabs{display:flex;gap:10px;margin-bottom:16px}
+    .tab{
+      flex:1;padding:12px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.06);
+      color:var(--text);cursor:pointer;font-weight:700
     }
-    .panel { padding: 22px; }
-    .tabs { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
-    .tab-btn {
-      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); color: var(--text);
-      padding: 10px 14px; border-radius: 12px; cursor: pointer; font-weight: 700;
+    .tab.active{background:linear-gradient(135deg,var(--accent),var(--accent2));border-color:transparent}
+    .field{margin-bottom:14px}
+    label{display:block;margin-bottom:8px;font-size:14px;color:#e8f0ff}
+    input,select,textarea{
+      width:100%;padding:13px 14px;border-radius:14px;border:1px solid var(--line);
+      background:rgba(255,255,255,.07);color:var(--text);outline:none
     }
-    .tab-btn.active { background: rgba(111,132,255,.22); border-color: rgba(111,132,255,.35); }
-    .tab-panel { display: none; }
-    .tab-panel.active { display: block; }
-
-    .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
-    .form-grid.three { grid-template-columns: repeat(3, 1fr); }
-    .form-grid.one { grid-template-columns: 1fr; }
-    .field { display: grid; gap: 7px; }
-    .field label { font-size: .92rem; }
-    .field input, .field textarea, .field select {
-      width: 100%; padding: 13px 14px; border-radius: 14px; border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.07); color: white; outline: none; font: inherit;
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .row-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+    .btn{
+      border:none;border-radius:14px;padding:12px 16px;font-weight:700;cursor:pointer;
+      transition:.22s ease;display:inline-flex;align-items:center;justify-content:center;gap:8px
     }
-    .field textarea { min-height: 110px; resize: vertical; }
-    .btn {
-      appearance: none; border: none; cursor: pointer; color: white; text-decoration: none;
-      background: linear-gradient(135deg, var(--primary), #5b71ff); border-radius: 14px; padding: 12px 16px;
-      font-weight: 700; transition: transform .2s ease, opacity .2s ease, box-shadow .2s ease;
-      box-shadow: 0 12px 30px rgba(91,113,255,.35);
+    .btn:hover{transform:translateY(-1px)}
+    .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+    .btn-secondary{background:rgba(255,255,255,.07);color:var(--text);border:1px solid var(--line)}
+    .hidden{display:none !important}
+    .report-shell{display:grid;gap:18px}
+    .profile-card{padding:22px}
+    .report-card{padding:0;overflow:hidden}
+    .report-header{
+      padding:22px;background:linear-gradient(135deg, rgba(124,92,255,.28), rgba(46,197,255,.18));
+      border-bottom:1px solid rgba(255,255,255,.08)
     }
-    .btn:hover { transform: translateY(-2px); }
-    .btn.secondary { background: rgba(255,255,255,.08); box-shadow: none; border: 1px solid rgba(255,255,255,.12); }
-    .btn.success { background: linear-gradient(135deg, #22c55e, #16a34a); }
-    .actions-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
-
-    .list-card { background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 14px; }
-    .list-row { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px dashed rgba(255,255,255,.08); }
-    .list-row:last-child { border-bottom: none; }
-
-    .help-note {
-      margin-top: 14px; padding: 14px; border-radius: 14px; background: rgba(140,241,255,.06); border: 1px solid rgba(140,241,255,.16); color: #cffafe;
+    .report-body{padding:22px}
+    .school-title{font-size:28px;font-weight:900;margin:0 0 6px}
+    .sub{color:#e8f2ff}
+    .student-box{
+      display:grid;grid-template-columns:120px 1fr;gap:18px;margin-top:18px;align-items:start
     }
-
-    .report-area { display: none; padding: 0 0 50px; }
-    .report-toolbar {
-      display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 16px;
+    .avatar{
+      width:120px;height:140px;border-radius:18px;border:1px solid var(--line);
+      background:rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;overflow:hidden
     }
-    .report-card {
-      padding: 24px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.14); border-radius: 24px; box-shadow: var(--shadow);
+    .avatar img{width:100%;height:100%;object-fit:cover}
+    .info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .info-item{padding:12px 14px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:rgba(255,255,255,.05)}
+    .info-label{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#bfd0ea}
+    .info-value{font-weight:700;margin-top:4px}
+    .result-list{display:grid;gap:16px;margin-top:18px}
+    .result-item{
+      border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:18px;background:rgba(255,255,255,.05)
     }
-    .report-head {
-      display: grid; grid-template-columns: 110px 1fr; gap: 18px; align-items: center; padding-bottom: 18px; border-bottom: 1px dashed rgba(255,255,255,.16);
+    .result-top{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+    .result-title{font-size:20px;font-weight:800}
+    .pill{display:inline-block;padding:7px 12px;border-radius:999px;font-size:12px;font-weight:800}
+    .pass{background:rgba(39,196,143,.14);color:#d8fff0}
+    .fail{background:rgba(255,107,122,.14);color:#ffe3e7}
+    .score-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+    .score-box{padding:12px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08)}
+    .score-label{font-size:12px;color:#bfd0ea;text-transform:uppercase}
+    .score-value{font-size:20px;font-weight:900;margin-top:6px}
+    #toast{
+      position:fixed;right:18px;bottom:18px;z-index:1001;min-width:260px;max-width:360px;
+      padding:14px 16px;border-radius:16px;border:1px solid var(--line);backdrop-filter:blur(18px);
+      box-shadow:var(--shadow);display:none
     }
-    .passport {
-      width: 110px; height: 110px; border-radius: 20px; object-fit: cover; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
+    #toast.show{display:block}
+    .toast-success{background:rgba(39,196,143,.16);color:#eafff6}
+    .toast-error{background:rgba(255,107,122,.16);color:#fff1f3}
+    .overlay{
+      position:fixed;inset:0;background:rgba(4,11,22,.68);display:none;align-items:center;justify-content:center;
+      z-index:1000;backdrop-filter:blur(8px)
     }
-    .passport.placeholder { display: grid; place-items: center; font-weight: 800; }
-    .school-meta h2 { margin: 0 0 6px; font-size: 1.6rem; }
-    .school-meta p { margin: 4px 0; color: var(--muted); }
-    .student-grid {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 18px 0 20px;
+    .overlay.show{display:flex}
+    .loader-box{width:min(92vw,380px);padding:24px;text-align:center}
+    .spinner{
+      width:52px;height:52px;border-radius:50%;margin:0 auto 14px;
+      border:4px solid rgba(255,255,255,.15);border-top-color:#fff;animation:spin 1s linear infinite
     }
-    .info-box {
-      padding: 14px; border-radius: 16px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08);
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @media print{
+      body{background:#fff;color:#111}
+      .topbar, #authSection, .print-hide, #toast, .overlay{display:none !important}
+      .glass{background:#fff !important;border:1px solid #ddd !important;box-shadow:none !important}
+      .report-header{background:#f5f7fb !important;color:#111}
+      .result-item,.score-box,.info-item{background:#fff !important}
     }
-    .info-box small { display: block; color: var(--muted); margin-bottom: 6px; }
-    .result-block {
-      margin-top: 16px; padding: 18px; border-radius: 18px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08);
-    }
-    .result-top {
-      display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 14px;
-    }
-    .score-grid {
-      display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
-    }
-    .score-box {
-      padding: 14px; border-radius: 16px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.08);
-    }
-    .score-box small { display: block; color: var(--muted); margin-bottom: 5px; }
-    .score-box strong { font-size: 1.1rem; }
-    .comment-box {
-      margin-top: 14px; padding: 14px; border-radius: 16px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08);
-    }
-    .status-pill {
-      display: inline-flex; align-items: center; justify-content: center; min-width: 90px;
-      padding: 8px 12px; border-radius: 999px; font-weight: 800; font-size: .82rem;
-    }
-    .status-pass { color: #bbf7d0; background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.25); }
-    .status-fail { color: #fecdd3; background: rgba(251,113,133,.12); border: 1px solid rgba(251,113,133,.25); }
-
-    .loading {
-      position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
-      background: rgba(2,6,23,.65); backdrop-filter: blur(8px); z-index: 100;
-    }
-    .loading.active { display: flex; }
-    .loading-box {
-      width: min(360px, calc(100% - 32px)); padding: 26px; text-align: center;
-      background: rgba(9,14,27,.86); border: 1px solid rgba(255,255,255,.12); border-radius: 22px; box-shadow: var(--shadow);
-    }
-    .spinner {
-      width: 58px; height: 58px; border-radius: 50%; margin: 0 auto 16px;
-      border: 4px solid rgba(255,255,255,.12); border-top-color: var(--primary-2); animation: spin 1s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .toast-wrap { position: fixed; top: 16px; right: 16px; z-index: 120; display: grid; gap: 10px; width: min(360px, calc(100% - 24px)); }
-    .toast { padding: 14px 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,.12); box-shadow: var(--shadow); background: rgba(9,14,27,.92); color: white; }
-    .toast.success { border-color: rgba(74,222,128,.28); }
-    .toast.error { border-color: rgba(251,113,133,.28); }
-
-    @media print {
-      body { background: white; color: #111827; }
-      .no-print, .loading, .toast-wrap { display: none !important; }
-      .report-card, .result-block, .info-box, .score-box, .comment-box { box-shadow: none !important; background: white !important; color: #111827 !important; border: 1px solid #d1d5db !important; }
-      .muted, .school-meta p, .info-box small, .score-box small { color: #4b5563 !important; }
-    }
-
-    @media (max-width: 1020px) {
-      .auth-wrap { grid-template-columns: 1fr; }
-      .student-grid { grid-template-columns: 1fr 1fr; }
-      .score-grid, .form-grid.three { grid-template-columns: 1fr 1fr; }
-    }
-    @media (max-width: 680px) {
-      .form-grid, .form-grid.three, .student-grid, .score-grid { grid-template-columns: 1fr; }
-      .report-head { grid-template-columns: 1fr; }
-      .actions-row .btn { width: 100%; }
+    @media (max-width:980px){
+      .auth-grid,.row,.row-3,.student-box,.info-grid,.score-grid{grid-template-columns:1fr}
     }
   </style>
 </head>
 <body>
-  <div class="loading" id="loadingOverlay">
-    <div class="loading-box">
+  <div class="wrap">
+    <div class="glass topbar">
+      <div class="brand">Genz Edutech Innovations</div>
+      <div class="muted">Student Result Portal</div>
+    </div>
+
+    <section id="authSection" class="auth-grid">
+      <div class="glass card">
+        <div class="tabs">
+          <button class="tab active" data-auth-tab="login">Student Login</button>
+          <button class="tab" data-auth-tab="signup">Student Signup</button>
+        </div>
+
+        <form id="loginForm">
+          <h2 style="margin:0 0 10px">Check your result</h2>
+          <p class="muted">Use your Registration ID and password to open your published report.</p>
+          <div class="field">
+            <label>Registration ID</label>
+            <input name="regId" placeholder="Enter Registration ID" required />
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input type="password" name="password" placeholder="Enter password" required />
+          </div>
+          <button class="btn btn-primary" type="submit" style="width:100%">Load Result</button>
+        </form>
+
+        <form id="signupForm" class="hidden">
+          <h2 style="margin:0 0 10px">Create student account</h2>
+          <div class="row">
+            <div class="field"><label>Registration ID</label><input name="regId" required /></div>
+            <div class="field"><label>Password</label><input name="password" type="password" required /></div>
+          </div>
+          <div class="row">
+            <div class="field"><label>Full Name</label><input name="fullName" required /></div>
+            <div class="field"><label>School Name</label><input name="schoolName" required /></div>
+          </div>
+          <div class="row-3">
+            <div class="field"><label>Age</label><input name="age" /></div>
+            <div class="field"><label>Gender</label><input name="gender" /></div>
+            <div class="field"><label>DOB</label><input name="dob" type="date" /></div>
+          </div>
+          <div class="row">
+            <div class="field"><label>Parent Name</label><input name="parentName" /></div>
+            <div class="field"><label>Parent Phone</label><input name="parentPhone" /></div>
+          </div>
+          <div class="row">
+            <div class="field"><label>Parent Email</label><input name="parentEmail" type="email" /></div>
+            <div class="field"><label>State</label><input name="state" /></div>
+          </div>
+          <div class="row-3">
+            <div class="field"><label>City / LGA</label><input name="cityLGA" /></div>
+            <div class="field"><label>Class Level</label><input name="classLevel" required /></div>
+            <div class="field"><label>Category</label><input name="category" /></div>
+          </div>
+          <div class="field">
+            <label>Address</label>
+            <input name="address" />
+          </div>
+          <button class="btn btn-primary" type="submit" style="width:100%">Create Student Account</button>
+        </form>
+      </div>
+
+      <div class="glass card">
+        <h2 style="margin:0 0 10px">Before you test</h2>
+        <p class="muted">
+          Make sure the Apps Script web app has been deployed as <strong>Anyone</strong> and that the real
+          <strong>/exec</strong> URL has been pasted into the WEB_APP_URL constant below.
+        </p>
+        <div class="glass" style="padding:18px;margin-top:16px">
+          <strong>Important</strong>
+          <p class="muted">Students will only see results where <strong>Published = true</strong>. If a result does not appear, check the Published value from the admin portal.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="reportSection" class="hidden report-shell">
+      <div class="glass profile-card print-hide" style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap">
+        <div>
+          <div style="font-weight:900;font-size:22px">Student Result Loaded</div>
+          <div class="muted">Review your published report blocks below.</div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-secondary" id="backBtn">Back to Login</button>
+          <button class="btn btn-primary" id="printBtn">Print / Download PDF</button>
+        </div>
+      </div>
+
+      <div class="glass report-card">
+        <div class="report-header">
+          <div class="school-title" id="brandName">Genz Edutech Innovations</div>
+          <div class="sub" id="schoolName">Result Portal</div>
+          <div class="sub" id="schoolAddress"></div>
+          <div class="sub"><span id="schoolPhone"></span> <span id="schoolEmail"></span></div>
+        </div>
+
+        <div class="report-body">
+          <div class="student-box">
+            <div class="avatar" id="passportBox">No Passport</div>
+            <div>
+              <div class="info-grid" id="studentInfoGrid"></div>
+            </div>
+          </div>
+
+          <div class="result-list" id="resultList"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div class="overlay" id="overlay">
+    <div class="glass loader-box">
       <div class="spinner"></div>
-      <div id="loadingText" style="font-weight:800; font-size:1.05rem; margin-bottom:6px;">Loading...</div>
-      <div class="muted">Please wait while we process your request.</div>
+      <div id="overlayText" style="font-weight:800;font-size:18px">Loading...</div>
+      <div class="muted" style="margin-top:6px">Please wait</div>
     </div>
   </div>
-  <div class="toast-wrap" id="toastWrap"></div>
 
-  <main class="container">
-    <section class="header">
-      <div class="glass intro">
-        <h1>Student result portal</h1>
-        <p class="muted">Sign up or log in with your Registration ID and password to view your published results in a clean report-card format.</p>
-      </div>
-    </section>
-
-    <section class="auth-wrap no-print" id="authSection">
-      <div class="glass panel">
-        <div class="tabs">
-          <button class="tab-btn active" data-tab-target="studentLoginTab">Student Login</button>
-          <button class="tab-btn" data-tab-target="studentSignupTab">Student Signup</button>
-        </div>
-
-        <div class="tab-panel active" id="studentLoginTab">
-          <form id="studentLoginForm">
-            <div class="form-grid one">
-              <div class="field"><label>Registration ID</label><input name="regId" required /></div>
-              <div class="field"><label>Password</label><input type="password" name="password" required /></div>
-            </div>
-            <div class="actions-row"><button class="btn" type="submit">Log In</button></div>
-          </form>
-        </div>
-
-        <div class="tab-panel" id="studentSignupTab">
-          <form id="studentSignupForm">
-            <div class="form-grid three">
-              <div class="field"><label>Registration ID</label><input name="RegID" required /></div>
-              <div class="field"><label>Password</label><input type="password" name="Password" required /></div>
-              <div class="field"><label>Full Name</label><input name="FullName" required /></div>
-              <div class="field"><label>Age</label><input name="Age" /></div>
-              <div class="field"><label>Gender</label><input name="Gender" /></div>
-              <div class="field"><label>Date of Birth</label><input name="DOB" type="date" /></div>
-              <div class="field"><label>Parent Name</label><input name="ParentName" /></div>
-              <div class="field"><label>Parent Phone</label><input name="ParentPhone" /></div>
-              <div class="field"><label>Parent Email</label><input type="email" name="ParentEmail" /></div>
-              <div class="field"><label>School Name</label><input name="SchoolName" /></div>
-              <div class="field"><label>State</label><input name="State" /></div>
-              <div class="field"><label>City / LGA</label><input name="CityLGA" /></div>
-              <div class="field"><label>Class Level</label><input name="ClassLevel" /></div>
-              <div class="field"><label>Category</label><input name="Category" /></div>
-            </div>
-            <div class="field" style="margin-top:14px;"><label>Address</label><textarea name="Address"></textarea></div>
-            <div class="actions-row"><button class="btn success" type="submit">Create Student Account</button></div>
-          </form>
-        </div>
-      </div>
-
-      <div class="glass panel">
-        <h2 style="margin-top:0;">Portal guide</h2>
-        <div class="list-card">
-          <div class="list-row"><span>Login format</span><strong>Registration ID + Password</strong></div>
-          <div class="list-row"><span>Visible results</span><strong>Published results only</strong></div>
-          <div class="list-row"><span>Printable</span><strong>Yes, browser print to PDF</strong></div>
-        </div>
-        <div class="help-note">Replace the <strong>WEB_APP_URL</strong> constant in this file with your deployed Apps Script <strong>/exec</strong> URL.</div>
-      </div>
-    </section>
-
-    <section class="report-area" id="reportArea">
-      <div class="report-toolbar no-print">
-        <div>
-          <div style="font-weight:800; font-size:1.1rem;">Published Results</div>
-          <div class="muted">Only approved published results are displayed.</div>
-        </div>
-        <div class="actions-row" style="margin-top:0;">
-          <button class="btn secondary" id="printBtn" type="button">Print / Download PDF</button>
-          <button class="btn secondary" id="logoutBtn" type="button">Log Out</button>
-        </div>
-      </div>
-      <div id="reportCard" class="report-card"></div>
-    </section>
-  </main>
+  <div id="toast"></div>
 
   <script>
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwTnf8fxSM56pTLXIw5deMGCPulj76fNoEF-geUhQlP00Wfkl-dnbKwPCBqv2oabARlXg/exec';
+    const WEB_APP_URL = 'PASTE_YOUR_APPS_SCRIPT_EXEC_URL_HERE';
 
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.tab-btn').forEach(x => x.classList.remove('active'));
-        document.querySelectorAll('.tab-panel').forEach(x => x.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById(btn.dataset.tabTarget).classList.add('active');
-      });
-    });
+    const overlay = document.getElementById('overlay');
+    const overlayText = document.getElementById('overlayText');
+    const toast = document.getElementById('toast');
+    const authSection = document.getElementById('authSection');
+    const reportSection = document.getElementById('reportSection');
 
-    function showLoading(text = 'Loading...') {
-      document.getElementById('loadingText').textContent = text;
-      document.getElementById('loadingOverlay').classList.add('active');
+    function showLoading(text){
+      overlayText.textContent = text || 'Loading...';
+      overlay.classList.add('show');
     }
-    function hideLoading() {
-      document.getElementById('loadingOverlay').classList.remove('active');
+    function hideLoading(){
+      overlay.classList.remove('show');
     }
-    function toast(message, type = 'success') {
-      const wrap = document.getElementById('toastWrap');
-      const el = document.createElement('div');
-      el.className = `toast ${type}`;
-      el.textContent = message;
-      wrap.appendChild(el);
-      setTimeout(() => el.remove(), 4200);
+    function showToast(message, type='success'){
+      toast.textContent = message;
+      toast.className = '';
+      toast.id = 'toast';
+      toast.classList.add('show', type === 'error' ? 'toast-error' : 'toast-success');
+      setTimeout(() => toast.classList.remove('show'), 3500);
     }
 
-    function buildQuery(params) {
-      return Object.keys(params)
-        .filter(k => params[k] !== undefined && params[k] !== null)
-        .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(params[k])}`)
-        .join('&');
-    }
-
-    function api(action, payload = {}, loadingText = 'Loading...') {
+    function jsonpRequest(params = {}, loadingText = 'Loading...'){
       return new Promise((resolve, reject) => {
-        if (!WEB_APP_URL || WEB_APP_URL.includes('PASTE_YOUR')) {
-          reject(new Error('Please replace WEB_APP_URL in student.html with your Apps Script /exec URL.'));
+        if (!WEB_APP_URL || WEB_APP_URL.includes('PASTE_YOUR_APPS_SCRIPT_EXEC_URL_HERE')) {
+          reject(new Error('Please paste your Apps Script /exec URL into WEB_APP_URL first.'));
           return;
         }
-        showLoading(loadingText);
-        const callbackName = `jsonp_cb_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
-        const script = document.createElement('script');
 
-        window[callbackName] = response => {
+        showLoading(loadingText);
+
+        const callbackName = 'jsonp_cb_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+        const script = document.createElement('script');
+        const url = new URL(WEB_APP_URL);
+
+        Object.keys(params).forEach(key => {
+          if (params[key] !== undefined && params[key] !== null) {
+            url.searchParams.set(key, params[key]);
+          }
+        });
+        url.searchParams.set('callback', callbackName);
+
+        const timeout = setTimeout(() => {
           cleanup();
+          hideLoading();
+          reject(new Error('Connection failed: timeout while contacting backend.'));
+        }, 25000);
+
+        function cleanup(){
+          clearTimeout(timeout);
+          if (script.parentNode) script.parentNode.removeChild(script);
+          try { delete window[callbackName]; } catch (err) { window[callbackName] = undefined; }
+        }
+
+        window[callbackName] = function(response){
+          cleanup();
+          hideLoading();
+          if (!response) {
+            reject(new Error('Empty response from backend.'));
+            return;
+          }
+          if (response.ok === false) {
+            reject(new Error(response.message || 'Backend returned an error.'));
+            return;
+          }
           resolve(response);
         };
 
-        function cleanup() {
-          hideLoading();
-          if (script.parentNode) script.parentNode.removeChild(script);
-          try { delete window[callbackName]; } catch (e) { window[callbackName] = undefined; }
-        }
-
-        script.onerror = () => {
+        script.onerror = function(){
           cleanup();
-          reject(new Error('Backend cannot be reached. Confirm your Apps Script is deployed as a Web App, access is set to Anyone, and WEB_APP_URL is correct.'));
+          hideLoading();
+          reject(new Error('Connection failed: Network error — check your WEB_APP_URL or Apps Script deployment.'));
         };
 
-        script.src = `${WEB_APP_URL}?${buildQuery(Object.assign({}, payload, { action, callback: callbackName }))}`;
+        script.src = url.toString();
         document.body.appendChild(script);
       });
     }
 
-    function serializeForm(form) {
-      const data = {};
-      new FormData(form).forEach((value, key) => data[key] = value.trim());
-      return data;
+    function serializeForm(form){
+      const fd = new FormData(form);
+      const obj = {};
+      for (const [key, value] of fd.entries()) obj[key] = value;
+      return obj;
     }
 
-    function escapeHtml(value) {
-      return String(value ?? '')
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
+    function setAuthTab(tabName){
+      document.querySelectorAll('[data-auth-tab]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.authTab === tabName);
+      });
+      document.getElementById('loginForm').classList.toggle('hidden', tabName !== 'login');
+      document.getElementById('signupForm').classList.toggle('hidden', tabName !== 'signup');
     }
 
-    function statusClass(status) {
-      return String(status).toUpperCase() === 'PASS' ? 'status-pass' : 'status-fail';
-    }
+    document.querySelectorAll('[data-auth-tab]').forEach(btn => {
+      btn.addEventListener('click', () => setAuthTab(btn.dataset.authTab));
+    });
 
-    function showReportArea(show) {
-      document.getElementById('authSection').style.display = show ? 'none' : 'grid';
-      document.getElementById('reportArea').style.display = show ? 'block' : 'none';
-    }
+    document.getElementById('signupForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      const data = serializeForm(this);
+      jsonpRequest({
+        action: 'studentSignup',
+        ...data
+      }, 'Creating student account...')
+      .then(res => {
+        showToast(res.message || 'Student account created.');
+        this.reset();
+        setAuthTab('login');
+      })
+      .catch(err => showToast(err.message, 'error'));
+    });
 
-    function renderReport(data) {
-      const settings = data.settings || {};
-      const student = data.student || {};
-      const results = data.results || [];
-      const showPosition = String(settings.SHOW_POSITION_ON_REPORT).toLowerCase() === 'true';
-      const passportHtml = student.passportUrl
-        ? `<img class="passport" src="${escapeHtml(student.passportUrl)}" alt="Passport" />`
-        : `<div class="passport placeholder">No Photo</div>`;
+    document.getElementById('loginForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      const data = serializeForm(this);
+      jsonpRequest({
+        action: 'studentLogin',
+        regId: data.regId,
+        password: data.password
+      }, 'Loading result...')
+      .then(res => {
+        renderReport(res.settings || {}, res.student || {}, res.results || []);
+        authSection.classList.add('hidden');
+        reportSection.classList.remove('hidden');
+        showToast(res.message || 'Result loaded.');
+      })
+      .catch(err => showToast(err.message, 'error'));
+    });
 
-      const resultHtml = results.length ? results.map(result => `
-        <div class="result-block">
+    document.getElementById('backBtn').addEventListener('click', function(){
+      reportSection.classList.add('hidden');
+      authSection.classList.remove('hidden');
+    });
+
+    document.getElementById('printBtn').addEventListener('click', function(){
+      window.print();
+    });
+
+    function renderReport(settings, student, results){
+      document.getElementById('brandName').textContent = settings.BRAND_NAME || 'Genz Edutech Innovations';
+      document.getElementById('schoolName').textContent = settings.SCHOOL_NAME || 'Result Portal';
+      document.getElementById('schoolAddress').textContent = settings.HEAD_OFFICE_ADDRESS || '';
+      document.getElementById('schoolPhone').textContent = settings.SCHOOL_PHONE || '';
+      document.getElementById('schoolEmail').textContent = settings.SCHOOL_EMAIL || '';
+
+      const passportBox = document.getElementById('passportBox');
+      if (student.passportUrl) {
+        passportBox.innerHTML = `<img src="${escapeAttribute(student.passportUrl)}" alt="Passport" />`;
+      } else {
+        passportBox.textContent = 'No Passport';
+      }
+
+      const showPosition = String(settings.SHOW_POSITION_ON_REPORT || 'true').toLowerCase() === 'true';
+
+      const info = [
+        ['Full Name', student.fullName],
+        ['Registration ID', student.regId],
+        ['Class Level', student.classLevel],
+        ['Category', student.category],
+        ['School Name', student.schoolName],
+        ['Gender', student.gender],
+        ['Age', student.age],
+        ['Date of Birth', student.dob],
+        ['Parent Name', student.parentName],
+        ['Parent Phone', student.parentPhone],
+        ['Parent Email', student.parentEmail],
+        ['State', student.state],
+        ['City / LGA', student.cityLGA],
+        ['Address', student.address]
+      ];
+
+      document.getElementById('studentInfoGrid').innerHTML = info.map(item => `
+        <div class="info-item">
+          <div class="info-label">${escapeHtml(item[0])}</div>
+          <div class="info-value">${escapeHtml(item[1] || '—')}</div>
+        </div>
+      `).join('');
+
+      const resultList = document.getElementById('resultList');
+      if (!results.length) {
+        resultList.innerHTML = `
+          <div class="result-item">
+            <div class="result-title">No published result found</div>
+            <p class="muted">Your account is active, but no published result has been made available yet.</p>
+          </div>
+        `;
+        return;
+      }
+
+      resultList.innerHTML = results.map(result => `
+        <div class="result-item">
           <div class="result-top">
             <div>
-              <div style="font-weight:800; font-size:1.05rem;">${escapeHtml(result.examTitle)}</div>
-              <div class="muted">${escapeHtml(result.academicSession || settings.ACADEMIC_SESSION || '')} • ${escapeHtml(result.term || settings.TERM || '')} • ${escapeHtml(result.examDate || '')}</div>
+              <div class="result-title">${escapeHtml(result.examTitle || 'Result')}</div>
+              <div class="muted">${escapeHtml(result.academicSession || '')} ${escapeHtml(result.term || '')} ${result.examDate ? '• ' + escapeHtml(result.examDate) : ''}</div>
             </div>
-            <div class="status-pill ${statusClass(result.status)}">${escapeHtml(result.status)}</div>
+            <div><span class="pill ${String(result.status).toUpperCase() === 'PASS' ? 'pass' : 'fail'}">${escapeHtml(result.status || '')}</span></div>
           </div>
 
           <div class="score-grid">
-            <div class="score-box"><small>Score</small><strong>${escapeHtml(result.studentScore)}</strong></div>
-            <div class="score-box"><small>Percentage</small><strong>${escapeHtml(result.percentage)}%</strong></div>
-            <div class="score-box"><small>Pass Mark</small><strong>${escapeHtml(result.passMarkNumber)} / ${escapeHtml(result.passMarkPercentage)}%</strong></div>
-            <div class="score-box"><small>Grade</small><strong>${escapeHtml(result.grade)}</strong></div>
-            <div class="score-box"><small>${showPosition ? 'Position' : 'Max Score'}</small><strong>${showPosition ? escapeHtml(result.position || '—') : escapeHtml(result.maxScore)}</strong></div>
+            <div class="score-box">
+              <div class="score-label">Score</div>
+              <div class="score-value">${escapeHtml(String(result.studentScore ?? ''))}</div>
+            </div>
+            <div class="score-box">
+              <div class="score-label">Percentage</div>
+              <div class="score-value">${escapeHtml(String(result.percentage ?? ''))}%</div>
+            </div>
+            <div class="score-box">
+              <div class="score-label">Grade</div>
+              <div class="score-value">${escapeHtml(result.grade || '')}</div>
+            </div>
+            <div class="score-box">
+              <div class="score-label">Pass Mark</div>
+              <div class="score-value">${escapeHtml(String(result.passMarkPercentage ?? ''))}%</div>
+            </div>
           </div>
 
-          <div class="comment-box">
-            <div><strong>Remark:</strong> ${escapeHtml(result.remark || '—')}</div>
-            <div style="margin-top:8px;"><strong>Teacher Comment:</strong> ${escapeHtml(result.teacherComment || '—')}</div>
+          <div class="info-grid" style="margin-top:14px">
+            <div class="info-item">
+              <div class="info-label">Remark</div>
+              <div class="info-value">${escapeHtml(result.remark || '—')}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Teacher Comment</div>
+              <div class="info-value">${escapeHtml(result.teacherComment || '—')}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Max Score</div>
+              <div class="info-value">${escapeHtml(String(result.maxScore ?? ''))}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Pass Mark Number</div>
+              <div class="info-value">${escapeHtml(String(result.passMarkNumber ?? ''))}</div>
+            </div>
+            ${showPosition ? `
+            <div class="info-item">
+              <div class="info-label">Position</div>
+              <div class="info-value">${escapeHtml(result.position || '—')}</div>
+            </div>` : ''}
           </div>
         </div>
-      `).join('') : `<div class="result-block"><div class="muted">No published result is available for this student yet.</div></div>`;
-
-      document.getElementById('reportCard').innerHTML = `
-        <div class="report-head">
-          ${passportHtml}
-          <div class="school-meta">
-            <h2>${escapeHtml(settings.BRAND_NAME || 'Genz Edutech Innovations')}</h2>
-            <p><strong>${escapeHtml(settings.SCHOOL_NAME || 'Result Portal')}</strong></p>
-            <p>${escapeHtml(settings.HEAD_OFFICE_ADDRESS || '')}</p>
-            <p>${escapeHtml(settings.SCHOOL_PHONE || '')} ${settings.SCHOOL_PHONE && settings.SCHOOL_EMAIL ? '•' : ''} ${escapeHtml(settings.SCHOOL_EMAIL || '')}</p>
-            <p>Principal: ${escapeHtml(settings.PRINCIPAL_NAME || '')}</p>
-          </div>
-        </div>
-
-        <div class="student-grid">
-          <div class="info-box"><small>Full Name</small><strong>${escapeHtml(student.fullName || '')}</strong></div>
-          <div class="info-box"><small>Registration ID</small><strong>${escapeHtml(student.regId || '')}</strong></div>
-          <div class="info-box"><small>Class Level</small><strong>${escapeHtml(student.classLevel || '')}</strong></div>
-          <div class="info-box"><small>Category</small><strong>${escapeHtml(student.category || '')}</strong></div>
-          <div class="info-box"><small>Age / Gender</small><strong>${escapeHtml(student.age || '')} ${student.age && student.gender ? '/' : ''} ${escapeHtml(student.gender || '')}</strong></div>
-          <div class="info-box"><small>Date of Birth</small><strong>${escapeHtml(student.dob || '')}</strong></div>
-          <div class="info-box"><small>Parent Name</small><strong>${escapeHtml(student.parentName || '')}</strong></div>
-          <div class="info-box"><small>Parent Phone</small><strong>${escapeHtml(student.parentPhone || '')}</strong></div>
-          <div class="info-box"><small>Parent Email</small><strong>${escapeHtml(student.parentEmail || '')}</strong></div>
-          <div class="info-box"><small>School Name</small><strong>${escapeHtml(student.schoolName || '')}</strong></div>
-          <div class="info-box"><small>State / City-LGA</small><strong>${escapeHtml(student.state || '')} ${student.state && student.cityLga ? '/' : ''} ${escapeHtml(student.cityLga || '')}</strong></div>
-          <div class="info-box"><small>Address</small><strong>${escapeHtml(student.address || '')}</strong></div>
-        </div>
-
-        ${resultHtml}
-      `;
+      `).join('');
     }
 
-    document.getElementById('studentSignupForm').addEventListener('submit', async e => {
-      e.preventDefault();
-      const payload = serializeForm(e.target);
-      try {
-        const res = await api('studentSignup', payload, 'Creating student account...');
-        if (!res.success) throw new Error(res.error || 'Student signup failed.');
-        toast(res.data.message || 'Student account created.', 'success');
-        e.target.reset();
-        document.querySelector('[data-tab-target="studentLoginTab"]').click();
-      } catch (err) {
-        toast(err.message, 'error');
-      }
-    });
+    function escapeHtml(value){
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
 
-    document.getElementById('studentLoginForm').addEventListener('submit', async e => {
-      e.preventDefault();
-      const payload = serializeForm(e.target);
-      try {
-        const res = await api('studentLogin', payload, 'Loading result...');
-        if (!res.success) throw new Error(res.error || 'Student login failed.');
-        renderReport(res.data);
-        showReportArea(true);
-        toast('Result loaded successfully.', 'success');
-      } catch (err) {
-        toast(err.message, 'error');
-      }
-    });
-
-    document.getElementById('printBtn').addEventListener('click', () => window.print());
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-      document.getElementById('studentLoginForm').reset();
-      showReportArea(false);
-      toast('Logged out successfully.', 'success');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+    function escapeAttribute(value){
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
   </script>
 </body>
 </html>
