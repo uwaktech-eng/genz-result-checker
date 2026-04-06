@@ -6,383 +6,494 @@
   <title>Admin Portal | Genz Edutech Innovations</title>
   <style>
     :root{
-      --bg:#07111f;
-      --bg2:#0d1d34;
-      --card:rgba(255,255,255,0.12);
-      --line:rgba(255,255,255,0.14);
-      --text:#f3f7ff;
-      --muted:#c5d3ea;
-      --accent:#7c5cff;
-      --accent2:#2ec5ff;
-      --success:#27c48f;
-      --danger:#ff6b7a;
-      --warn:#ffcf5d;
-      --shadow:0 20px 60px rgba(0,0,0,.28);
-      --radius:22px;
+      --bg:#0b1220;--bg2:#111b31;--panel:rgba(255,255,255,.10);--panel2:rgba(255,255,255,.07);--line:rgba(255,255,255,.12);
+      --text:#f4f8ff;--muted:#b8c7de;--primary:#6f63ff;--primary2:#22c7ff;--success:#19b47a;--danger:#ff6f86;--warn:#ffb84c;
+      --shadow:0 24px 60px rgba(0,0,0,.28);--radius:22px
     }
     *{box-sizing:border-box}
-    html{scroll-behavior:smooth}
-    body{
-      margin:0;
-      font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(124,92,255,.28), transparent 35%),
-        radial-gradient(circle at bottom right, rgba(46,197,255,.20), transparent 35%),
-        linear-gradient(160deg, var(--bg), var(--bg2));
-      min-height:100vh;
-    }
-    .wrap{max-width:1180px;margin:0 auto;padding:22px}
-    .glass{
-      background:var(--card);backdrop-filter:blur(18px);
-      border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
-    }
-    .topbar{
-      display:flex;justify-content:space-between;align-items:center;gap:16px;
-      padding:15px 18px;margin-bottom:18px
-    }
-    .brand{font-weight:800}
-    .muted{color:var(--muted)}
-    .btn{
-      border:none;border-radius:14px;padding:12px 16px;font-weight:700;cursor:pointer;
-      transition:.22s ease;display:inline-flex;align-items:center;justify-content:center;gap:8px
-    }
+    body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:
+      radial-gradient(circle at top left, rgba(111,99,255,.22), transparent 30%),
+      radial-gradient(circle at top right, rgba(34,199,255,.16), transparent 28%),
+      linear-gradient(160deg,var(--bg),var(--bg2));color:var(--text);min-height:100vh}
+    a{color:inherit}
+    .hidden{display:none!important}
+    .btn{border:none;border-radius:14px;padding:12px 16px;font-weight:700;cursor:pointer;transition:.2s ease;display:inline-flex;align-items:center;justify-content:center;gap:8px}
     .btn:hover{transform:translateY(-1px)}
-    .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
-    .btn-secondary{background:rgba(255,255,255,.07);color:var(--text);border:1px solid var(--line)}
-    .btn-danger{background:rgba(255,107,122,.12);color:#ffd9de;border:1px solid rgba(255,107,122,.2)}
-    .grid{display:grid;gap:18px}
-    .auth{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
-    .card{padding:22px}
-    .tabs{display:flex;gap:10px;margin-bottom:16px}
-    .tab{
-      flex:1;padding:12px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.06);
-      color:var(--text);cursor:pointer;font-weight:700
-    }
-    .tab.active{background:linear-gradient(135deg,var(--accent),var(--accent2));border-color:transparent}
+    .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff}
+    .btn-soft{background:rgba(255,255,255,.08);border:1px solid var(--line);color:var(--text)}
+    .btn-success{background:rgba(25,180,122,.18);border:1px solid rgba(25,180,122,.28);color:#dbfff1}
+    .btn-danger{background:rgba(255,111,134,.16);border:1px solid rgba(255,111,134,.25);color:#ffe9ee}
+    .btn-warn{background:rgba(255,184,76,.16);border:1px solid rgba(255,184,76,.28);color:#fff4de}
+    .shell{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+    .sidebar{background:rgba(8,14,28,.78);backdrop-filter:blur(20px);border-right:1px solid var(--line);padding:18px;position:sticky;top:0;height:100vh;overflow:auto}
+    .brand{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+    .brand-badge{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,var(--primary),var(--primary2))}
+    .brand h1{margin:0;font-size:1.08rem}
+    .brand p{margin:3px 0 0;color:var(--muted);font-size:13px}
+    .nav-group{margin-top:20px}
+    .nav-title{font-size:12px;text-transform:uppercase;color:#93a9c7;letter-spacing:.08em;margin-bottom:8px}
+    .nav-btn{width:100%;text-align:left;background:transparent;color:var(--text);border:1px solid transparent;padding:12px 14px;border-radius:14px;margin-bottom:8px;cursor:pointer;font-weight:700}
+    .nav-btn.active,.nav-btn:hover{background:rgba(255,255,255,.08);border-color:var(--line)}
+    .content{padding:22px}
+    .topbar{display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+    .hamburger{display:none;width:46px;height:46px;border-radius:14px}
+    .glass{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);backdrop-filter:blur(18px);box-shadow:var(--shadow)}
+    .card{padding:20px}
+    .auth-shell{max-width:1060px;margin:26px auto;padding:18px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .panel-title{margin:0 0 8px;font-size:1.12rem}
+    .muted{color:var(--muted)}
     .field{margin-bottom:14px}
-    label{display:block;margin-bottom:8px;font-size:14px;color:#e8f0ff}
-    input,select,textarea{
-      width:100%;padding:13px 14px;border-radius:14px;border:1px solid var(--line);
-      background:rgba(255,255,255,.07);color:var(--text);outline:none
-    }
-    textarea{min-height:90px;resize:vertical}
-    input::placeholder, textarea::placeholder{color:#b6c7df}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .row-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-    .hidden{display:none !important}
-    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-    .stat{padding:18px}
-    .stat .num{font-size:32px;font-weight:800;margin-top:10px}
-    .panel-title{font-size:20px;font-weight:800;margin:0 0 6px}
-    .hint{font-size:13px;color:var(--muted)}
-    table{width:100%;border-collapse:collapse}
-    th,td{padding:12px 10px;text-align:left;border-bottom:1px solid rgba(255,255,255,.08);font-size:14px}
-    th{color:#dcebff}
-    .pill{display:inline-block;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700}
-    .ok{background:rgba(39,196,143,.13);color:#baf2db}
-    .no{background:rgba(255,107,122,.13);color:#ffd5da}
-    #toast{
-      position:fixed;right:18px;bottom:18px;z-index:1001;min-width:260px;max-width:360px;
-      padding:14px 16px;border-radius:16px;border:1px solid var(--line);backdrop-filter:blur(18px);
-      box-shadow:var(--shadow);display:none
-    }
-    #toast.show{display:block}
-    .toast-success{background:rgba(39,196,143,.16);color:#eafff6}
-    .toast-error{background:rgba(255,107,122,.16);color:#fff1f3}
-    .overlay{
-      position:fixed;inset:0;background:rgba(4,11,22,.68);display:none;align-items:center;justify-content:center;
-      z-index:1000;backdrop-filter:blur(8px)
-    }
+    label{display:block;margin-bottom:8px;font-size:14px;color:#edf5ff;font-weight:700}
+    input,select,textarea{width:100%;padding:13px 14px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.08);color:var(--text);outline:none}
+    textarea{min-height:96px;resize:vertical}
+    input::placeholder,textarea::placeholder{color:#94a8c7}
+    .grid{display:grid;gap:18px}
+    .grid-2{grid-template-columns:1fr 1fr}
+    .grid-3{grid-template-columns:repeat(3,1fr)}
+    .grid-4{grid-template-columns:repeat(4,1fr)}
+    .summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+    .summary-card{padding:18px;border-radius:20px;background:var(--panel2);border:1px solid var(--line)}
+    .summary-label{font-size:12px;color:#9db2cf;text-transform:uppercase;letter-spacing:.08em}
+    .summary-value{font-size:1.75rem;font-weight:900;margin-top:8px}
+    .section{display:none}
+    .section.active{display:block}
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.05)}
+    table{width:100%;border-collapse:collapse;min-width:1000px}
+    th,td{padding:12px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;vertical-align:top;font-size:14px}
+    th{position:sticky;top:0;background:rgba(14,22,39,.98);z-index:1}
+    .toolbar{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+    .toolbar .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .tag{display:inline-flex;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:800;border:1px solid var(--line);background:rgba(255,255,255,.07)}
+    .ok{color:#d4ffef}.error{color:#ffdfe4}
+    .status{min-height:18px;font-size:14px}
+    .subject-boxes{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .subject-item{padding:14px;border-radius:18px;border:1px solid var(--line);background:rgba(255,255,255,.05)}
+    .subject-head{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}
+    .chip-check{display:flex;gap:8px;align-items:center}
+    .chip-check input{width:auto}
+    .login-tabs{display:flex;gap:10px;margin-bottom:16px}
+    .tab{flex:1;padding:12px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--text);font-weight:700;cursor:pointer}
+    .tab.active{background:linear-gradient(135deg,var(--primary),var(--primary2));border-color:transparent}
+    .overlay{position:fixed;inset:0;background:rgba(5,10,18,.68);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(8px)}
     .overlay.show{display:flex}
-    .loader-box{
-      width:min(92vw,380px);padding:24px;text-align:center
-    }
-    .spinner{
-      width:52px;height:52px;border-radius:50%;margin:0 auto 14px;
-      border:4px solid rgba(255,255,255,.15);border-top-color:#fff;animation:spin 1s linear infinite
-    }
+    .loader-box{padding:24px;width:min(90vw,360px);text-align:center}
+    .spinner{width:54px;height:54px;border-radius:50%;margin:0 auto 14px;border:4px solid rgba(255,255,255,.18);border-top-color:#fff;animation:spin 1s linear infinite}
+    #toast{position:fixed;right:18px;bottom:18px;z-index:1001;padding:14px 16px;border-radius:16px;border:1px solid var(--line);display:none;max-width:360px;box-shadow:var(--shadow)}
+    #toast.show{display:block}
+    .toast-success{background:rgba(25,180,122,.18);color:#e9fff6}
+    .toast-error{background:rgba(255,111,134,.16);color:#fff1f4}
+    .avatar-preview{width:92px;height:110px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .avatar-preview img{width:100%;height:100%;object-fit:cover}
+    .inline-note{padding:12px 14px;border-radius:16px;background:rgba(34,199,255,.10);border:1px solid rgba(34,199,255,.18);color:#dff8ff;font-size:14px}
+    .small{font-size:12px}
     @keyframes spin{to{transform:rotate(360deg)}}
+    @media (max-width:1150px){
+      .summary-grid,.grid-4{grid-template-columns:1fr 1fr}
+      .grid-3{grid-template-columns:1fr 1fr}
+    }
     @media (max-width:980px){
-      .auth,.stats,.row,.row-3{grid-template-columns:1fr}
+      .shell{grid-template-columns:1fr}
+      .sidebar{position:fixed;left:-310px;top:0;width:280px;z-index:1002;transition:.25s ease}
+      .sidebar.open{left:0}
+      .content{padding:18px}
+      .hamburger{display:inline-flex}
+      .auth-shell,.grid-2,.grid-3,.grid-4,.summary-grid,.subject-boxes{grid-template-columns:1fr}
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="glass topbar">
-      <div>
-        <div class="brand">Genz Edutech Innovations</div>
-        <div class="muted" id="portalLabel">Admin Result Portal</div>
+  <div class="overlay" id="overlay"><div class="glass loader-box"><div class="spinner"></div><div id="overlayText">Loading...</div></div></div>
+  <div id="toast"></div>
+
+  <section id="authView" class="auth-shell">
+    <div class="glass card">
+      <div class="login-tabs">
+        <button class="tab active" data-auth-tab="login">Admin Login</button>
+        <button class="tab" data-auth-tab="signup">Admin Signup</button>
+        <button class="tab" data-auth-tab="reset">Forgot Password</button>
       </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <a class="btn btn-secondary" href="index.html" style="text-decoration:none">Landing Page</a>
-        <button class="btn btn-danger hidden" id="logoutBtn">Log Out</button>
-      </div>
+
+      <form id="loginForm">
+        <h2 class="panel-title">Sign in</h2>
+        <p class="muted">Use your admin credentials to manage students, results, and publishing controls.</p>
+        <div class="field"><label>Username</label><input name="username" required /></div>
+        <div class="field"><label>Password</label><input type="password" name="password" required /></div>
+        <button class="btn btn-primary" style="width:100%" type="submit">Login</button>
+      </form>
+
+      <form id="signupForm" class="hidden">
+        <h2 class="panel-title">Create admin account</h2>
+        <div class="grid grid-2">
+          <div class="field"><label>Display Name</label><input name="displayName" required /></div>
+          <div class="field"><label>Username</label><input name="username" required /></div>
+        </div>
+        <div class="grid grid-2">
+          <div class="field"><label>Email</label><input name="email" type="email" required /></div>
+          <div class="field"><label>Phone</label><input name="phone" /></div>
+        </div>
+        <div class="field"><label>Password</label><input type="password" name="password" required /></div>
+        <button class="btn btn-primary" style="width:100%" type="submit">Create Admin</button>
+      </form>
+
+      <form id="resetRequestForm" class="hidden">
+        <h2 class="panel-title">Forgot password</h2>
+        <p class="muted">Enter your username or email. A reset code will be sent to the registered email address.</p>
+        <div class="field"><label>Username or Email</label><input name="identifier" required /></div>
+        <button class="btn btn-primary" style="width:100%" type="submit">Send Reset Code</button>
+      </form>
+
+      <form id="resetApplyForm" class="hidden" style="margin-top:16px">
+        <div class="field"><label>Username</label><input name="identifier" required /></div>
+        <div class="grid grid-2">
+          <div class="field"><label>Reset Code</label><input name="code" required /></div>
+          <div class="field"><label>New Password</label><input name="newPassword" type="password" required /></div>
+        </div>
+        <button class="btn btn-success" style="width:100%" type="submit">Reset Password</button>
+      </form>
     </div>
 
-    <section id="authSection" class="auth">
-      <div class="glass card">
-        <div class="tabs">
-          <button class="tab active" data-auth-tab="login">Admin Login</button>
-          <button class="tab" data-auth-tab="signup">Admin Signup</button>
+    <div class="glass card">
+      <h2 class="panel-title">What this build now includes</h2>
+      <div class="inline-note">
+        Sidebar + hamburger navigation, dashboard summaries, student/result archive and restore actions, result access by exam code, CSV imports, ranking recalculation, bulk email, PDF export on student portal, password reset by email, alphabetical student listing, and signature support.
+      </div>
+      <div class="grid" style="margin-top:16px">
+        <div class="glass card" style="padding:16px">
+          <strong>Important</strong>
+          <p class="muted">This portal uses the same request style as your working CBT app: <strong>fetch + action + payload</strong>.</p>
         </div>
+        <div class="glass card" style="padding:16px">
+          <strong>Default admin</strong>
+          <p class="muted">Username: <strong>admin</strong><br>Password: <strong>admin123</strong></p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-        <form id="loginForm">
-          <h2 class="panel-title">Welcome back</h2>
-          <p class="hint">Default admin after first setup: username <strong>admin</strong>, password <strong>admin123</strong></p>
-          <div class="field">
-            <label>Username</label>
-            <input name="username" placeholder="Enter admin username" required />
-          </div>
-          <div class="field">
-            <label>Password</label>
-            <input type="password" name="password" placeholder="Enter password" required />
-          </div>
-          <button class="btn btn-primary" type="submit" style="width:100%">Sign In</button>
-        </form>
-
-        <form id="signupForm" class="hidden">
-          <h2 class="panel-title">Create admin account</h2>
-          <div class="field">
-            <label>Display Name</label>
-            <input name="displayName" placeholder="Full admin name" required />
-          </div>
-          <div class="field">
-            <label>Username</label>
-            <input name="username" placeholder="Choose username" required />
-          </div>
-          <div class="field">
-            <label>Email</label>
-            <input name="email" type="email" placeholder="admin@email.com" />
-          </div>
-          <div class="field">
-            <label>Password</label>
-            <input name="password" type="password" placeholder="Create password" required />
-          </div>
-          <button class="btn btn-primary" type="submit" style="width:100%">Create Admin Account</button>
-        </form>
+  <section id="appView" class="shell hidden">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-badge"></div>
+        <div>
+          <h1>Genz Admin</h1>
+          <p>Result management workspace</p>
+        </div>
       </div>
 
-      <div class="glass card">
-        <h2 class="panel-title">Core rescue build</h2>
-        <p class="muted">
-          This version focuses on the most reliable working flow first:
-          admin signup/login, settings save, create/update students, save/publish results,
-          and student viewing of published results.
-        </p>
+      <div class="nav-group">
+        <div class="nav-title">Workspace</div>
+        <button class="nav-btn active" data-section="dashboardSection">Dashboard</button>
+        <button class="nav-btn" data-section="studentsSection">Students</button>
+        <button class="nav-btn" data-section="resultsSection">Results</button>
+        <button class="nav-btn" data-section="adminsSection">Admins</button>
+        <button class="nav-btn" data-section="communicationsSection">Bulk Email / SMS</button>
+        <button class="nav-btn" data-section="settingsSection">Settings</button>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-title">Quick links</div>
+        <button class="nav-btn" id="refreshBtn">Refresh data</button>
+        <button class="nav-btn" id="logoutBtn">Logout</button>
+      </div>
+    </aside>
+
+    <main class="content">
+      <div class="topbar">
+        <div class="actions">
+          <button class="btn btn-soft hamburger" id="menuBtn">☰</button>
+          <div>
+            <div style="font-weight:900;font-size:1.3rem">Admin Dashboard</div>
+            <div class="muted" id="welcomeText">Signed in</div>
+          </div>
+        </div>
+        <div class="actions">
+          <a class="btn btn-soft" href="index.html">Home</a>
+        </div>
+      </div>
+
+      <section id="dashboardSection" class="section active">
+        <div class="summary-grid" id="summaryGrid"></div>
+        <div class="grid grid-2" style="margin-top:18px">
+          <div class="glass card">
+            <div class="toolbar">
+              <div>
+                <h2 class="panel-title">Recent students</h2>
+                <div class="muted">Alphabetical listing is used globally.</div>
+              </div>
+              <button class="btn btn-soft" id="exportStudentsBtn">Export Students CSV</button>
+            </div>
+            <div class="table-wrap"><table><thead><tr><th>Reg ID</th><th>Name</th><th>Class</th><th>Status</th></tr></thead><tbody id="recentStudentsBody"></tbody></table></div>
+          </div>
+
+          <div class="glass card">
+            <div class="toolbar">
+              <div>
+                <h2 class="panel-title">Recent results</h2>
+                <div class="muted">Published date, rank, and exam code are included.</div>
+              </div>
+              <button class="btn btn-soft" id="exportResultsBtn">Export Results CSV</button>
+            </div>
+            <div class="table-wrap"><table><thead><tr><th>Exam Code</th><th>Subject</th><th>Reg ID</th><th>Score</th><th>Published</th></tr></thead><tbody id="recentResultsBody"></tbody></table></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="studentsSection" class="section">
+        <div class="grid grid-2">
+          <div class="glass card">
+            <h2 class="panel-title">Create or update student</h2>
+            <form id="studentForm">
+              <div class="grid grid-2">
+                <div class="field"><label>Registration ID</label><input name="regId" required /></div>
+                <div class="field"><label>Password <span class="small muted">(leave blank to keep old password)</span></label><input name="password" type="password" /></div>
+              </div>
+              <div class="grid grid-2">
+                <div class="field"><label>Full Name</label><input name="fullName" required /></div>
+                <div class="field"><label>School Name</label><input name="schoolName" /></div>
+              </div>
+              <div class="grid grid-3">
+                <div class="field"><label>Age</label><input name="age" /></div>
+                <div class="field"><label>Gender</label><select name="gender"><option value="">Select</option><option>Male</option><option>Female</option></select></div>
+                <div class="field"><label>Date of Birth</label><input type="date" name="dob" /></div>
+              </div>
+              <div class="grid grid-2">
+                <div class="field"><label>Parent Name</label><input name="parentName" /></div>
+                <div class="field"><label>Parent Phone</label><input name="parentPhone" /></div>
+              </div>
+              <div class="grid grid-2">
+                <div class="field"><label>Parent Email</label><input name="parentEmail" type="email" /></div>
+                <div class="field"><label>State</label><input name="state" /></div>
+              </div>
+              <div class="grid grid-3">
+                <div class="field"><label>City / LGA</label><input name="cityLGA" /></div>
+                <div class="field"><label>Class Level</label><select name="classLevel" id="studentClassLevel"></select></div>
+                <div class="field"><label>Category</label><select name="category" id="studentCategory"></select></div>
+              </div>
+              <div class="field"><label>Address</label><textarea name="address"></textarea></div>
+              <div class="grid grid-2">
+                <div class="field">
+                  <label>Passport URL</label>
+                  <input name="passportUrl" id="passportUrlInput" placeholder="Paste image URL" />
+                </div>
+                <div class="field">
+                  <label>Preview</label>
+                  <div class="avatar-preview" id="passportPreview">No image</div>
+                </div>
+              </div>
+              <div class="actions">
+                <button class="btn btn-primary" type="submit">Save Student</button>
+                <button class="btn btn-soft" type="button" id="clearStudentFormBtn">Clear</button>
+              </div>
+              <div class="status" id="studentFormStatus"></div>
+            </form>
+          </div>
+
+          <div class="glass card">
+            <h2 class="panel-title">Import students from CSV</h2>
+            <div class="inline-note">Required headers: regId,password,fullName,schoolName,classLevel,category. Other columns can follow your sheet field names.</div>
+            <div class="field" style="margin-top:14px"><label>Student CSV File</label><input type="file" id="studentsCsvFile" accept=".csv" /></div>
+            <div class="actions">
+              <button class="btn btn-primary" type="button" id="importStudentsBtn">Import Students CSV</button>
+              <button class="btn btn-soft" type="button" id="downloadStudentTemplateBtn">Download Student CSV Template</button>
+            </div>
+            <div class="status" id="studentImportStatus"></div>
+          </div>
+        </div>
+
+        <div class="glass card" style="margin-top:18px">
+          <div class="toolbar">
+            <div>
+              <h2 class="panel-title">Student list</h2>
+              <div class="muted">Activate, archive, delete, restore, or delete forever.</div>
+            </div>
+            <div class="actions">
+              <input id="studentSearch" placeholder="Search by name, reg ID, class, or category" style="min-width:280px" />
+              <select id="studentFilterState">
+                <option value="all">All states</option>
+                <option value="active">Active only</option>
+                <option value="archived">Archived only</option>
+                <option value="deleted">Deleted only</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Reg ID</th><th>Full Name</th><th>Class</th><th>Category</th><th>Email / Phone</th><th>Status</th><th>Actions</th></tr></thead><tbody id="studentsBody"></tbody></table></div>
+        </div>
+      </section>
+
+      <section id="resultsSection" class="section">
         <div class="grid">
-          <div class="glass card" style="padding:18px">
-            <strong>Why this version is safer</strong>
-            <p class="muted">It uses JSONP for browser-to-Apps-Script communication, which avoids the cross-origin issues that often break static sites.</p>
-          </div>
-          <div class="glass card" style="padding:18px">
-            <strong>Before testing the frontend</strong>
-            <p class="muted">Deploy Apps Script as Web App, set access to Anyone, run setupSystem() once, and paste the /exec URL below in the code constant.</p>
-          </div>
-        </div>
-      </div>
-    </section>
+          <div class="glass card">
+            <div class="toolbar">
+              <div>
+                <h2 class="panel-title">Save result entries</h2>
+                <div class="muted">For single student, enter scores per selected subject. For all active students, the system creates subject result rows using the selected exam code.</div>
+              </div>
+            </div>
 
-    <section id="dashboardSection" class="hidden">
-      <div class="stats">
-        <div class="glass stat">
-          <div class="muted">Admins</div>
-          <div class="num" id="statAdmins">0</div>
-        </div>
-        <div class="glass stat">
-          <div class="muted">Students</div>
-          <div class="num" id="statStudents">0</div>
-        </div>
-        <div class="glass stat">
-          <div class="muted">Results</div>
-          <div class="num" id="statResults">0</div>
-        </div>
-        <div class="glass stat">
-          <div class="muted">Published Results</div>
-          <div class="num" id="statPublished">0</div>
-        </div>
-      </div>
+            <form id="resultForm">
+              <div class="grid grid-4">
+                <div class="field"><label>Target</label><select name="targetMode" id="targetMode"><option value="single">Selected student</option><option value="all">All active students</option></select></div>
+                <div class="field"><label>Registration ID</label><select name="selectedRegId" id="resultRegIdSelect"><option value="">Select student</option></select></div>
+                <div class="field"><label>Or type Reg ID manually</label><input name="manualRegId" id="manualRegId" /></div>
+                <div class="field"><label>Exam Code</label><input name="examCode" required placeholder="e.g. GEI-TERM1-2026" /></div>
+              </div>
 
-      <div class="grid" style="margin-top:18px">
+              <div class="grid grid-4">
+                <div class="field"><label>Exam Title</label><input name="examTitle" /></div>
+                <div class="field"><label>Exam Date</label><input type="date" name="examDate" /></div>
+                <div class="field"><label>Academic Session</label><input name="academicSession" id="resultAcademicSession" /></div>
+                <div class="field"><label>Term</label><input name="term" id="resultTerm" /></div>
+              </div>
+
+              <div class="grid grid-4">
+                <div class="field"><label>Pass Mark Number</label><input name="passMarkNumber" type="number" /></div>
+                <div class="field"><label>Pass Mark Percentage</label><input name="passMarkPercentage" type="number" /></div>
+                <div class="field"><label>Signature URL (optional)</label><input name="signatureUrl" /></div>
+                <div class="field"><label>Teacher Comment (applies to selected subjects)</label><input name="teacherComment" /></div>
+              </div>
+
+              <div class="inline-note">Select the subjects to save or publish. Unselected subjects are not created. This is also how you skip subjects a student did not sit for.</div>
+              <div class="subject-boxes" id="subjectBoxes" style="margin-top:14px"></div>
+
+              <div class="actions" style="margin-top:16px">
+                <button class="btn btn-primary" type="submit">Save Selected Subjects</button>
+                <button class="btn btn-success" type="button" id="recalculateBtn">Recalculate Rankings</button>
+                <button class="btn btn-soft" type="button" id="clearResultFormBtn">Clear</button>
+              </div>
+              <div class="status" id="resultFormStatus"></div>
+            </form>
+          </div>
+
+          <div class="grid grid-2">
+            <div class="glass card">
+              <h2 class="panel-title">Import results from CSV</h2>
+              <div class="inline-note">Required headers: regId,examCode,subject. Recommended: examTitle,studentScore,maxScore,academicSession,term,published,viewActive.</div>
+              <div class="field" style="margin-top:14px"><label>Results CSV File</label><input type="file" id="resultsCsvFile" accept=".csv" /></div>
+              <div class="actions">
+                <button class="btn btn-primary" type="button" id="importResultsBtn">Import Results CSV</button>
+                <button class="btn btn-soft" type="button" id="downloadResultsTemplateBtn">Download Results CSV Template</button>
+              </div>
+              <div class="status" id="resultImportStatus"></div>
+            </div>
+
+            <div class="glass card">
+              <h2 class="panel-title">Result filters</h2>
+              <div class="grid grid-3">
+                <div class="field"><label>Exam Code</label><input id="resultSearchExamCode" placeholder="Filter by exam code" /></div>
+                <div class="field"><label>Session</label><input id="resultSearchSession" placeholder="e.g. 2025/2026" /></div>
+                <div class="field"><label>Term</label><input id="resultSearchTerm" placeholder="e.g. First Term" /></div>
+              </div>
+              <div class="grid grid-3">
+                <div class="field"><label>Subject / Reg ID / Title</label><input id="resultSearchText" placeholder="Search results" /></div>
+                <div class="field"><label>State</label><select id="resultStateFilter"><option value="all">All states</option><option value="published">Published only</option><option value="viewActive">View active only</option><option value="archived">Archived only</option><option value="deleted">Deleted only</option></select></div>
+                <div class="field"><label>Quick actions</label><div class="actions"><button class="btn btn-soft" id="refreshResultsBtn" type="button">Refresh Results</button></div></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass card">
+            <div class="toolbar">
+              <div>
+                <h2 class="panel-title">Result table</h2>
+                <div class="muted">Edit from the row, then publish or activate view for student access by exam code.</div>
+              </div>
+            </div>
+            <div class="table-wrap"><table><thead><tr><th>Exam Code</th><th>Subject</th><th>Reg ID</th><th>Score / %</th><th>Rank</th><th>Published</th><th>View Access</th><th>Published Date</th><th>Status</th><th>Actions</th></tr></thead><tbody id="resultsBody"></tbody></table></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="adminsSection" class="section">
         <div class="glass card">
-          <h2 class="panel-title">Portal Settings</h2>
-          <p class="hint">These values appear on the student report view.</p>
+          <div class="toolbar">
+            <div>
+              <h2 class="panel-title">Admin accounts</h2>
+              <div class="muted">Activate, archive, restore, delete, or delete forever. One active admin must always remain.</div>
+            </div>
+          </div>
+          <div class="table-wrap"><table><thead><tr><th>Username</th><th>Name</th><th>Email / Phone</th><th>Status</th><th>Actions</th></tr></thead><tbody id="adminsBody"></tbody></table></div>
+        </div>
+      </section>
+
+      <section id="communicationsSection" class="section">
+        <div class="grid grid-2">
+          <div class="glass card">
+            <h2 class="panel-title">Bulk email</h2>
+            <div class="grid grid-2">
+              <div class="field"><label>Audience</label><select id="bulkEmailTarget"><option value="students">Students / Parents</option><option value="admins">Admins</option></select></div>
+              <div class="field"><label>Subject</label><input id="bulkEmailSubject" /></div>
+            </div>
+            <div class="field"><label>Message</label><textarea id="bulkEmailMessage"></textarea></div>
+            <button class="btn btn-primary" id="sendBulkEmailBtn" type="button">Send Bulk Email</button>
+            <div class="status" id="bulkEmailStatus"></div>
+          </div>
+
+          <div class="glass card">
+            <h2 class="panel-title">SMS contact export</h2>
+            <div class="inline-note">Direct SMS sending is not available in Apps Script alone without an external SMS gateway. This export gives you a clean CSV of phone numbers for bulk SMS tools.</div>
+            <div class="field" style="margin-top:14px"><label>Audience</label><select id="smsTarget"><option value="students">Students / Parents</option><option value="admins">Admins</option></select></div>
+            <button class="btn btn-soft" id="exportSmsBtn" type="button">Export SMS Contacts CSV</button>
+            <div class="status" id="smsStatus"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="settingsSection" class="section">
+        <div class="glass card">
+          <h2 class="panel-title">Portal settings</h2>
           <form id="settingsForm">
-            <div class="row">
+            <div class="grid grid-3">
               <div class="field"><label>Brand Name</label><input name="BRAND_NAME" /></div>
               <div class="field"><label>School Name</label><input name="SCHOOL_NAME" /></div>
-            </div>
-            <div class="row">
               <div class="field"><label>Head Office Address</label><input name="HEAD_OFFICE_ADDRESS" /></div>
-              <div class="field"><label>Principal Name</label><input name="PRINCIPAL_NAME" /></div>
             </div>
-            <div class="row">
+            <div class="grid grid-3">
               <div class="field"><label>School Phone</label><input name="SCHOOL_PHONE" /></div>
               <div class="field"><label>School Email</label><input name="SCHOOL_EMAIL" /></div>
+              <div class="field"><label>Principal / Head Name</label><input name="PRINCIPAL_NAME" /></div>
             </div>
-            <div class="row-3">
+            <div class="grid grid-4">
               <div class="field"><label>Academic Session</label><input name="ACADEMIC_SESSION" /></div>
               <div class="field"><label>Term</label><input name="TERM" /></div>
               <div class="field"><label>Default Exam Title</label><input name="EXAM_TITLE" /></div>
+              <div class="field"><label>Show Position On Report</label><select name="SHOW_POSITION_ON_REPORT"><option value="true">true</option><option value="false">false</option></select></div>
             </div>
-            <div class="row-3">
+            <div class="grid grid-4">
               <div class="field"><label>Pass Mark Number</label><input name="PASS_MARK_NUMBER" type="number" /></div>
               <div class="field"><label>Pass Mark Percentage</label><input name="PASS_MARK_PERCENTAGE" type="number" /></div>
-              <div class="field">
-                <label>Show Position On Report</label>
-                <select name="SHOW_POSITION_ON_REPORT">
-                  <option value="true">true</option>
-                  <option value="false">false</option>
-                </select>
-              </div>
+              <div class="field"><label>Signature Name</label><input name="SIGNATURE_NAME" /></div>
+              <div class="field"><label>Signature URL</label><input name="SIGNATURE_URL" /></div>
             </div>
-            <button class="btn btn-primary" type="submit">Save Settings</button>
+            <div class="field"><label>Portal Notice</label><textarea name="PORTAL_NOTICE"></textarea></div>
+            <div class="grid grid-3">
+              <div class="field"><label>Class / Level Options (comma separated)</label><textarea name="CLASS_OPTIONS"></textarea></div>
+              <div class="field"><label>Category Options (comma separated)</label><textarea name="CATEGORY_OPTIONS"></textarea></div>
+              <div class="field"><label>Subject Options (comma separated)</label><textarea name="SUBJECT_OPTIONS"></textarea></div>
+            </div>
+            <div class="actions">
+              <button class="btn btn-primary" type="submit">Save Settings</button>
+            </div>
+            <div class="status" id="settingsStatus"></div>
           </form>
         </div>
-
-        <div class="glass card">
-          <h2 class="panel-title">Create or Update Student</h2>
-          <p class="hint">When updating an existing student, leave password empty if you do not want to reset it.</p>
-          <form id="studentForm">
-            <div class="row-3">
-              <div class="field"><label>Registration ID</label><input name="regId" required /></div>
-              <div class="field"><label>Password</label><input name="password" type="password" placeholder="Required for new student" /></div>
-              <div class="field">
-                <label>Active</label>
-                <select name="active">
-                  <option value="true">true</option>
-                  <option value="false">false</option>
-                </select>
-              </div>
-            </div>
-            <div class="row">
-              <div class="field"><label>Full Name</label><input name="fullName" required /></div>
-              <div class="field"><label>School Name</label><input name="schoolName" required /></div>
-            </div>
-            <div class="row-3">
-              <div class="field"><label>Age</label><input name="age" /></div>
-              <div class="field"><label>Gender</label><input name="gender" /></div>
-              <div class="field"><label>Date of Birth</label><input name="dob" type="date" /></div>
-            </div>
-            <div class="row">
-              <div class="field"><label>Parent Name</label><input name="parentName" /></div>
-              <div class="field"><label>Parent Phone</label><input name="parentPhone" /></div>
-            </div>
-            <div class="row">
-              <div class="field"><label>Parent Email</label><input name="parentEmail" type="email" /></div>
-              <div class="field"><label>State</label><input name="state" /></div>
-            </div>
-            <div class="row-3">
-              <div class="field"><label>City / LGA</label><input name="cityLGA" /></div>
-              <div class="field"><label>Class Level</label><input name="classLevel" required /></div>
-              <div class="field"><label>Category</label><input name="category" /></div>
-            </div>
-            <div class="row">
-              <div class="field"><label>Address</label><input name="address" /></div>
-              <div class="field"><label>Passport URL</label><input name="passportUrl" placeholder="https://..." /></div>
-            </div>
-            <button class="btn btn-primary" type="submit">Save Student</button>
-          </form>
-        </div>
-
-        <div class="glass card">
-          <h2 class="panel-title">Save Result</h2>
-          <form id="resultForm">
-            <div class="row-3">
-              <div class="field"><label>Registration ID</label><input name="regId" required /></div>
-              <div class="field"><label>Exam Title</label><input name="examTitle" required /></div>
-              <div class="field"><label>Exam Date</label><input name="examDate" type="date" /></div>
-            </div>
-            <div class="row-3">
-              <div class="field"><label>Max Score</label><input name="maxScore" type="number" value="100" /></div>
-              <div class="field"><label>Pass Mark Number</label><input name="passMarkNumber" type="number" value="50" /></div>
-              <div class="field"><label>Pass Mark Percentage</label><input name="passMarkPercentage" type="number" value="50" /></div>
-            </div>
-            <div class="row-3">
-              <div class="field"><label>Student Score</label><input name="studentScore" type="number" required /></div>
-              <div class="field"><label>Position</label><input name="position" placeholder="e.g. 3rd" /></div>
-              <div class="field">
-                <label>Published</label>
-                <select name="published">
-                  <option value="true">true</option>
-                  <option value="false">false</option>
-                </select>
-              </div>
-            </div>
-            <div class="row">
-              <div class="field"><label>Academic Session</label><input name="academicSession" /></div>
-              <div class="field"><label>Term</label><input name="term" /></div>
-            </div>
-            <div class="row">
-              <div class="field"><label>Teacher Comment</label><textarea name="teacherComment" placeholder="Teacher's comment"></textarea></div>
-              <div class="field"><label>Custom Remark (optional)</label><textarea name="remark" placeholder="Leave empty to auto-generate from percentage band"></textarea></div>
-            </div>
-            <button class="btn btn-primary" type="submit">Save Result</button>
-          </form>
-        </div>
-
-        <div class="row">
-          <div class="glass card">
-            <h2 class="panel-title">Recent Students</h2>
-            <div style="overflow:auto">
-              <table>
-                <thead>
-                  <tr><th>Reg ID</th><th>Name</th><th>Class</th><th>Status</th><th>Updated</th></tr>
-                </thead>
-                <tbody id="recentStudentsBody">
-                  <tr><td colspan="5" class="muted">No data yet.</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div class="glass card">
-            <h2 class="panel-title">Recent Results</h2>
-            <div style="overflow:auto">
-              <table>
-                <thead>
-                  <tr><th>Reg ID</th><th>Exam</th><th>Score</th><th>Published</th><th>Updated</th></tr>
-                </thead>
-                <tbody id="recentResultsBody">
-                  <tr><td colspan="5" class="muted">No data yet.</td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  </div>
-
-  <div class="overlay" id="overlay">
-    <div class="glass loader-box">
-      <div class="spinner"></div>
-      <div id="overlayText" style="font-weight:800;font-size:18px">Loading...</div>
-      <div class="muted" style="margin-top:6px">Please wait</div>
-    </div>
-  </div>
-
-  <div id="toast"></div>
+      </section>
+    </main>
+  </section>
 
   <script>
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxkqab1CGlVVZ1No0Q5XF3vg6QMgDF7avYLAvaV5DhW_fR8AASqhn_O8lx3nAgXDG_NtQ/exec';
-    const ADMIN_TOKEN_KEY = 'gei_admin_token';
+    const ADMIN_TOKEN_KEY = 'gei_admin_token_v3';
 
-    const overlay = document.getElementById('overlay');
-    const overlayText = document.getElementById('overlayText');
-    const toast = document.getElementById('toast');
-    const authSection = document.getElementById('authSection');
-    const dashboardSection = document.getElementById('dashboardSection');
-    const logoutBtn = document.getElementById('logoutBtn');
+    let bootstrapData = {settings:{},students:[],results:[],admins:[],classOptions:[],categoryOptions:[],subjectOptions:[],examCodes:[]};
 
-    function showLoading(text){
-      overlayText.textContent = text || 'Loading...';
-      overlay.classList.add('show');
-    }
-    function hideLoading(){
-      overlay.classList.remove('show');
-    }
+    const $ = id => document.getElementById(id);
+    const overlay = $('overlay');
+    const overlayText = $('overlayText');
+    const toast = $('toast');
+
+    function showLoading(text='Loading...'){ overlayText.textContent = text; overlay.classList.add('show'); }
+    function hideLoading(){ overlay.classList.remove('show'); }
     function showToast(message, type='success'){
       toast.textContent = message;
       toast.className = '';
@@ -390,286 +501,646 @@
       toast.classList.add('show', type === 'error' ? 'toast-error' : 'toast-success');
       setTimeout(() => toast.classList.remove('show'), 3500);
     }
+    function esc(v){
+      return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+    function token(){ return localStorage.getItem(ADMIN_TOKEN_KEY) || ''; }
+    function setToken(v){ localStorage.setItem(ADMIN_TOKEN_KEY, v); }
+    function clearToken(){ localStorage.removeItem(ADMIN_TOKEN_KEY); }
 
-    function apiRequest(params = {}, loadingText = 'Loading...', method = 'POST'){
-      return new Promise(async (resolve, reject) => {
-        if (!WEB_APP_URL || WEB_APP_URL.includes('PASTE_YOUR_APPS_SCRIPT_EXEC_URL_HERE')) {
-          reject(new Error('Please paste your Apps Script /exec URL into WEB_APP_URL first.'));
-          return;
+    async function apiRequest(action, payload={}, method='POST', loadingText='Loading...'){
+      if (!WEB_APP_URL || WEB_APP_URL.includes('PASTE_YOUR_APPS_SCRIPT_EXEC_URL_HERE')) {
+        throw new Error('Please paste your Apps Script /exec URL into WEB_APP_URL.');
+      }
+      showLoading(loadingText);
+      try{
+        payload = payload || {};
+        if (!payload.token && action !== 'adminLogin' && action !== 'adminSignup' && action !== 'requestPasswordReset' && action !== 'resetPassword' && action !== 'getPublicBootstrap') {
+          payload.token = token();
         }
-
-        showLoading(loadingText);
-
-        try {
-          let response;
-          if (method === 'GET') {
-            const url = new URL(WEB_APP_URL);
-            Object.keys(params).forEach(key => {
-              if (params[key] !== undefined && params[key] !== null) {
-                url.searchParams.set(key, params[key]);
-              }
-            });
-            url.searchParams.set('_ts', Date.now());
-            response = await fetch(url.toString(), { method: 'GET' });
-          } else {
-            const form = new URLSearchParams();
-            form.set('action', params.action || '');
-            const payload = Object.assign({}, params);
-            delete payload.action;
-            form.set('payload', JSON.stringify(payload));
-            response = await fetch(WEB_APP_URL, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-              body: form.toString()
-            });
-          }
-
-          const text = await response.text();
-          let parsed;
-          try {
-            parsed = JSON.parse(text);
-          } catch (err) {
-            throw new Error('Server returned non-JSON response. Check Apps Script deployment and URL.');
-          }
-
-          hideLoading();
-          if (!parsed) {
-            reject(new Error('Empty response from backend.'));
-            return;
-          }
-          if (parsed.ok === false) {
-            reject(new Error(parsed.message || 'Backend returned an error.'));
-            return;
-          }
-          resolve(parsed);
-        } catch (err) {
-          hideLoading();
-          reject(new Error(err.message || 'Connection failed: Network error — check your WEB_APP_URL or Apps Script deployment.'));
+        let res;
+        if (method === 'GET'){
+          const url = new URL(WEB_APP_URL);
+          url.searchParams.set('action', action);
+          Object.keys(payload).forEach(key => {
+            const value = payload[key];
+            if (value !== undefined && value !== null) url.searchParams.set(key, typeof value === 'object' ? JSON.stringify(value) : String(value));
+          });
+          res = await fetch(url.toString(), {method:'GET'});
+        } else {
+          const form = new URLSearchParams();
+          form.set('action', action);
+          form.set('payload', JSON.stringify(payload));
+          res = await fetch(WEB_APP_URL, {
+            method:'POST',
+            headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+            body:form.toString()
+          });
         }
-      });
+        const text = await res.text();
+        let json;
+        try{ json = JSON.parse(text); }catch(err){ throw new Error('Server returned non-JSON response.'); }
+        if (!json.ok) throw new Error(json.message || 'Request failed.');
+        return json;
+      } finally {
+        hideLoading();
+      }
     }
 
     function serializeForm(form){
-      const fd = new FormData(form);
-      const obj = {};
-      for (const [key, value] of fd.entries()) obj[key] = value;
-      return obj;
+      const data = {};
+      new FormData(form).forEach((value,key)=> data[key] = value);
+      return data;
     }
 
-    function setAuthTab(tabName){
-      document.querySelectorAll('[data-auth-tab]').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.authTab === tabName);
+    function splitCsvLine(line){
+      const result=[]; let current=''; let inQuotes=false;
+      for (let i=0;i<line.length;i++){
+        const ch=line[i];
+        if (ch === '"' && line[i+1] === '"'){ current += '"'; i++; continue; }
+        if (ch === '"'){ inQuotes = !inQuotes; continue; }
+        if (ch === ',' && !inQuotes){ result.push(current); current=''; continue; }
+        current += ch;
+      }
+      result.push(current); return result;
+    }
+    function parseCsv(text){
+      const lines = text.replace(/\r/g,'').split('\n').filter(x => x.trim());
+      if (!lines.length) return [];
+      const rows = lines.map(splitCsvLine);
+      const headers = rows[0].map(h => h.trim());
+      return rows.slice(1).map(cols => {
+        const obj={}; headers.forEach((h,i)=> obj[h] = (cols[i] || '').trim()); return obj;
       });
-      document.getElementById('loginForm').classList.toggle('hidden', tabName !== 'login');
-      document.getElementById('signupForm').classList.toggle('hidden', tabName !== 'signup');
+    }
+    function downloadText(filename, text, mime='text/plain;charset=utf-8'){
+      const blob = new Blob([text], {type:mime});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      setTimeout(()=> URL.revokeObjectURL(a.href), 500);
     }
 
-    document.querySelectorAll('[data-auth-tab]').forEach(btn => {
-      btn.addEventListener('click', () => setAuthTab(btn.dataset.authTab));
+    function setAuthTab(name){
+      document.querySelectorAll('[data-auth-tab]').forEach(btn => btn.classList.toggle('active', btn.dataset.authTab === name));
+      $('loginForm').classList.toggle('hidden', name !== 'login');
+      $('signupForm').classList.toggle('hidden', name !== 'signup');
+      $('resetRequestForm').classList.toggle('hidden', name !== 'reset');
+      $('resetApplyForm').classList.toggle('hidden', name !== 'reset');
+    }
+
+    function fillOptions(selectEl, options, placeholder='Select'){
+      selectEl.innerHTML = `<option value="">${placeholder}</option>` + options.map(opt => `<option value="${esc(opt)}">${esc(opt)}</option>`).join('');
+    }
+
+    function renderSubjectBoxes(prefill = null){
+      const subjects = bootstrapData.subjectOptions || [];
+      $('subjectBoxes').innerHTML = subjects.map(subject => {
+        const key = slug(subject);
+        const saved = prefill && prefill.subject === subject ? prefill : null;
+        return `
+          <div class="subject-item">
+            <div class="subject-head">
+              <label class="chip-check"><input type="checkbox" class="subjectToggle" data-key="${esc(slug(subject))}" data-subject="${esc(subject)}" ${saved ? 'checked' : ''}/> ${esc(subject)}</label>
+              <span class="tag">${esc(subject)}</span>
+            </div>
+            <div class="grid grid-4">
+              <div class="field"><label>Score</label><input class="subject-score" data-key="${esc(slug(subject))}" data-subject="${esc(subject)}" type="number" value="${saved?.studentScore ?? ''}" /></div>
+              <div class="field"><label>Max Score</label><input class="subject-max" data-key="${esc(slug(subject))}" data-subject="${esc(subject)}" type="number" value="${saved?.maxScore ?? ''}" /></div>
+              <div class="field"><label>Published</label><select class="subject-published" data-key="${esc(slug(subject))}" data-subject="${esc(subject)}"><option value="false">false</option><option value="true" ${saved?.published ? 'selected' : ''}>true</option></select></div>
+              <div class="field"><label>View Active</label><select class="subject-view" data-key="${esc(slug(subject))}" data-subject="${esc(subject)}"><option value="false">false</option><option value="true" ${saved?.viewActive ? 'selected' : ''}>true</option></select></div>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function slug(v){ return String(v || '').toLowerCase().replace(/[^a-z0-9]+/g,'-'); }
+
+    function buildResultEntriesFromForm(){
+      const formData = serializeForm($('resultForm'));
+      const selectedSubjects = [...document.querySelectorAll('.subjectToggle:checked')].map(el => el.dataset.subject);
+      if (!selectedSubjects.length) throw new Error('Select at least one subject.');
+      const regId = (formData.targetMode === 'single') ? (formData.manualRegId.trim() || formData.selectedRegId.trim()) : '';
+      if (formData.targetMode === 'single' && !regId) throw new Error('Select or type a student Registration ID.');
+      if (!formData.examCode.trim()) throw new Error('Exam code is required.');
+
+      const targets = formData.targetMode === 'all'
+        ? bootstrapData.students.filter(s => s.active && !s.archived && !s.deleted).map(s => s.regId)
+        : [regId];
+
+      const entries = [];
+      targets.forEach(targetRegId => {
+        selectedSubjects.forEach(subject => {
+          const key = slug(subject);
+          const scoreEl = document.querySelector(`.subject-score[data-key="${key}"]`);
+          const maxEl = document.querySelector(`.subject-max[data-key="${key}"]`);
+          const publishedEl = document.querySelector(`.subject-published[data-key="${key}"]`);
+          const viewEl = document.querySelector(`.subject-view[data-key="${key}"]`);
+          entries.push({
+            regId: targetRegId,
+            examCode: formData.examCode,
+            examTitle: formData.examTitle,
+            subject: subject,
+            examDate: formData.examDate,
+            maxScore: maxEl ? maxEl.value : '',
+            passMarkNumber: formData.passMarkNumber,
+            passMarkPercentage: formData.passMarkPercentage,
+            studentScore: formData.targetMode === 'all' ? '' : (scoreEl ? scoreEl.value : ''),
+            teacherComment: formData.teacherComment,
+            academicSession: formData.academicSession,
+            term: formData.term,
+            published: publishedEl ? publishedEl.value : 'false',
+            viewActive: viewEl ? viewEl.value : 'false',
+            signatureUrl: formData.signatureUrl
+          });
+        });
+      });
+      return entries;
+    }
+
+    function renderSummary(){
+      const s = bootstrapData.summaries;
+      if (!s) return;
+      $('summaryGrid').innerHTML = [
+        ['Students', s.studentsTotal],
+        ['Active Students', s.studentsActive],
+        ['Results', s.resultsTotal],
+        ['View Active Results', s.resultsViewActive],
+        ['Published Results', s.resultsPublished],
+        ['Admins', s.adminsTotal],
+        ['Archived Students', s.studentsArchived],
+        ['Exam Codes', s.examCodesTotal]
+      ].map(item => `<div class="summary-card"><div class="summary-label">${esc(item[0])}</div><div class="summary-value">${esc(item[1])}</div></div>`).join('');
+
+      $('recentStudentsBody').innerHTML = bootstrapData.students.slice(0,8).map(s => `
+        <tr><td>${esc(s.regId)}</td><td>${esc(s.fullName)}</td><td>${esc(s.classLevel)}</td><td>${statusBadge(s)}</td></tr>
+      `).join('') || `<tr><td colspan="4" class="muted">No students yet.</td></tr>`;
+
+      $('recentResultsBody').innerHTML = bootstrapData.results.slice(0,8).map(r => `
+        <tr><td>${esc(r.examCode)}</td><td>${esc(r.subject)}</td><td>${esc(r.regId)}</td><td>${esc(r.studentScore)} / ${esc(r.percentage)}%</td><td>${esc(r.publishedAt || '—')}</td></tr>
+      `).join('') || `<tr><td colspan="5" class="muted">No results yet.</td></tr>`;
+    }
+
+    function statusBadge(row){
+      if (row.deleted) return `<span class="tag" style="color:#ffdce4">Deleted</span>`;
+      if (row.archived) return `<span class="tag" style="color:#fff0d8">Archived</span>`;
+      return `<span class="tag" style="color:${row.active ? '#d9fff1':'#ffdce4'}">${row.active ? 'Active':'Inactive'}</span>`;
+    }
+
+    function renderStudents(){
+      fillOptions($('resultRegIdSelect'), bootstrapData.students.filter(s => !s.deleted).map(s => s.regId), 'Select student');
+      const q = $('studentSearch').value.trim().toLowerCase();
+      const filter = $('studentFilterState').value;
+      const rows = bootstrapData.students.filter(s => {
+        const hay = `${s.regId} ${s.fullName} ${s.classLevel} ${s.category}`.toLowerCase();
+        if (q && !hay.includes(q)) return false;
+        if (filter === 'active' && (!s.active || s.archived || s.deleted)) return false;
+        if (filter === 'archived' && !s.archived) return false;
+        if (filter === 'deleted' && !s.deleted) return false;
+        return true;
+      });
+
+      $('studentsBody').innerHTML = rows.map(s => `
+        <tr>
+          <td>${esc(s.regId)}</td>
+          <td>${esc(s.fullName)}</td>
+          <td>${esc(s.classLevel)}</td>
+          <td>${esc(s.category)}</td>
+          <td>${esc(s.parentEmail || '—')}<br>${esc(s.parentPhone || '')}</td>
+          <td>${statusBadge(s)}</td>
+          <td>
+            <div class="actions">
+              <button class="btn btn-soft small-btn" onclick="editStudent('${esc(s.regId)}')">Edit</button>
+              <button class="btn btn-soft" onclick="changeStudentState('${esc(s.regId)}','${s.active ? 'deactivate':'activate'}')">${s.active ? 'Deactivate':'Activate'}</button>
+              <button class="btn btn-warn" onclick="changeStudentState('${esc(s.regId)}','${s.archived ? 'restore':'archive'}')">${s.archived ? 'Restore':'Archive'}</button>
+              <button class="btn btn-danger" onclick="changeStudentState('${esc(s.regId)}','${s.deleted ? 'restore':'delete'}')">${s.deleted ? 'Restore':'Delete'}</button>
+              <button class="btn btn-danger" onclick="changeStudentState('${esc(s.regId)}','harddelete')">Delete Forever</button>
+            </div>
+          </td>
+        </tr>
+      `).join('') || `<tr><td colspan="7" class="muted">No students found.</td></tr>`;
+    }
+
+    window.editStudent = function(regId){
+      const row = bootstrapData.students.find(s => s.regId === regId);
+      if (!row) return;
+      const form = $('studentForm');
+      Object.keys(row).forEach(key => {
+        const field = form.querySelector(`[name="${key}"]`) || form.querySelector(`[name="${camelToFormName(key)}"]`);
+        if (field) field.value = row[key] ?? '';
+      });
+      form.querySelector('[name="regId"]').value = row.regId;
+      form.querySelector('[name="fullName"]').value = row.fullName;
+      form.querySelector('[name="age"]').value = row.age;
+      form.querySelector('[name="gender"]').value = row.gender;
+      form.querySelector('[name="dob"]').value = row.dob;
+      form.querySelector('[name="parentName"]').value = row.parentName;
+      form.querySelector('[name="parentPhone"]').value = row.parentPhone;
+      form.querySelector('[name="parentEmail"]').value = row.parentEmail;
+      form.querySelector('[name="schoolName"]').value = row.schoolName;
+      form.querySelector('[name="state"]').value = row.state;
+      form.querySelector('[name="cityLGA"]').value = row.cityLGA;
+      form.querySelector('[name="classLevel"]').value = row.classLevel;
+      form.querySelector('[name="category"]').value = row.category;
+      form.querySelector('[name="address"]').value = row.address;
+      form.querySelector('[name="passportUrl"]').value = row.passportUrl;
+      previewPassport(row.passportUrl);
+      activateSection('studentsSection');
+    }
+
+    function camelToFormName(key){ return key; }
+
+    window.changeStudentState = async function(regId, state){
+      if (state === 'harddelete' && !confirm('Delete this student forever? This also removes their result rows.')) return;
+      if (state !== 'harddelete' && !confirm(`Proceed with ${state} for ${regId}?`)) return;
+      try{
+        const res = await apiRequest('setStudentState', {regId, state}, 'POST', 'Updating student state...');
+        showToast(res.message);
+        await loadBootstrap();
+      }catch(err){ showToast(err.message, 'error'); }
+    }
+
+    function renderResults(){
+      const q = $('resultSearchText').value.trim().toLowerCase();
+      const examCode = $('resultSearchExamCode').value.trim().toLowerCase();
+      const session = $('resultSearchSession').value.trim().toLowerCase();
+      const term = $('resultSearchTerm').value.trim().toLowerCase();
+      const state = $('resultStateFilter').value;
+
+      const rows = bootstrapData.results.filter(r => {
+        const hay = `${r.examCode} ${r.subject} ${r.regId} ${r.examTitle}`.toLowerCase();
+        if (q && !hay.includes(q)) return false;
+        if (examCode && !String(r.examCode).toLowerCase().includes(examCode)) return false;
+        if (session && !String(r.academicSession).toLowerCase().includes(session)) return false;
+        if (term && !String(r.term).toLowerCase().includes(term)) return false;
+        if (state === 'published' && !r.published) return false;
+        if (state === 'viewActive' && !r.viewActive) return false;
+        if (state === 'archived' && !r.archived) return false;
+        if (state === 'deleted' && !r.deleted) return false;
+        return true;
+      });
+
+      $('resultsBody').innerHTML = rows.map(r => `
+        <tr>
+          <td>${esc(r.examCode)}<br><span class="muted small">${esc(r.examTitle)}</span></td>
+          <td>${esc(r.subject)}<br><span class="muted small">${esc(r.academicSession)} • ${esc(r.term)}</span></td>
+          <td>${esc(r.regId)}</td>
+          <td>${esc(r.studentScore || '—')} / ${esc(r.maxScore || '—')}<br><span class="muted">${esc(r.percentage || '—')}%</span></td>
+          <td>${esc(r.positionText || '—')}</td>
+          <td>${r.published ? '<span class="tag">Yes</span>' : '<span class="tag">No</span>'}</td>
+          <td>${r.viewActive ? '<span class="tag">Active</span>' : '<span class="tag">Inactive</span>'}<br><span class="muted small">Code: ${esc(r.examCode)}</span></td>
+          <td>${esc(r.publishedAt || '—')}</td>
+          <td>${r.deleted ? '<span class="tag" style="color:#ffdce4">Deleted</span>' : r.archived ? '<span class="tag" style="color:#fff0d8">Archived</span>' : '<span class="tag">'+esc(r.resultStatus || 'PENDING')+'</span>'}</td>
+          <td>
+            <div class="actions">
+              <button class="btn btn-soft" onclick="editResult('${esc(r.resultId)}')">Edit</button>
+              <button class="btn btn-soft" onclick="changeResultState('${esc(r.resultId)}','${r.published ? 'unpublish':'publish'}')">${r.published ? 'Unpublish':'Publish'}</button>
+              <button class="btn btn-soft" onclick="changeResultState('${esc(r.resultId)}','${r.viewActive ? 'viewinactive':'viewactive'}')">${r.viewActive ? 'Hide':'View Active'}</button>
+              <button class="btn btn-warn" onclick="changeResultState('${esc(r.resultId)}','${r.archived ? 'restore':'archive'}')">${r.archived ? 'Restore':'Archive'}</button>
+              <button class="btn btn-danger" onclick="changeResultState('${esc(r.resultId)}','${r.deleted ? 'restore':'delete'}')">${r.deleted ? 'Restore':'Delete'}</button>
+              <button class="btn btn-danger" onclick="changeResultState('${esc(r.resultId)}','harddelete')">Delete Forever</button>
+            </div>
+          </td>
+        </tr>
+      `).join('') || `<tr><td colspan="10" class="muted">No results found.</td></tr>`;
+    }
+
+    window.editResult = function(resultId){
+      const row = bootstrapData.results.find(r => r.resultId === resultId);
+      if (!row) return;
+      const form = $('resultForm');
+      form.targetMode.value = 'single';
+      form.selectedRegId.value = row.regId;
+      form.manualRegId.value = '';
+      form.examCode.value = row.examCode;
+      form.examTitle.value = row.examTitle;
+      form.examDate.value = row.examDate;
+      form.academicSession.value = row.academicSession;
+      form.term.value = row.term;
+      form.passMarkNumber.value = row.passMarkNumber;
+      form.passMarkPercentage.value = row.passMarkPercentage;
+      form.signatureUrl.value = row.signatureUrl;
+      form.teacherComment.value = row.teacherComment;
+      renderSubjectBoxes(row);
+      activateSection('resultsSection');
+    }
+
+    window.changeResultState = async function(resultId, state){
+      if (state === 'harddelete' && !confirm('Delete this result forever?')) return;
+      if (state !== 'harddelete' && !confirm(`Proceed with ${state} for this result?`)) return;
+      try{
+        const res = await apiRequest('setResultState', {resultId, state}, 'POST', 'Updating result state...');
+        showToast(res.message);
+        await loadBootstrap();
+      }catch(err){ showToast(err.message, 'error'); }
+    }
+
+    function renderAdmins(){
+      $('adminsBody').innerHTML = bootstrapData.admins.map(a => `
+        <tr>
+          <td>${esc(a.username)}</td>
+          <td>${esc(a.displayName)}</td>
+          <td>${esc(a.email || '—')}<br>${esc(a.phone || '')}</td>
+          <td>${statusBadge(a)}</td>
+          <td>
+            <div class="actions">
+              <button class="btn btn-soft" onclick="changeAdminState('${esc(a.username)}','${a.active ? 'deactivate':'activate'}')">${a.active ? 'Deactivate':'Activate'}</button>
+              <button class="btn btn-warn" onclick="changeAdminState('${esc(a.username)}','${a.archived ? 'restore':'archive'}')">${a.archived ? 'Restore':'Archive'}</button>
+              <button class="btn btn-danger" onclick="changeAdminState('${esc(a.username)}','${a.deleted ? 'restore':'delete'}')">${a.deleted ? 'Restore':'Delete'}</button>
+              <button class="btn btn-danger" onclick="changeAdminState('${esc(a.username)}','harddelete')">Delete Forever</button>
+            </div>
+          </td>
+        </tr>
+      `).join('') || `<tr><td colspan="5" class="muted">No admins found.</td></tr>`;
+    }
+
+    window.changeAdminState = async function(username, state){
+      if (state === 'harddelete' && !confirm('Delete this admin forever?')) return;
+      if (state !== 'harddelete' && !confirm(`Proceed with ${state} for ${username}?`)) return;
+      try{
+        const res = await apiRequest('setAdminState', {username, state}, 'POST', 'Updating admin state...');
+        showToast(res.message);
+        await loadBootstrap();
+      }catch(err){ showToast(err.message, 'error'); }
+    }
+
+    async function loadBootstrap(){
+      const res = await apiRequest('getAdminBootstrap', {}, 'GET', 'Loading dashboard...');
+      bootstrapData = res.data;
+      $('welcomeText').textContent = `Signed in • ${res.data.settings.BRAND_NAME || 'Genz Edutech Innovations'}`;
+      fillOptions($('studentClassLevel'), res.data.classOptions, 'Select class level');
+      fillOptions($('studentCategory'), res.data.categoryOptions, 'Select category');
+      fillOptions($('resultRegIdSelect'), res.data.students.filter(s => !s.deleted).map(s => s.regId), 'Select student');
+      $('resultAcademicSession').value = res.data.settings.ACADEMIC_SESSION || '';
+      $('resultTerm').value = res.data.settings.TERM || '';
+      renderSubjectBoxes();
+      renderSummary();
+      renderStudents();
+      renderResults();
+      renderAdmins();
+      bindSettings();
+    }
+
+    function bindSettings(){
+      const form = $('settingsForm');
+      Object.keys(bootstrapData.settings).forEach(key => {
+        const field = form.querySelector(`[name="${key}"]`);
+        if (field) field.value = bootstrapData.settings[key] ?? '';
+      });
+    }
+
+    function activateSection(id){
+      document.querySelectorAll('.nav-btn[data-section]').forEach(btn => btn.classList.toggle('active', btn.dataset.section === id));
+      document.querySelectorAll('.section').forEach(section => section.classList.toggle('active', section.id === id));
+      if (window.innerWidth <= 980) $('sidebar').classList.remove('open');
+    }
+
+    function previewPassport(url){
+      const box = $('passportPreview');
+      if (url && /^https?:\/\//i.test(url.trim())) box.innerHTML = `<img src="${esc(url)}" alt="Passport" />`;
+      else box.textContent = 'No image';
+    }
+
+    async function validateSavedSession(){
+      const t = token();
+      if (!t) return false;
+      try{
+        const res = await apiRequest('validateSession', {token:t}, 'POST', 'Checking session...');
+        return res.data && res.data.role === 'admin';
+      }catch(err){
+        clearToken();
+        return false;
+      }
+    }
+
+    document.querySelectorAll('[data-auth-tab]').forEach(btn => btn.addEventListener('click', ()=> setAuthTab(btn.dataset.authTab)));
+
+    $('loginForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      try{
+        const data = serializeForm(e.target);
+        const res = await apiRequest('adminLogin', data, 'POST', 'Signing in...');
+        setToken(res.data.token);
+        $('authView').classList.add('hidden');
+        $('appView').classList.remove('hidden');
+        await loadBootstrap();
+        showToast(res.message);
+      }catch(err){ showToast(err.message, 'error'); }
     });
 
-    function setAdminSession(token){
-      localStorage.setItem(ADMIN_TOKEN_KEY, token);
-    }
-    function getAdminSession(){
-      return localStorage.getItem(ADMIN_TOKEN_KEY) || '';
-    }
-    function clearAdminSession(){
-      localStorage.removeItem(ADMIN_TOKEN_KEY);
-    }
-
-    function showDashboard(){
-      authSection.classList.add('hidden');
-      dashboardSection.classList.remove('hidden');
-      logoutBtn.classList.remove('hidden');
-    }
-    function showAuth(){
-      authSection.classList.remove('hidden');
-      dashboardSection.classList.add('hidden');
-      logoutBtn.classList.add('hidden');
-    }
-
-    function fillSettings(settings){
-      const form = document.getElementById('settingsForm');
-      Object.keys(settings || {}).forEach(key => {
-        const input = form.querySelector(`[name="${key}"]`);
-        if (input) input.value = settings[key];
-      });
-      document.getElementById('portalLabel').textContent = (settings.BRAND_NAME || 'Genz Edutech Innovations') + ' — Admin Result Portal';
-
-      const resultForm = document.getElementById('resultForm');
-      if (!resultForm.examTitle.value) resultForm.examTitle.value = settings.EXAM_TITLE || '';
-      if (!resultForm.academicSession.value) resultForm.academicSession.value = settings.ACADEMIC_SESSION || '';
-      if (!resultForm.term.value) resultForm.term.value = settings.TERM || '';
-      if (!resultForm.passMarkNumber.value) resultForm.passMarkNumber.value = settings.PASS_MARK_NUMBER || '50';
-      if (!resultForm.passMarkPercentage.value) resultForm.passMarkPercentage.value = settings.PASS_MARK_PERCENTAGE || '50';
-    }
-
-    function renderSummary(summary){
-      document.getElementById('statAdmins').textContent = summary.admins || 0;
-      document.getElementById('statStudents').textContent = summary.students || 0;
-      document.getElementById('statResults').textContent = summary.results || 0;
-      document.getElementById('statPublished').textContent = summary.publishedResults || 0;
-    }
-
-    function renderRecentStudents(items){
-      const body = document.getElementById('recentStudentsBody');
-      if (!items || !items.length) {
-        body.innerHTML = '<tr><td colspan="5" class="muted">No student records yet.</td></tr>';
-        return;
-      }
-      body.innerHTML = items.map(item => `
-        <tr>
-          <td>${escapeHtml(item.regId || '')}</td>
-          <td>${escapeHtml(item.fullName || '')}</td>
-          <td>${escapeHtml(item.classLevel || '')}</td>
-          <td><span class="pill ${item.active ? 'ok' : 'no'}">${item.active ? 'Active' : 'Inactive'}</span></td>
-          <td>${escapeHtml(item.updatedAt || '')}</td>
-        </tr>
-      `).join('');
-    }
-
-    function renderRecentResults(items){
-      const body = document.getElementById('recentResultsBody');
-      if (!items || !items.length) {
-        body.innerHTML = '<tr><td colspan="5" class="muted">No result records yet.</td></tr>';
-        return;
-      }
-      body.innerHTML = items.map(item => `
-        <tr>
-          <td>${escapeHtml(item.regId || '')}</td>
-          <td>${escapeHtml(item.examTitle || '')}</td>
-          <td>${escapeHtml(String(item.score || ''))} (${escapeHtml(String(item.percentage || ''))}%)</td>
-          <td><span class="pill ${item.published ? 'ok' : 'no'}">${item.published ? 'Published' : 'Draft'}</span></td>
-          <td>${escapeHtml(item.updatedAt || '')}</td>
-        </tr>
-      `).join('');
-    }
-
-    function loadBootstrap(){
-      const token = getAdminSession();
-      if (!token) {
-        showAuth();
-        return;
-      }
-
-      apiRequest({
-        action: 'getAdminBootstrap',
-        adminToken: token
-      }, 'Loading dashboard...')
-      .then(res => {
-        showDashboard();
-        fillSettings(res.settings || {});
-        renderSummary(res.summary || {});
-        renderRecentStudents(res.recentStudents || []);
-        renderRecentResults(res.recentResults || []);
-      })
-      .catch(err => {
-        clearAdminSession();
-        showAuth();
-        showToast(err.message, 'error');
-      });
-    }
-
-    document.getElementById('loginForm').addEventListener('submit', function(e){
+    $('signupForm').addEventListener('submit', async e => {
       e.preventDefault();
-      const data = serializeForm(this);
-      apiRequest({
-        action: 'adminLogin',
-        username: data.username,
-        password: data.password
-      }, 'Signing in...')
-      .then(res => {
-        setAdminSession(res.token);
-        showToast(res.message || 'Login successful.');
-        this.reset();
-        loadBootstrap();
-      })
-      .catch(err => showToast(err.message, 'error'));
-    });
-
-    document.getElementById('signupForm').addEventListener('submit', function(e){
-      e.preventDefault();
-      const data = serializeForm(this);
-      apiRequest({
-        action: 'adminSignup',
-        displayName: data.displayName,
-        username: data.username,
-        email: data.email,
-        password: data.password
-      }, 'Creating admin account...')
-      .then(res => {
-        showToast(res.message || 'Admin account created.');
-        this.reset();
+      try{
+        const res = await apiRequest('adminSignup', serializeForm(e.target), 'POST', 'Creating admin...');
+        showToast(res.message);
+        e.target.reset();
         setAuthTab('login');
-      })
-      .catch(err => showToast(err.message, 'error'));
+      }catch(err){ showToast(err.message, 'error'); }
     });
 
-    document.getElementById('settingsForm').addEventListener('submit', function(e){
+    $('resetRequestForm').addEventListener('submit', async e => {
       e.preventDefault();
-      const data = serializeForm(this);
-      apiRequest({
-        action: 'saveSettings',
-        adminToken: getAdminSession(),
-        ...data
-      }, 'Saving settings...')
-      .then(res => {
-        fillSettings(res.settings || {});
-        showToast(res.message || 'Settings saved.');
-        loadBootstrap();
-      })
-      .catch(err => showToast(err.message, 'error'));
+      try{
+        const data = serializeForm(e.target);
+        const res = await apiRequest('requestPasswordReset', {role:'admin', identifier:data.identifier}, 'POST', 'Sending reset code...');
+        showToast(res.message);
+      }catch(err){ showToast(err.message, 'error'); }
     });
 
-    document.getElementById('studentForm').addEventListener('submit', function(e){
+    $('resetApplyForm').addEventListener('submit', async e => {
       e.preventDefault();
-      const data = serializeForm(this);
-      apiRequest({
-        action: 'saveStudent',
-        adminToken: getAdminSession(),
-        ...data
-      }, 'Saving student...')
-      .then(res => {
-        showToast(res.message || 'Student saved.');
-        this.reset();
-        loadBootstrap();
-      })
-      .catch(err => showToast(err.message, 'error'));
+      try{
+        const data = serializeForm(e.target);
+        const res = await apiRequest('resetPassword', {role:'admin', ...data}, 'POST', 'Resetting password...');
+        showToast(res.message);
+        setAuthTab('login');
+      }catch(err){ showToast(err.message, 'error'); }
     });
 
-    document.getElementById('resultForm').addEventListener('submit', function(e){
+    $('studentForm').addEventListener('submit', async e => {
       e.preventDefault();
-      const data = serializeForm(this);
-      apiRequest({
-        action: 'saveResult',
-        adminToken: getAdminSession(),
-        ...data
-      }, 'Saving result...')
-      .then(res => {
-        showToast(res.message || 'Result saved.');
-        this.reset();
-        loadBootstrap();
-      })
-      .catch(err => showToast(err.message, 'error'));
+      try{
+        const res = await apiRequest('saveStudent', serializeForm(e.target), 'POST', 'Saving student...');
+        $('studentFormStatus').textContent = res.message;
+        $('studentFormStatus').className = 'status ok';
+        showToast(res.message);
+        e.target.querySelector('[name="password"]').value = '';
+        await loadBootstrap();
+      }catch(err){
+        $('studentFormStatus').textContent = err.message;
+        $('studentFormStatus').className = 'status error';
+        showToast(err.message, 'error');
+      }
     });
 
-    logoutBtn.addEventListener('click', function(){
-      clearAdminSession();
-      showAuth();
-      showToast('Logged out successfully.');
+    $('clearStudentFormBtn').addEventListener('click', () => {
+      $('studentForm').reset();
+      previewPassport('');
+    });
+    $('passportUrlInput').addEventListener('input', e => previewPassport(e.target.value));
+
+    $('importStudentsBtn').addEventListener('click', async () => {
+      try{
+        const file = $('studentsCsvFile').files[0];
+        if (!file) throw new Error('Choose a student CSV file first.');
+        const rows = parseCsv(await file.text());
+        const res = await apiRequest('importStudentsCsv', {rows}, 'POST', 'Importing students...');
+        $('studentImportStatus').textContent = `${res.message} Created: ${res.data.created}, Updated: ${res.data.updated}`;
+        $('studentImportStatus').className = 'status ok';
+        showToast(res.message);
+        await loadBootstrap();
+      }catch(err){
+        $('studentImportStatus').textContent = err.message;
+        $('studentImportStatus').className = 'status error';
+        showToast(err.message, 'error');
+      }
     });
 
-    function escapeHtml(value){
-      return String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-    }
+    $('downloadStudentTemplateBtn').addEventListener('click', () => {
+      downloadText('student_template.csv', 'regId,password,fullName,schoolName,classLevel,category,age,gender,dob,parentName,parentPhone,parentEmail,state,cityLGA,address\n');
+    });
 
-    loadBootstrap();
+    $('resultForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      try{
+        const entries = buildResultEntriesFromForm();
+        const res = await apiRequest('saveResultEntries', {entries}, 'POST', 'Saving result entries...');
+        $('resultFormStatus').textContent = `${res.message} Saved: ${res.data.saved}`;
+        $('resultFormStatus').className = 'status ok';
+        showToast(res.message);
+        await loadBootstrap();
+      }catch(err){
+        $('resultFormStatus').textContent = err.message;
+        $('resultFormStatus').className = 'status error';
+        showToast(err.message, 'error');
+      }
+    });
+
+    $('clearResultFormBtn').addEventListener('click', () => {
+      $('resultForm').reset();
+      $('resultAcademicSession').value = bootstrapData.settings.ACADEMIC_SESSION || '';
+      $('resultTerm').value = bootstrapData.settings.TERM || '';
+      renderSubjectBoxes();
+    });
+
+    $('recalculateBtn').addEventListener('click', async () => {
+      try{
+        const formData = serializeForm($('resultForm'));
+        const res = await apiRequest('recalculateResults', {
+          examCode: formData.examCode,
+          academicSession: formData.academicSession,
+          term: formData.term
+        }, 'POST', 'Recalculating results...');
+        showToast(res.message + ` Affected: ${res.data.affected}`);
+        await loadBootstrap();
+      }catch(err){ showToast(err.message, 'error'); }
+    });
+
+    $('importResultsBtn').addEventListener('click', async () => {
+      try{
+        const file = $('resultsCsvFile').files[0];
+        if (!file) throw new Error('Choose a results CSV file first.');
+        const rows = parseCsv(await file.text());
+        const res = await apiRequest('importResultsCsv', {rows}, 'POST', 'Importing results...');
+        $('resultImportStatus').textContent = `${res.message} Created: ${res.data.created}, Updated: ${res.data.updated}`;
+        $('resultImportStatus').className = 'status ok';
+        showToast(res.message);
+        await loadBootstrap();
+      }catch(err){
+        $('resultImportStatus').textContent = err.message;
+        $('resultImportStatus').className = 'status error';
+        showToast(err.message, 'error');
+      }
+    });
+
+    $('downloadResultsTemplateBtn').addEventListener('click', () => {
+      downloadText('results_template.csv', 'regId,examCode,examTitle,subject,examDate,maxScore,passMarkNumber,passMarkPercentage,studentScore,teacherComment,academicSession,term,published,viewActive,signatureUrl\n');
+    });
+
+    $('refreshResultsBtn').addEventListener('click', loadBootstrap);
+    $('studentSearch').addEventListener('input', renderStudents);
+    $('studentFilterState').addEventListener('change', renderStudents);
+    $('resultSearchText').addEventListener('input', renderResults);
+    $('resultSearchExamCode').addEventListener('input', renderResults);
+    $('resultSearchSession').addEventListener('input', renderResults);
+    $('resultSearchTerm').addEventListener('input', renderResults);
+    $('resultStateFilter').addEventListener('change', renderResults);
+
+    $('settingsForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      try{
+        const res = await apiRequest('saveSettings', serializeForm(e.target), 'POST', 'Saving settings...');
+        $('settingsStatus').textContent = res.message;
+        $('settingsStatus').className = 'status ok';
+        showToast(res.message);
+        await loadBootstrap();
+      }catch(err){
+        $('settingsStatus').textContent = err.message;
+        $('settingsStatus').className = 'status error';
+        showToast(err.message, 'error');
+      }
+    });
+
+    $('sendBulkEmailBtn').addEventListener('click', async () => {
+      try{
+        const res = await apiRequest('sendBulkEmail', {
+          target: $('bulkEmailTarget').value,
+          subject: $('bulkEmailSubject').value,
+          message: $('bulkEmailMessage').value
+        }, 'POST', 'Sending bulk email...');
+        $('bulkEmailStatus').textContent = `${res.message} Recipients: ${res.data.recipients}`;
+        $('bulkEmailStatus').className = 'status ok';
+        showToast(res.message);
+      }catch(err){
+        $('bulkEmailStatus').textContent = err.message;
+        $('bulkEmailStatus').className = 'status error';
+        showToast(err.message, 'error');
+      }
+    });
+
+    $('exportSmsBtn').addEventListener('click', async () => {
+      try{
+        const res = await apiRequest('exportSmsContacts', {target: $('smsTarget').value}, 'POST', 'Preparing SMS contacts...');
+        downloadText(res.data.filename, res.data.csv, 'text/csv;charset=utf-8');
+        $('smsStatus').textContent = res.message;
+        $('smsStatus').className = 'status ok';
+        showToast(res.message);
+      }catch(err){
+        $('smsStatus').textContent = err.message;
+        $('smsStatus').className = 'status error';
+        showToast(err.message, 'error');
+      }
+    });
+
+    $('exportStudentsBtn').addEventListener('click', async () => {
+      try{
+        const res = await apiRequest('exportStudentsCsv', {}, 'POST', 'Preparing student export...');
+        downloadText(res.data.filename, res.data.csv, 'text/csv;charset=utf-8');
+      }catch(err){ showToast(err.message, 'error'); }
+    });
+
+    $('exportResultsBtn').addEventListener('click', async () => {
+      try{
+        const res = await apiRequest('exportResultsCsv', {}, 'POST', 'Preparing result export...');
+        downloadText(res.data.filename, res.data.csv, 'text/csv;charset=utf-8');
+      }catch(err){ showToast(err.message, 'error'); }
+    });
+
+    $('refreshBtn').addEventListener('click', loadBootstrap);
+    $('logoutBtn').addEventListener('click', () => { clearToken(); location.reload(); });
+    $('menuBtn').addEventListener('click', () => $('sidebar').classList.toggle('open'));
+    document.querySelectorAll('.nav-btn[data-section]').forEach(btn => btn.addEventListener('click', ()=> activateSection(btn.dataset.section)));
+
+    (async function init(){
+      setAuthTab('login');
+      const ok = await validateSavedSession();
+      if (ok){
+        $('authView').classList.add('hidden');
+        $('appView').classList.remove('hidden');
+        await loadBootstrap();
+      }
+    })();
   </script>
 </body>
 </html>
