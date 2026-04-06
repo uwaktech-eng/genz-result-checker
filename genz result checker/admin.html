@@ -267,7 +267,7 @@
               </div>
               <div class="grid grid-3">
                 <div class="field"><label>City / LGA</label><input name="cityLGA" /></div>
-                <div class="field"><label>Class Level</label><select name="classLevel" id="studentClassLevel"></select></div>
+                <div class="field"><label>Class Level</label><input name="classLevel" id="studentClassLevel" placeholder="e.g. Year 5, JSS 2, 200 Level" /></div>
                 <div class="field"><label>Category</label><select name="category" id="studentCategory"></select></div>
               </div>
               <div class="field"><label>Address</label><textarea name="address"></textarea></div>
@@ -869,8 +869,8 @@
       const res = await apiRequest('getAdminBootstrap', {}, 'GET', 'Loading dashboard...');
       bootstrapData = res.data;
       $('welcomeText').textContent = `Signed in • ${res.data.settings.BRAND_NAME || 'Genz Edutech Innovations'}`;
-      fillOptions($('studentClassLevel'), res.data.classOptions, 'Select class level');
-      fillOptions($('studentCategory'), res.data.categoryOptions, 'Select category');
+      $('studentClassLevel').value = $('studentClassLevel').value || '';
+      fillOptions($('studentCategory'), ['Lower Primary','Upper Primary','Junior High School','Senior High School','Undergraduate'], 'Select category');
       fillOptions($('resultRegIdSelect'), res.data.students.filter(s => !s.deleted).map(s => s.regId), 'Select student');
       $('resultAcademicSession').value = res.data.settings.ACADEMIC_SESSION || '';
       $('resultTerm').value = res.data.settings.TERM || '';
