@@ -3,142 +3,79 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Genz Edutech Innovations | Result Checker</title>
+  <title>Genz Edutech Innovations | Result Portal</title>
   <style>
-    :root{
-      --bg:#07111f;
-      --bg2:#0d1d34;
-      --card:rgba(255,255,255,0.12);
-      --line:rgba(255,255,255,0.14);
-      --text:#f3f7ff;
-      --muted:#c5d3ea;
-      --accent:#7c5cff;
-      --accent2:#2ec5ff;
-      --success:#27c48f;
-      --danger:#ff6b7a;
-      --shadow:0 20px 60px rgba(0,0,0,.28);
-      --radius:22px;
-    }
+    :root{--bg:#0b1220;--bg2:#13203c;--text:#f7fbff;--muted:#b8c7de;--card:rgba(255,255,255,.09);--line:rgba(255,255,255,.12);--primary:#6f63ff;--primary2:#21c7ff;--shadow:0 26px 60px rgba(0,0,0,.28)}
     *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(124,92,255,.28), transparent 35%),
-        radial-gradient(circle at bottom right, rgba(46,197,255,.20), transparent 35%),
-        linear-gradient(160deg, var(--bg), var(--bg2));
-      min-height:100vh;
-    }
-    .wrap{max-width:1100px;margin:0 auto;padding:24px}
-    .nav{
-      display:flex;justify-content:space-between;align-items:center;gap:16px;
-      padding:14px 18px;margin-top:8px;
-      background:var(--card);backdrop-filter:blur(16px);
-      border:1px solid var(--line);border-radius:18px;
-      box-shadow:var(--shadow);
-    }
-    .brand{font-weight:800;letter-spacing:.2px}
-    .hero{
-      display:grid;grid-template-columns:1.2fr .8fr;gap:24px;align-items:center;
-      padding:48px 0 28px;
-    }
-    .glass{
-      background:var(--card);backdrop-filter:blur(18px);
-      border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
-    }
-    .hero-card{padding:34px}
-    h1{font-size:clamp(2rem,4vw,3.4rem);line-height:1.05;margin:0 0 12px}
-    p{color:var(--muted);line-height:1.65}
-    .badge{
-      display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:999px;
-      background:rgba(255,255,255,.08);border:1px solid var(--line);margin-bottom:14px;font-size:14px
-    }
-    .dot{width:10px;height:10px;border-radius:50%;background:var(--success);box-shadow:0 0 18px var(--success)}
-    .actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:22px}
-    .btn{
-      display:inline-flex;align-items:center;justify-content:center;
-      padding:14px 18px;border-radius:14px;text-decoration:none;font-weight:700;
-      border:1px solid transparent;transition:.22s ease;cursor:pointer;
-    }
-    .btn:hover{transform:translateY(-1px)}
-    .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white}
-    .btn-secondary{background:rgba(255,255,255,.06);border-color:var(--line);color:var(--text)}
-    .panel{
-      min-height:320px;padding:28px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden
-    }
-    .orb{
-      position:absolute;border-radius:50%;filter:blur(8px);opacity:.9
-    }
-    .orb.one{width:170px;height:170px;background:rgba(124,92,255,.44);top:18px;left:20px}
-    .orb.two{width:150px;height:150px;background:rgba(46,197,255,.34);bottom:26px;right:18px}
-    .screen{
-      position:relative;width:100%;max-width:340px;background:rgba(255,255,255,.1);
-      border:1px solid var(--line);border-radius:20px;padding:18px
-    }
-    .bar{height:12px;border-radius:999px;background:rgba(255,255,255,.12);margin:10px 0}
-    .bar.big{height:64px;border-radius:18px}
-    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:16px 0 38px}
-    .feature{padding:22px}
-    .feature h3{margin:10px 0 8px;font-size:18px}
-    .foot{text-align:center;color:var(--muted);padding-bottom:26px}
-    @media (max-width:900px){
-      .hero{grid-template-columns:1fr}
-      .cards{grid-template-columns:1fr}
-    }
+    body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--text);background:
+      radial-gradient(circle at top left, rgba(111,99,255,.22), transparent 28%),
+      radial-gradient(circle at top right, rgba(33,199,255,.14), transparent 24%),
+      linear-gradient(150deg,var(--bg),var(--bg2));min-height:100vh}
+    .wrap{max-width:1180px;margin:0 auto;padding:24px}
+    .glass{background:var(--card);border:1px solid var(--line);border-radius:26px;backdrop-filter:blur(18px);box-shadow:var(--shadow)}
+    .topbar{padding:16px 18px;display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap}
+    .brand{font-weight:900;font-size:1.15rem}
+    .hero{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;align-items:stretch;margin-top:18px}
+    .hero-card{padding:30px}
+    .eyebrow{display:inline-flex;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid var(--line);font-size:12px;font-weight:800}
+    h1{font-size:clamp(2rem,4vw,3.3rem);line-height:1.08;margin:18px 0 14px}
+    p{line-height:1.7}
+    .muted{color:var(--muted)}
+    .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+    .btn{border:none;border-radius:16px;padding:14px 18px;font-weight:900;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+    .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff}
+    .btn-soft{background:rgba(255,255,255,.08);color:#fff;border:1px solid var(--line)}
+    .feature-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:18px}
+    .feature{padding:18px}
+    .feature strong{display:block;margin-bottom:8px}
+    .mock{padding:22px;display:grid;gap:14px}
+    .panel{padding:18px;border-radius:20px;background:rgba(255,255,255,.07);border:1px solid var(--line)}
+    .pill{display:inline-flex;padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.09);border:1px solid var(--line);font-size:12px;font-weight:800}
+    @media (max-width:980px){.hero,.feature-grid{grid-template-columns:1fr}.wrap{padding:16px}}
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="nav">
+    <div class="glass topbar">
       <div class="brand">Genz Edutech Innovations</div>
-      <div style="color:var(--muted);font-size:14px">Result Checker Portal</div>
+      <div class="muted">Modern result checker portal</div>
     </div>
 
     <section class="hero">
       <div class="glass hero-card">
-        <div class="badge"><span class="dot"></span> Secure School Result Access</div>
-        <h1>Modern result checking for admins and students.</h1>
-        <p>
-          This portal lets administrators manage student records and publish results, while students can log in
-          privately to view only their published report cards in a clean printable format.
+        <span class="eyebrow">Production-ready static frontend + Apps Script backend</span>
+        <h1>Beautiful school result management with exam-code controlled student access</h1>
+        <p class="muted">
+          This portal gives admins clean student and result management, soft-delete and restore flows, CSV imports, ranking recalculation, bulk email, and a report card view students can download as a real PDF.
         </p>
         <div class="actions">
           <a class="btn btn-primary" href="student.html">Open Student Portal</a>
-          <a class="btn btn-secondary" href="admin.html">Open Admin Portal</a>
+          <a class="btn btn-soft" href="admin.html">Open Admin Portal</a>
         </div>
       </div>
 
-      <div class="glass panel">
-        <div class="orb one"></div>
-        <div class="orb two"></div>
-        <div class="screen">
-          <div class="bar" style="width:42%"></div>
-          <div class="bar big"></div>
-          <div class="bar" style="width:100%"></div>
-          <div class="bar" style="width:78%"></div>
-          <div class="bar" style="width:86%"></div>
-          <div class="bar big" style="height:90px"></div>
+      <div class="glass mock">
+        <div class="panel">
+          <div class="pill">Admin controls</div>
+          <p class="muted">Create or update students, import CSV, publish by exam code, archive or delete records, and export lists.</p>
+        </div>
+        <div class="panel">
+          <div class="pill">Student access</div>
+          <p class="muted">Students log in, enter the exam code given by the admin, filter by term or session, and download a high-quality PDF report.</p>
+        </div>
+        <div class="panel">
+          <div class="pill">Safe workflow</div>
+          <p class="muted">Passwords are hashed, sessions are cached, and reset codes can be sent by email for both admin and student accounts.</p>
         </div>
       </div>
     </section>
 
-    <section class="cards">
-      <div class="glass feature">
-        <h3>Admin Access</h3>
-        <p>Create an admin account, sign in, manage settings, create students, and publish results from one dashboard.</p>
-      </div>
-      <div class="glass feature">
-        <h3>Student Access</h3>
-        <p>Students sign up or log in with Registration ID and password to view their own published results only.</p>
-      </div>
-      <div class="glass feature">
-        <h3>Printable Report Card</h3>
-        <p>Each published result appears in a polished report-card layout with marks, grade, remark, and teacher comment.</p>
-      </div>
+    <section class="feature-grid">
+      <div class="glass feature"><strong>Dashboard summaries</strong><span class="muted">Clean stats for students, published results, active view records, and exam codes.</span></div>
+      <div class="glass feature"><strong>Archive / restore</strong><span class="muted">Soft-delete, restore, archive, activate, deactivate, and delete forever from the admin portal.</span></div>
+      <div class="glass feature"><strong>CSV-friendly</strong><span class="muted">Import student data and result entries in batches, then export the updated records any time.</span></div>
+      <div class="glass feature"><strong>Report card style</strong><span class="muted">Published date, exam code, rank, remarks, comments, and signature support are all reflected in the result view.</span></div>
     </section>
-
-    <div class="foot">Built for Genz Edutech Innovations</div>
   </div>
 </body>
 </html>
