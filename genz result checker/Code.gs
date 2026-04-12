@@ -143,6 +143,9 @@ function handleRequest_(e) {
       case 'setAdminState':
         result = setAdminState_(payload);
         break;
+      case 'checkDriveStorageReady':
+        result = checkDriveStorageReady_(payload);
+        break;
       default:
         result = fail_('Unknown action.');
     }
@@ -210,7 +213,7 @@ function validateAction_(action) {
     saveResult: true, saveResultEntries: true, importResultsCsv: true, recalculateResults: true, setResultState: true,
     exportResultsCsv: true, loadStudentExamCodes: true, loadStudentResults: true, sendBulkEmail: true,
     authorizeMailStatus: true, exportSmsContacts: true, requestPasswordReset: true, resetPassword: true,
-    setAdminState: true
+    setAdminState: true, checkDriveStorageReady: true
   };
   if (!allowed[action]) throw new Error('Invalid or missing action.');
 }
@@ -245,7 +248,9 @@ function setupSystem_() {
   ensureSheet_(SHEET_NAMES.AUDIT_LOGS, HEADERS.AUDIT_LOGS);
   bootstrapSettings_();
   bootstrapAdmins_();
+  ensurePrincipalAdminIntegrity_();
   bootstrapRemarks_();
+  ensureStorageFolderSafe_();
   return ok_('System setup completed.');
 }
 
@@ -302,23 +307,50 @@ function bootstrapSettings_() {
 function bootstrapAdmins_() {
   var sh = getSpreadsheet_().getSheetByName(SHEET_NAMES.ADMINS);
   if (countNonBlankRows_(sh) > 0) return;
-  var creds = createPasswordRecord_('admin12345');
-  appendObjectRow_(sh, {
-    Username: 'admin',
-    PasswordHash: creds.hash,
-    PasswordSalt: creds.salt,
-    PasswordVersion: creds.version,
-    DisplayName: 'Principal Admin',
-    Email: '',
-    Phone: '',
-    IsPrincipal: true,
-    Active: true,
-    Archived: false,
-    Deleted: false,
-    CreatedAt: isoNow_(),
-    UpdatedAt: isoNow_(),
-    LastLoginAt: ''
+  // Fresh onboarding model: do not auto-create a default admin.
+  // The first public admin signup becomes the principal admin automatically.
+}
+
+function ensurePrincipalAdminIntegrity_() {
+  var sh = getSpreadsheet_().getSheetByName(SHEET_NAMES.ADMINS);
+  var rows = getSheetObjectsWithIndex_(sh).filter(function(item) {
+    return !normalizeBoolean_(item.obj.Deleted, false) && !normalizeBoolean_(item.obj.Archived, false) && normalizeBoolean_(item.obj.Active, true);
   });
+  if (!rows.length) return;
+  var principals = rows.filter(function(item) { return normalizeBoolean_(item.obj.IsPrincipal, false); });
+  if (principals.length === 1) return;
+  var keeper = principals.length ? principals[0] : rows[0];
+  rows.forEach(function(item) {
+    var shouldBePrincipal = item.rowIndex === keeper.rowIndex;
+    if (normalizeBoolean_(item.obj.IsPrincipal, false) !== shouldBePrincipal) {
+      updateObjectRow_(sh, item.rowIndex, { IsPrincipal: shouldBePrincipal, UpdatedAt: isoNow_() });
+    }
+  });
+}
+
+function ensureStorageFolderSafe_() {
+  try {
+    getRootStorageFolder_();
+  } catch (err) {
+    // Ignore setup-time Drive auth failures. Upload actions will surface a clearer message when needed.
+  }
+}
+
+function authorizeDriveNow() {
+  return getRootStorageFolder_().getId();
+}
+
+function factoryResetFreshOnboarding() {
+  setupSystem_();
+  [SHEET_NAMES.ADMINS, SHEET_NAMES.STUDENTS, SHEET_NAMES.RESULTS, SHEET_NAMES.RESET_CODES, SHEET_NAMES.AUDIT_LOGS].forEach(function(name) {
+    var sh = getSpreadsheet_().getSheetByName(name);
+    if (sh && sh.getLastRow() > 1) sh.deleteRows(2, sh.getLastRow() - 1);
+  });
+  upsertSetting_('STUDENT_SIGNUP_ENABLED', 'false');
+  upsertSetting_('PUBLIC_ADMIN_SIGNUP_ENABLED', 'false');
+  ensurePrincipalAdminIntegrity_();
+  ensureStorageFolderSafe_();
+  return 'Fresh onboarding reset completed. The next public admin signup will become the principal admin.';
 }
 
 function bootstrapRemarks_() {
@@ -370,6 +402,7 @@ function getPublicBootstrap_() {
 }
 
 function adminLogin_(payload) {
+  ensurePrincipalAdminIntegrity_();
   var username = sanitizeValue_(payload.username);
   var password = String(payload.password || '');
   var clientId = sanitizeValue_(payload.clientId);
@@ -416,8 +449,8 @@ function adminSignup_(payload) {
   }
   if (admins.length > 0) {
     if (!caller || !caller.isPrincipal) throw new Error('Only the principal admin can create sub-admin accounts.');
-  } else if (!normalizeBoolean_(settings.PUBLIC_ADMIN_SIGNUP_ENABLED, false) && !caller) {
-    throw new Error('Public admin signup is disabled.');
+  } else {
+    // Fresh onboarding: when no admin exists yet, the first signup becomes principal admin.
   }
   validatePasswordStrength_(password, 'Password');
   if (!username || !displayName || !email) throw new Error('Display name, username, and email are required.');
@@ -530,6 +563,7 @@ function validateSession_(payload) {
 }
 
 function getAdminBootstrap_(payload) {
+  ensurePrincipalAdminIntegrity_();
   var session = requireSession_(payload.token, 'admin', sanitizeValue_(payload.clientId));
   var settings = getSettings_();
   var admins = getSheetObjects_(getSpreadsheet_().getSheetByName(SHEET_NAMES.ADMINS)).map(cleanAdmin_);
@@ -887,10 +921,14 @@ function sendBulkEmail_(payload) {
   requireAdmin_(payload.token, sanitizeValue_(payload.clientId));
   var target = sanitizeValue_(payload.target || 'students').toLowerCase();
   var subject = sanitizeValue_(payload.subject);
-  var message = sanitizeValue_(payload.message);
+  var message = String(payload.message || '').trim();
   if (!subject || !message) throw new Error('Subject and message are required.');
   var recipients = [];
-  if (target === 'admins') {
+  if (Array.isArray(payload.recipientEmails) && payload.recipientEmails.length) {
+    recipients = payload.recipientEmails.map(sanitizeEmail_).filter(Boolean);
+  } else if (sanitizeValue_(payload.manualEmails)) {
+    recipients = parseEmailList_(payload.manualEmails);
+  } else if (target === 'admins') {
     recipients = getSheetObjects_(getSpreadsheet_().getSheetByName(SHEET_NAMES.ADMINS)).filter(function(a) {
       return sanitizeEmail_(a.Email) && normalizeBoolean_(a.Active, true) && !normalizeBoolean_(a.Archived, false) && !normalizeBoolean_(a.Deleted, false);
     }).map(function(a) { return sanitizeEmail_(a.Email); });
@@ -901,17 +939,20 @@ function sendBulkEmail_(payload) {
       return sanitizeEmail_(s.ParentEmail) && normalizeBoolean_(s.Active, true) && !normalizeBoolean_(s.Archived, false) && !normalizeBoolean_(s.Deleted, false);
     }).map(function(s) { return sanitizeEmail_(s.ParentEmail); });
   }
-  recipients = uniqueList_(recipients);
+  recipients = uniqueList_(recipients.map(sanitizeEmail_).filter(Boolean));
   if (!recipients.length) throw new Error('No email recipients were found.');
   var quota = MailApp.getRemainingDailyQuota();
-  var limit = Math.min(quota, 50, recipients.length);
+  var requestedBatch = Math.max(1, Math.min(250, Number(payload.batchSize || 50) || 50));
+  var limit = Math.min(quota, requestedBatch, recipients.length);
   if (limit <= 0) throw new Error('Mail quota is exhausted for today.');
   recipients.slice(0, limit).forEach(function(email) {
-    MailApp.sendEmail({ to: email, subject: subject, htmlBody: message.replace(/\n/g, '<br>') });
+    MailApp.sendEmail({ to: email, subject: subject, htmlBody: message });
   });
-  return ok_(limit < recipients.length ? 'Bulk email sent to the allowed quota limit.' : 'Bulk email sent successfully.', {
+  return ok_(limit < recipients.length ? 'Bulk email sent to the selected batch size / quota limit.' : 'Bulk email sent successfully.', {
     recipients: limit,
-    totalMatched: recipients.length
+    totalMatched: recipients.length,
+    remainingAfterBatch: Math.max(0, recipients.length - limit),
+    requestedBatch: requestedBatch
   });
 }
 
@@ -1150,7 +1191,7 @@ function normalizeResultEntry_(src, settings) {
     Position: maybeNumber_(src.position || src.Position, ''),
     Grade: percentage === '' ? '' : getGradeFromPercentage_(Number(percentage)),
     Remark: percentage === '' ? '' : getRemarkFromPercentage_(Number(percentage)),
-    TeacherComment: sanitizeValue_(src.teacherComment || src.TeacherComment),
+    TeacherComment: percentage === '' ? sanitizeValue_(src.teacherComment || src.TeacherComment) : (sanitizeValue_(src.teacherComment || src.TeacherComment) || getAutoCommentFromPercentage_(Number(percentage))),
     AcademicSession: sanitizeValue_(src.academicSession || src.AcademicSession || settings.ACADEMIC_SESSION),
     Term: sanitizeValue_(src.term || src.Term || settings.TERM),
     Published: normalizeBoolean_(src.published || src.Published, false),
@@ -1197,6 +1238,7 @@ function recalculateRankings_(examCode, academicSession, term) {
           Percentage: '',
           Grade: '',
           Remark: '',
+          TeacherComment: '',
           UpdatedAt: isoNow_()
         });
         affected++;
@@ -1210,6 +1252,7 @@ function recalculateRankings_(examCode, academicSession, term) {
         Percentage: percentage,
         Grade: getGradeFromPercentage_(percentage),
         Remark: getRemarkFromPercentage_(percentage),
+        TeacherComment: sanitizeValue_(item.obj.TeacherComment) || getAutoCommentFromPercentage_(percentage),
         UpdatedAt: isoNow_()
       });
       affected++;
@@ -1224,6 +1267,18 @@ function getRemarkFromPercentage_(percentage) {
     return Number(percentage) >= Number(item.MinPercent) && Number(percentage) <= Number(item.MaxPercent);
   });
   return band ? String(band.Remark || '') : 'No remark configured for this score band.';
+}
+
+function getAutoCommentFromPercentage_(percentage) {
+  percentage = Number(percentage);
+  if (isNaN(percentage)) return '';
+  if (percentage >= 90) return 'Outstanding result. Keep leading by example and maintain this excellent standard.';
+  if (percentage >= 80) return 'Excellent work. Your understanding is strong and your effort is clearly showing.';
+  if (percentage >= 70) return 'Very good performance. Stay consistent and keep pushing for even higher mastery.';
+  if (percentage >= 60) return 'Good performance. You are progressing well; keep practicing to move to the next level.';
+  if (percentage >= 50) return 'Fair performance. You met the pass mark, but there is still room for stronger improvement.';
+  if (percentage >= 40) return 'Below average performance. More focused reading, practice, and guidance are needed.';
+  return 'Poor performance. Immediate extra support, revision, and closer follow-up are strongly advised.';
 }
 
 function getGradeFromPercentage_(percentage) {
@@ -1452,7 +1507,11 @@ function getRootStorageFolder_() {
     var iter = DriveApp.getFoldersByName(folderName);
     return iter.hasNext() ? iter.next() : DriveApp.createFolder(folderName);
   } catch (err) {
-    throw new Error('Drive permission is not active yet. Replace appsscript.json, save the project, authorize Drive access when prompted, then redeploy the web app.');
+    var msg = String(err && err.message || '');
+    if (/permission|authorization|required|scope/i.test(msg)) {
+      throw new Error('Drive permission is not active yet. Replace appsscript.json, save the project, run authorizeDriveNow() once in the Apps Script editor, approve Drive access, then redeploy the web app.');
+    }
+    throw new Error('Unable to prepare the Google Drive storage folder. ' + msg);
   }
 }
 
@@ -1545,6 +1604,12 @@ function uploadBrandingAsset_(payload) {
   });
 }
 
+function checkDriveStorageReady_(payload) {
+  requireAdmin_(payload.token, sanitizeValue_(payload.clientId));
+  var folder = getRootStorageFolder_();
+  return ok_('Drive storage folder is ready.', { folderId: folder.getId(), folderName: folder.getName(), folderUrl: folder.getUrl() });
+}
+
 function parseListSetting_(value) {
   return uniqueList_(sanitizeValue_(value).split(',').map(function(part) { return sanitizeValue_(part); }).filter(Boolean));
 }
@@ -1557,6 +1622,10 @@ function uniqueList_(arr) {
     seen[key] = true;
     return true;
   });
+}
+
+function parseEmailList_(value) {
+  return uniqueList_(String(value || '').split(/[\n,;\t ]+/).map(function(part) { return sanitizeEmail_(part); }).filter(Boolean));
 }
 
 function normalizeBoolean_(value, defaultValue) {

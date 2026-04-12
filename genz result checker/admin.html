@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://script.google.com https://script.googleusercontent.com https://cdnjs.cloudflare.com data: blob:; img-src * data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; connect-src https://script.google.com https://script.googleusercontent.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://script.google.com" />
   <title>Admin Portal | Genz Edutech Innovations</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
     :root{
       --bg:#0b1220;--bg2:#111b31;--panel:rgba(255,255,255,.10);--panel2:rgba(255,255,255,.07);--line:rgba(255,255,255,.12);
@@ -91,7 +94,9 @@
     .toast-error{background:rgba(255,111,134,.16);color:#fff1f4}
     .avatar-preview{width:92px;height:110px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;overflow:hidden}
     .avatar-preview img{width:100%;height:100%;object-fit:cover}
-    .inline-note{padding:12px 14px;border-radius:16px;background:rgba(34,199,255,.10);border:1px solid rgba(34,199,255,.18);color:#dff8ff;font-size:14px}
+    .inline-note{padding:12px 14px;border-radius:16px;background:rgba(34,199,255,.10);border:1px solid rgba(34,199,255,.18);color:#dff8ff;font-size:14px;overflow-wrap:anywhere;word-break:break-word}
+    .status,.muted,.panel-title,.field,.card,.glass{overflow-wrap:anywhere}
+    .code-note{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:#e8f2ff;display:block}
     .small{font-size:12px}
     @keyframes spin{to{transform:rotate(360deg)}}
     @media (max-width:1150px){
@@ -110,6 +115,43 @@
       table{min-width:640px}
     }
     @media (max-width:640px){.toolbar .actions{width:100%}.toolbar .actions input,.toolbar .actions select{width:100%}}
+
+    .grid-5{grid-template-columns:repeat(5,minmax(0,1fr))}
+    .pdf-export-surface{background:linear-gradient(180deg,#ffffff,#f6faff);color:#16304d;border:1px solid #d9e5f7;border-radius:24px;overflow:hidden;box-shadow:0 22px 54px rgba(32,58,96,.10)}
+    .pdf-export-head{padding:24px;background:linear-gradient(135deg,rgba(111,99,255,.12),rgba(34,199,255,.12));border-bottom:1px solid #d9e5f7}
+    .pdf-export-body{padding:22px;background:linear-gradient(180deg,#ffffff,#f8fbff)}
+    .pdf-brand-line{display:grid;grid-template-columns:72px 1fr;gap:14px;align-items:center}
+    .pdf-brand-name{font-size:1.15rem;font-weight:900;color:#16304d}
+    .pdf-school-title{font-size:1.65rem;font-weight:900;margin:2px 0 0;color:#16304d}
+    .pdf-school-sub{margin-top:6px;color:#5b738f}
+    .pdf-profile-grid{display:grid;grid-template-columns:110px 1fr;gap:18px;align-items:start}
+    .pdf-passport{width:110px;height:132px;border-radius:16px;border:1px solid #d9e5f7;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#6b819c;font-weight:700;text-align:center}
+    .pdf-passport img{width:100%;height:100%;object-fit:cover}
+    .pdf-passport.contain img{object-fit:contain}
+    .pdf-info-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .pdf-info-item{padding:12px 14px;border-radius:16px;background:#ffffff;border:1px solid #dfe8f7}
+    .pdf-info-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#6c829e}
+    .pdf-info-value{font-weight:800;margin-top:6px;color:#16304d}
+    .pdf-summary-strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:18px}
+    .pdf-summary-box{padding:14px;border-radius:16px;background:#ffffff;border:1px solid #dfe8f7}
+    .pdf-summary-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#6c829e}
+    .pdf-summary-value{font-size:1.15rem;font-weight:900;margin-top:6px;color:#16304d}
+    .pdf-subject-table-wrap{overflow:auto;border:1px solid #dfe8f7;border-radius:18px;background:#fff;margin-top:18px}
+    .pdf-subject-table-wrap th{background:#f4f8ff;color:#16304d;position:static}
+    .pdf-subject-table-wrap td{color:#16304d;border-bottom:1px solid #edf2fa}
+    .pdf-lite-card{padding:16px;border-radius:20px;background:#ffffff;border:1px solid #dfe8f7}
+    .pdf-signature-wrap{margin-top:20px;display:grid;grid-template-columns:1fr 180px;gap:18px;align-items:end}
+    .pdf-signature-box{border-top:1px solid #cdd9eb;padding-top:8px;text-align:center;color:#16304d}
+    .pdf-signature-box img{max-width:160px;max-height:60px;display:block;margin:0 auto 8px}
+    .pdf-inline-note{padding:12px 14px;border-radius:16px;background:#eef6ff;border:1px solid #dbe7fb;color:#2a4f77;font-size:14px}
+    .report-workbench{position:fixed;left:-10000px;top:0;width:920px;z-index:-1;opacity:0;pointer-events:none}
+    .preview-surface{padding:14px;border-radius:18px;border:1px dashed rgba(255,255,255,.16);background:rgba(255,255,255,.04)}
+    .export-mini{font-size:12px;color:#9db2cf}
+    .export-manager-table td,.export-manager-table th{white-space:normal}
+    .export-score-pill{display:inline-flex;padding:6px 10px;border-radius:999px;background:rgba(111,99,255,.14);border:1px solid rgba(111,99,255,.22);font-size:12px;font-weight:800;color:#eef5ff}
+    @media (max-width:1150px){ .grid-5{grid-template-columns:1fr 1fr} }
+    @media (max-width:980px){ .grid-5,.pdf-summary-strip,.pdf-info-grid,.pdf-signature-wrap,.pdf-profile-grid{grid-template-columns:1fr} .report-workbench{width:760px} }
+
   </style>
 </head>
 <body>
@@ -133,7 +175,7 @@
       </form>
 
       <form id="signupForm" class="hidden">
-        <h2 class="panel-title">Create admin account</h2><p class="muted">This public signup is only for the first setup admin. After that, only the principal admin can create sub-admins from inside the dashboard.</p>
+        <h2 class="panel-title">Create admin account</h2><p class="muted">If no admin exists yet, this signup becomes the <strong>principal admin</strong>. After that, only the principal admin can create sub-admins from inside the dashboard.</p>
         <div class="grid grid-2">
           <div class="field"><label>Display Name</label><input name="displayName" required /></div>
           <div class="field"><label>Username</label><input name="username" required /></div>
@@ -174,8 +216,8 @@
           <p class="muted">This portal uses the same request style as your working CBT app: <strong>fetch + action + payload</strong>.</p>
         </div>
         <div class="glass card" style="padding:16px">
-          <strong>Default admin</strong>
-          <p class="muted">Username: <strong>admin</strong><br>Password: <strong>admin123</strong></p>
+          <strong>Fresh onboarding</strong>
+          <p class="muted">This rebuild no longer depends on a seeded default admin. If there is no admin record yet, the <strong>first admin signup becomes the principal admin</strong>.</p><div class="code-note">Need a clean restart later? Run <strong>factoryResetFreshOnboarding()</strong> once in the Apps Script editor, then sign up again as principal admin.</div>
         </div>
       </div>
     </div>
@@ -242,9 +284,57 @@
                 <h2 class="panel-title">Recent results</h2>
                 <div class="muted">Published date, rank, and exam code are included.</div>
               </div>
-              <button class="btn btn-soft" id="exportResultsBtn">Export Results CSV</button>
+              <div class="actions">
+                <button class="btn btn-soft" id="exportResultsBtn">Export Results CSV</button>
+                <button class="btn btn-primary" id="openResultExportManagerBtn" type="button">Open PDF Export Manager</button>
+              </div>
             </div>
             <div class="table-wrap"><table><thead><tr><th>Exam Code</th><th>Subject</th><th>Reg ID</th><th>Score</th><th>Published</th></tr></thead><tbody id="recentResultsBody"></tbody></table></div>
+          </div>
+        </div>
+
+        <div class="glass card" id="resultExportManagerCard" style="margin-top:18px">
+          <div class="toolbar">
+            <div>
+              <h2 class="panel-title">Result PDF Export Manager</h2>
+              <div class="muted">Search, preview, export a single PDF, or export many PDFs inside one ZIP file.</div>
+            </div>
+            <div class="actions">
+              <button class="btn btn-soft" type="button" id="refreshResultExportManagerBtn">Refresh List</button>
+              <button class="btn btn-soft" type="button" id="selectVisibleReportsBtn">Select Visible</button>
+              <button class="btn btn-soft" type="button" id="clearReportSelectionBtn">Clear Selection</button>
+            </div>
+          </div>
+          <div class="inline-note">Use the search, class, exam code, and score filters to bring up only the results you want. Score filter supports <strong>total score upward</strong> or <strong>average percentage upward</strong>.</div>
+          <div class="grid grid-5" style="margin-top:14px">
+            <div class="field"><label>Search Result</label><input id="reportExportSearch" placeholder="Name, reg ID, class, exam code, title" /></div>
+            <div class="field"><label>Exam Code</label><select id="reportExportExamCode"></select></div>
+            <div class="field"><label>Class Filter</label><select id="reportExportClassFilter"></select></div>
+            <div class="field"><label>Score Filter</label><select id="reportExportScoreMode"><option value="">No score filter</option><option value="total">Total Score ≥</option><option value="percentage">Average % ≥</option></select></div>
+            <div class="field"><label>Minimum Score Upward</label><input id="reportExportScoreValue" type="number" min="0" step="0.01" placeholder="e.g. 200 or 70" /></div>
+          </div>
+          <div class="toolbar">
+            <div class="selection-info" id="reportExportSelectionInfo">No result selected.</div>
+            <div class="actions">
+              <button class="btn btn-primary" type="button" id="exportSelectedZipBtn">Export Selected PDFs (ZIP)</button>
+              <button class="btn btn-soft" type="button" id="exportVisibleZipBtn">Export Visible PDFs (ZIP)</button>
+              <button class="btn btn-soft" type="button" id="exportClassZipBtn">Export Class PDFs (ZIP)</button>
+              <button class="btn btn-soft" type="button" id="exportAllZipBtn">Export All PDFs (ZIP)</button>
+            </div>
+          </div>
+          <div class="table-wrap export-manager-table"><table><thead><tr><th>Select</th><th>Reg ID</th><th>Student</th><th>Class</th><th>Exam Code</th><th>Subjects</th><th>Total Score</th><th>Average %</th><th>Published</th><th>Actions</th></tr></thead><tbody id="reportExportBody"></tbody></table></div>
+          <div class="glass card" style="padding:16px;margin-top:18px">
+            <div class="toolbar">
+              <div>
+                <h3 class="panel-title" style="margin-bottom:4px">Preview Selected Result</h3>
+                <div class="muted">Preview any result here before exporting a single PDF.</div>
+              </div>
+              <div class="actions">
+                <button class="btn btn-primary" type="button" id="downloadPreviewPdfBtn">Export Preview as PDF</button>
+              </div>
+            </div>
+            <div class="status" id="reportPreviewStatus"></div>
+            <div id="reportPreviewMount" class="preview-surface muted" style="margin-top:14px">Click <strong>Preview</strong> on any result row to inspect it here before export.</div>
           </div>
         </div>
       </section>
@@ -474,13 +564,31 @@
         <div class="grid grid-2">
           <div class="glass card">
             <h2 class="panel-title">Bulk email</h2>
-            <div class="grid grid-2">
-              <div class="field"><label>Audience</label><select id="bulkEmailTarget"><option value="students">Students / Parents</option><option value="admins">Admins</option></select></div>
-              <div class="field"><label>Subject</label><input id="bulkEmailSubject" /></div>
+            <div class="grid grid-3">
+              <div class="field"><label>Audience</label><select id="bulkEmailTarget"><option value="students">Students / Parents</option><option value="admins">Admins</option><option value="custom">Custom Email List</option></select></div>
+              <div class="field"><label>Recipients per send</label><select id="bulkEmailBatchSize"><option value="10">10</option><option value="20">20</option><option value="50" selected>50</option><option value="100">100</option><option value="150">150</option><option value="250">250</option></select></div>
+              <div class="field"><label>Subject</label><input id="bulkEmailSubject" placeholder="Email subject" /></div>
             </div>
-            <div class="field"><label>Message</label><textarea id="bulkEmailMessage"></textarea></div>
+            <div class="field"><label>HTML Message</label><textarea id="bulkEmailMessage" placeholder="You can type normal text or full HTML email markup here."></textarea></div>
+            <div class="grid grid-2">
+              <div class="field">
+                <label>Manual recipient emails</label>
+                <textarea id="bulkEmailManualRecipients" placeholder="Enter one or more emails separated by comma, space, or new line."></textarea>
+                <div class="small muted" style="margin-top:8px">When this box or the CSV below has emails, they override the audience list and send only to those addresses.</div>
+              </div>
+              <div class="field">
+                <label>CSV email upload</label>
+                <input id="bulkEmailCsvFile" type="file" accept=".csv,text/csv" />
+                <div class="actions" style="margin-top:10px">
+                  <button class="btn btn-soft" id="downloadEmailTemplateBtn" type="button">Download Email CSV Template</button>
+                  <button class="btn btn-soft" id="importEmailCsvBtn" type="button">Import Email CSV</button>
+                  <button class="btn btn-soft" id="clearEmailCsvBtn" type="button">Clear Imported Emails</button>
+                </div>
+                <div class="selection-info" id="bulkEmailRecipientsSummary">No imported CSV email list yet.</div>
+              </div>
+            </div>
             <div class="actions"><button class="btn btn-primary" id="sendBulkEmailBtn" type="button">Send Bulk Email</button><button class="btn btn-soft" id="checkMailAuthBtn" type="button">Check Mail Permission</button></div>
-            <div class="inline-note" style="margin-top:10px">If Apps Script says mail permission is missing, run <strong>authorizeMailAccess()</strong> once in the Apps Script editor, approve the permission, then redeploy the web app.</div>
+            <div class="inline-note" style="margin-top:10px">HTML is allowed in the email message box. If Apps Script says mail permission is missing, run <strong>authorizeMailAccess()</strong> once in the Apps Script editor, approve the permission, then redeploy the web app.</div>
             <div class="status" id="bulkEmailStatus"></div>
           </div>
 
@@ -539,6 +647,20 @@
                 <div class="avatar-preview" id="brandLogoPreview">No image</div>
               </div>
             </div>
+            <div class="grid grid-2">
+              <div class="field">
+                <label>Drive storage folder</label>
+                <div class="actions">
+                  <button class="btn btn-soft" type="button" id="createDriveStorageBtn">Create / Open Drive Storage Folder</button>
+                </div>
+                <div class="status" id="driveStorageStatus" style="margin-top:10px"></div>
+                <a id="driveStorageLink" class="small" target="_blank" rel="noopener" style="display:none"></a>
+              </div>
+              <div class="field">
+                <label>Fresh onboarding reset</label>
+                <div class="inline-note">To onboard from scratch as principal admin later, run <strong>factoryResetFreshOnboarding()</strong> once in the Apps Script editor. The next admin signup becomes the principal admin automatically.</div>
+              </div>
+            </div>
             <div class="field"><label>Portal Notice</label><textarea name="PORTAL_NOTICE"></textarea></div>
             <div class="grid grid-3">
               <div class="field"><label>Class / Level Options (comma separated, optional)</label><textarea name="CLASS_OPTIONS"></textarea></div>
@@ -556,6 +678,8 @@
     </main>
   </section>
 
+  <div id="reportWorkbench" class="report-workbench" aria-hidden="true"></div>
+
   <script>
     try{ if(window.top !== window.self){ window.top.location = window.self.location.href; } }catch(_err){}
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxkqab1CGlVVZ1No0Q5XF3vg6QMgDF7avYLAvaV5DhW_fR8AASqhn_O8lx3nAgXDG_NtQ/exec';
@@ -564,6 +688,9 @@
 
     let bootstrapData = {settings:{},students:[],results:[],admins:[],classOptions:[],categoryOptions:[],subjectOptions:[],examCodes:[],currentAdmin:{}};
     let selectedStudentIds = new Set();
+    let selectedReportKeys = new Set();
+    let currentPreviewReportKey = '';
+    let uploadedEmailRecipients = [];
 
     const $ = id => document.getElementById(id);
     const overlay = $('overlay');
@@ -665,6 +792,37 @@
         const obj={}; headers.forEach((h,i)=> obj[h] = (cols[i] || '').trim()); return obj;
       });
     }
+    function extractEmailsFromCsvRows(rows){
+      const candidates = [];
+      (rows || []).forEach(row => {
+        const keys = Object.keys(row || {});
+        const emailKey = keys.find(key => /email/i.test(key));
+        if (emailKey && row[emailKey]) candidates.push(String(row[emailKey]).trim());
+      });
+      return [...new Set(candidates.map(v => v.toLowerCase()).filter(v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)))];
+    }
+
+    function parseManualEmails(value){
+      return [...new Set(String(value || '').split(/[\n,;\t ]+/).map(v => v.trim().toLowerCase()).filter(v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)))];
+    }
+
+    function refreshBulkEmailSummary(){
+      const manual = parseManualEmails($('bulkEmailManualRecipients') ? $('bulkEmailManualRecipients').value : '');
+      const imported = uploadedEmailRecipients || [];
+      const summary = $('bulkEmailRecipientsSummary');
+      if (!summary) return;
+      const totalCustom = [...new Set([...manual, ...imported])].length;
+      if (totalCustom) {
+        summary.textContent = `${imported.length} imported from CSV • ${manual.length} from manual list • ${totalCustom} unique custom recipient(s).`;
+      } else {
+        summary.textContent = $('bulkEmailTarget').value === 'students'
+          ? `No custom email list loaded. Sending will use the selected student audience (${selectedStudentIds.size || 'all visible'}).`
+          : $('bulkEmailTarget').value === 'admins'
+            ? 'No custom email list loaded. Sending will use active admin emails.'
+            : 'No custom email list yet. Add manual emails or import a CSV file.';
+      }
+    }
+
     function downloadText(filename, text, mime='text/plain;charset=utf-8'){
       const blob = new Blob([text], {type:mime});
       const a = document.createElement('a');
@@ -722,6 +880,7 @@
     function updateStudentSelectionInfo(){
       const box = $('studentSelectionInfo');
       if (box) box.textContent = selectedStudentIds.size ? `${selectedStudentIds.size} student(s) selected.` : 'No student selected.';
+      refreshBulkEmailSummary();
     }
 
     function toggleStudentSelection(regId, checked){
@@ -978,6 +1137,370 @@
       }catch(err){ showToast(err.message, 'error'); }
     }
 
+
+    function slugifyText(value){
+      return String(value || '').trim().replace(/[^a-z0-9_\-.]+/gi, '_').replace(/^_+|_+$/g, '') || 'result';
+    }
+    function num(v){
+      const n = Number(v);
+      return Number.isFinite(n) ? n : 0;
+    }
+    function uniqueValues(list){
+      return [...new Set((list || []).filter(Boolean))];
+    }
+    function updateReportSelectionInfo(){
+      const box = $('reportExportSelectionInfo');
+      if (!box) return;
+      box.textContent = selectedReportKeys.size ? `${selectedReportKeys.size} result report(s) selected.` : 'No result selected.';
+    }
+    function getResultReportGroups(){
+      const studentMap = new Map((bootstrapData.students || []).map(s => [String(s.regId || '').toUpperCase(), s]));
+      const bucket = new Map();
+      (bootstrapData.results || []).forEach(r => {
+        if (r.deleted || r.archived) return;
+        const regId = String(r.regId || '').toUpperCase();
+        const key = [regId, r.examCode || '', r.academicSession || '', r.term || ''].join('|');
+        if (!bucket.has(key)) {
+          bucket.set(key, {
+            key,
+            regId,
+            examCode: r.examCode || '',
+            examTitle: r.examTitle || '',
+            academicSession: r.academicSession || '',
+            term: r.term || '',
+            examDate: r.examDate || '',
+            rows: [],
+            student: studentMap.get(regId) || { regId: regId, fullName: r.regId || regId },
+            publishedAt: r.publishedAt || r.updatedAt || '',
+            updatedAt: r.updatedAt || '',
+            published: !!r.published,
+            viewActive: !!r.viewActive
+          });
+        }
+        const group = bucket.get(key);
+        group.rows.push(r);
+        if (r.publishedAt && String(r.publishedAt) > String(group.publishedAt || '')) group.publishedAt = r.publishedAt;
+        if (r.updatedAt && String(r.updatedAt) > String(group.updatedAt || '')) group.updatedAt = r.updatedAt;
+        if (r.published) group.published = true;
+        if (r.viewActive) group.viewActive = true;
+        if (!group.examTitle && r.examTitle) group.examTitle = r.examTitle;
+      });
+      return Array.from(bucket.values()).map(group => {
+        group.rows.sort((a,b) => String(a.subject || '').localeCompare(String(b.subject || '')));
+        group.subjectCount = group.rows.length;
+        group.totalScore = group.rows.reduce((sum, row) => sum + num(row.studentScore), 0);
+        group.avgPercentage = group.subjectCount ? (group.rows.reduce((sum, row) => sum + num(row.percentage), 0) / group.subjectCount) : 0;
+        group.passCount = group.rows.filter(row => String(row.resultStatus || '').toUpperCase() === 'PASS').length;
+        group.classLevel = group.student.classLevel || '';
+        group.fullName = group.student.fullName || group.regId;
+        group.category = group.student.category || '';
+        return group;
+      }).sort((a,b) => String(b.publishedAt || b.updatedAt || '').localeCompare(String(a.publishedAt || a.updatedAt || '')));
+    }
+    function refreshReportExportFilters(){
+      const examSelect = $('reportExportExamCode');
+      const classSelect = $('reportExportClassFilter');
+      if (!examSelect || !classSelect) return;
+      const oldExam = examSelect.value;
+      const oldClass = classSelect.value;
+      const groups = getResultReportGroups();
+      fillOptions(examSelect, uniqueValues(groups.map(g => g.examCode)).sort((a,b) => String(a).localeCompare(String(b))), 'All exam codes');
+      fillOptions(classSelect, uniqueValues(groups.map(g => g.classLevel)).sort((a,b) => String(a).localeCompare(String(b))), 'All classes');
+      if ([...examSelect.options].some(opt => opt.value === oldExam)) examSelect.value = oldExam;
+      if ([...classSelect.options].some(opt => opt.value === oldClass)) classSelect.value = oldClass;
+    }
+    function getFilteredReportGroups(){
+      const search = String($('reportExportSearch')?.value || '').trim().toLowerCase();
+      const examCode = String($('reportExportExamCode')?.value || '').trim().toLowerCase();
+      const classLevel = String($('reportExportClassFilter')?.value || '').trim().toLowerCase();
+      const scoreMode = String($('reportExportScoreMode')?.value || '').trim().toLowerCase();
+      const scoreValueRaw = String($('reportExportScoreValue')?.value || '').trim();
+      const scoreValue = scoreValueRaw === '' ? null : num(scoreValueRaw);
+      return getResultReportGroups().filter(group => {
+        const hay = `${group.regId} ${group.fullName} ${group.classLevel} ${group.category} ${group.examCode} ${group.examTitle} ${group.academicSession} ${group.term}`.toLowerCase();
+        if (search && !hay.includes(search)) return false;
+        if (examCode && !String(group.examCode).toLowerCase().includes(examCode)) return false;
+        if (classLevel && !String(group.classLevel).toLowerCase().includes(classLevel)) return false;
+        if (scoreValue !== null && scoreMode === 'total' && group.totalScore < scoreValue) return false;
+        if (scoreValue !== null && scoreMode === 'percentage' && group.avgPercentage < scoreValue) return false;
+        return true;
+      });
+    }
+    function findReportGroupByKey(key){
+      return getResultReportGroups().find(group => group.key === key) || null;
+    }
+    function renderReportExportManager(){
+      refreshReportExportFilters();
+      const groups = getFilteredReportGroups();
+      const tbody = $('reportExportBody');
+      if (!tbody) return;
+      tbody.innerHTML = groups.map(group => `
+        <tr>
+          <td><input type="checkbox" ${selectedReportKeys.has(group.key) ? 'checked' : ''} onchange="toggleReportSelection('${esc(group.key)}', this.checked)" /></td>
+          <td>${esc(group.regId)}</td>
+          <td>${esc(group.fullName)}<div class="export-mini">${esc(group.category || '')}</div></td>
+          <td>${esc(group.classLevel || '—')}</td>
+          <td>${esc(group.examCode)}<div class="export-mini">${esc(group.term || '')} ${group.academicSession ? '• ' + esc(group.academicSession) : ''}</div></td>
+          <td>${esc(group.subjectCount)}<div class="export-mini">${esc(group.rows.map(r => r.subject).slice(0,3).join(', '))}${group.subjectCount > 3 ? '…' : ''}</div></td>
+          <td><span class="export-score-pill">${esc(group.totalScore.toFixed(2))}</span></td>
+          <td><span class="export-score-pill">${esc(group.avgPercentage.toFixed(2))}%</span></td>
+          <td>${group.published ? '<span class="tag">Published</span>' : '<span class="tag">Draft</span>'}<div class="export-mini">${esc(group.publishedAt || '—')}</div></td>
+          <td>
+            <div class="actions">
+              <button class="btn btn-soft" type="button" onclick="previewReportGroup('${esc(group.key)}')">Preview</button>
+              <button class="btn btn-primary" type="button" onclick="downloadSingleReportPdfByKey('${esc(group.key)}')">Single PDF</button>
+            </div>
+          </td>
+        </tr>
+      `).join('') || '<tr><td colspan="10" class="muted">No result report matched the current filters.</td></tr>';
+      updateReportSelectionInfo();
+      if (currentPreviewReportKey && !findReportGroupByKey(currentPreviewReportKey)) {
+        currentPreviewReportKey = '';
+        if ($('reportPreviewMount')) $('reportPreviewMount').innerHTML = 'Click <strong>Preview</strong> on any result row to inspect it here before export.';
+      }
+    }
+    function toggleReportSelection(key, checked){
+      if (checked) selectedReportKeys.add(key); else selectedReportKeys.delete(key);
+      updateReportSelectionInfo();
+    }
+    window.toggleReportSelection = toggleReportSelection;
+    function selectVisibleReportGroups(){
+      getFilteredReportGroups().forEach(group => selectedReportKeys.add(group.key));
+      renderResultExportManager();
+    }
+    function clearReportSelection(){
+      selectedReportKeys.clear();
+      renderResultExportManager();
+    }
+    function buildTagClass(status){
+      const val = String(status || '').toUpperCase();
+      if (val === 'PASS') return 'tag-pass';
+      if (val === 'FAIL') return 'tag-fail';
+      return 'tag-pending';
+    }
+    function buildAdminReportMarkup(group){
+      const settings = bootstrapData.settings || {};
+      const student = group.student || {};
+      const first = group.rows[0] || {};
+      const signatureRaw = first.signatureUrl || settings.SIGNATURE_URL || '';
+      const signatureName = settings.SIGNATURE_NAME || 'Authorized Signatory';
+      const studentInfo = [
+        ['Full Name', student.fullName], ['Registration ID', student.regId || group.regId], ['Class Level', student.classLevel],
+        ['Category', student.category], ['School Name', student.schoolName], ['Gender', student.gender],
+        ['Age', student.age], ['Date of Birth', student.dob], ['Parent Name', student.parentName],
+        ['Parent Phone', student.parentPhone], ['Parent Email', student.parentEmail], ['State', student.state],
+        ['City / LGA', student.cityLGA], ['Address', student.address]
+      ];
+      const summary = [
+        ['Exam Code', group.examCode], ['Subjects', group.subjectCount], ['Passed', group.passCount],
+        ['Average %', `${group.avgPercentage.toFixed(2)}%`], ['Published', group.publishedAt || '—']
+      ];
+      const examMeta = [
+        ['Exam Code', first.examCode], ['Exam Title', first.examTitle], ['Academic Session', first.academicSession],
+        ['Term', first.term], ['Exam Date', first.examDate], ['Pass Mark Number', first.passMarkNumber],
+        ['Pass Mark Percentage', first.passMarkPercentage ? `${first.passMarkPercentage}%` : '—'], ['Published Date', first.publishedAt]
+      ];
+      return `
+        <div class="pdf-export-surface">
+          <div class="pdf-export-head">
+            <div class="pdf-brand-line">
+              <div class="pdf-passport contain" style="width:72px;height:72px" data-role="brandLogo">LOGO</div>
+              <div>
+                <div class="pdf-brand-name">${esc(settings.BRAND_NAME || 'Genz Edutech Innovations')}</div>
+                <div class="pdf-school-title">${esc(settings.SCHOOL_NAME || 'Result Portal')}</div>
+                <div class="pdf-school-sub">${esc(settings.HEAD_OFFICE_ADDRESS || '')}</div>
+                <div class="pdf-school-sub">${esc(settings.SCHOOL_PHONE || '')}${settings.SCHOOL_PHONE && settings.SCHOOL_EMAIL ? ' • ' : ''}${esc(settings.SCHOOL_EMAIL || '')}</div>
+              </div>
+            </div>
+          </div>
+          <div class="pdf-export-body">
+            <div class="pdf-profile-grid">
+              <div class="pdf-passport" data-role="passport">No passport</div>
+              <div>
+                <div class="pdf-info-grid">
+                  ${studentInfo.map(([label, value]) => `<div class="pdf-info-item"><div class="pdf-info-label">${esc(label)}</div><div class="pdf-info-value">${esc(value || '—')}</div></div>`).join('')}
+                </div>
+              </div>
+            </div>
+            <div class="pdf-summary-strip">
+              ${summary.map(([label, value]) => `<div class="pdf-summary-box"><div class="pdf-summary-label">${esc(label)}</div><div class="pdf-summary-value">${esc(value || '—')}</div></div>`).join('')}
+            </div>
+            <div class="pdf-subject-table-wrap">
+              <table>
+                <thead>
+                  <tr><th>Exam Code</th><th>Subject</th><th>Score</th><th>Percentage</th><th>Grade</th><th>Rank</th><th>Status</th><th>Published Date</th></tr>
+                </thead>
+                <tbody>
+                  ${group.rows.map(r => `
+                    <tr>
+                      <td>${esc(r.examCode)}</td>
+                      <td>${esc(r.subject)}</td>
+                      <td>${esc(r.studentScore || '—')} / ${esc(r.maxScore || '—')}</td>
+                      <td>${esc(r.percentage || '—')}%</td>
+                      <td>${esc(r.grade || '—')}</td>
+                      <td>${esc(r.positionText || '—')}</td>
+                      <td><span class="tag ${buildTagClass(r.resultStatus)}">${esc(r.resultStatus || 'PENDING')}</span></td>
+                      <td>${esc(r.publishedAt || '—')}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+            <div class="grid grid-2" style="margin-top:18px">
+              <div class="pdf-lite-card">
+                <strong>Exam details</strong>
+                <div class="pdf-info-grid" style="margin-top:12px">
+                  ${examMeta.map(([label, value]) => `<div class="pdf-info-item"><div class="pdf-info-label">${esc(label)}</div><div class="pdf-info-value">${esc(value || '—')}</div></div>`).join('')}
+                </div>
+              </div>
+              <div class="pdf-lite-card">
+                <strong>Teacher comments / remarks</strong>
+                <div style="margin-top:12px">
+                  ${group.rows.map(r => `
+                    <div class="pdf-info-item" style="margin-bottom:10px">
+                      <div class="pdf-info-label">${esc(r.subject)}</div>
+                      <div class="pdf-info-value">${esc(r.remark || '—')}</div>
+                      <div style="margin-top:6px;color:#5d728d">${esc(r.teacherComment || 'No teacher comment')}</div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+            <div class="pdf-signature-wrap">
+              <div class="pdf-inline-note">This result was exported from the admin result manager. The exam code, published date, and subject rows shown here reflect the official record currently saved in the portal.</div>
+              <div class="pdf-signature-box" data-role="signatureBox">
+                ${signatureRaw ? `<div style="color:#5d728d;margin-bottom:8px">${esc(signatureName)}</div><div class="pdf-passport contain" style="width:160px;height:68px;margin:0 auto;background:transparent;border:none" data-role="signatureImage"></div>` : `<div style="color:#5d728d">No signature added</div><div>${esc(signatureName)}</div>`}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    function loadImageIntoBox(box, raw, alt='Image', contain=false, emptyText='No image'){
+      return new Promise(resolve => {
+        if (!box){ resolve(false); return; }
+        const candidates = buildImageCandidates(raw);
+        if (!candidates.length){
+          box.textContent = emptyText;
+          resolve(false);
+          return;
+        }
+        let idx = 0;
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.referrerPolicy = 'no-referrer';
+        img.alt = alt;
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = contain ? 'contain' : 'cover';
+        img.onload = () => { box.innerHTML = ''; box.appendChild(img); resolve(true); };
+        img.onerror = () => {
+          idx += 1;
+          if (idx < candidates.length) img.src = candidates[idx];
+          else { box.textContent = emptyText; resolve(false); }
+        };
+        img.src = candidates[idx];
+      });
+    }
+    async function renderReportGroupInto(target, group){
+      if (!target || !group) return;
+      target.innerHTML = buildAdminReportMarkup(group);
+      const settings = bootstrapData.settings || {};
+      const first = group.rows[0] || {};
+      const promises = [
+        loadImageIntoBox(target.querySelector('[data-role="brandLogo"]'), settings.BRAND_LOGO_URL || '', 'Brand Logo', true, 'LOGO'),
+        loadImageIntoBox(target.querySelector('[data-role="passport"]'), group.student?.passportUrl || '', 'Student Passport', false, 'No passport')
+      ];
+      const signatureBox = target.querySelector('[data-role="signatureImage"]');
+      if (signatureBox) promises.push(loadImageIntoBox(signatureBox, first.signatureUrl || settings.SIGNATURE_URL || '', 'Signature', true, 'No signature'));
+      await Promise.all(promises);
+      await new Promise(resolve => setTimeout(resolve, 120));
+    }
+    async function previewReportGroup(key){
+      const group = findReportGroupByKey(key);
+      if (!group) {
+        showToast('That result report is no longer available.', 'error');
+        return;
+      }
+      currentPreviewReportKey = key;
+      const mount = $('reportPreviewMount');
+      const status = $('reportPreviewStatus');
+      if (status){ status.textContent = 'Rendering preview...'; status.className = 'status'; }
+      await renderReportGroupInto(mount, group);
+      if (status){ status.textContent = `Preview ready for ${group.fullName} • ${group.examCode}`; status.className = 'status ok'; }
+    }
+    window.previewReportGroup = previewReportGroup;
+    function downloadBlob(filename, blob){
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+    }
+    async function createPdfBlobFromGroup(group){
+      const workbench = $('reportWorkbench');
+      if (!workbench) throw new Error('Report workbench is missing.');
+      const holder = document.createElement('div');
+      workbench.innerHTML = '';
+      workbench.appendChild(holder);
+      await renderReportGroupInto(holder, group);
+      const capture = holder.firstElementChild;
+      if (!capture) throw new Error('Failed to prepare the report for export.');
+      const canvas = await html2canvas(capture, {scale: 2.4, useCORS: true, backgroundColor: '#ffffff'});
+      const imgData = canvas.toDataURL('image/png');
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const imgW = pageW;
+      const imgH = canvas.height * imgW / canvas.width;
+      let heightLeft = imgH;
+      let position = 0;
+      pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH, undefined, 'FAST');
+      heightLeft -= pageH;
+      while (heightLeft > 0) {
+        position = heightLeft - imgH;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH, undefined, 'FAST');
+        heightLeft -= pageH;
+      }
+      workbench.innerHTML = '';
+      return pdf.output('blob');
+    }
+    async function downloadSingleReportPdfByKey(key){
+      const group = findReportGroupByKey(key);
+      if (!group) {
+        showToast('Result report not found for PDF export.', 'error');
+        return;
+      }
+      showLoading(`Exporting PDF for ${group.fullName}...`);
+      try{
+        const blob = await createPdfBlobFromGroup(group);
+        const fileName = `${slugifyText(group.fullName)}_${slugifyText(group.examCode)}_result.pdf`;
+        downloadBlob(fileName, blob);
+        showToast('PDF exported successfully.');
+      }catch(err){
+        showToast('Failed to export that PDF.', 'error');
+      }finally{
+        hideLoading();
+      }
+    }
+    window.downloadSingleReportPdfByKey = downloadSingleReportPdfByKey;
+    async function downloadReportsZip(groups, zipName){
+      if (!groups.length) throw new Error('No result report matched that export request.');
+      if (!window.JSZip) throw new Error('ZIP library is not available on this page.');
+      const zip = new JSZip();
+      for (let i = 0; i < groups.length; i += 1){
+        const group = groups[i];
+        showLoading(`Preparing PDF ${i + 1} of ${groups.length}...`);
+        const blob = await createPdfBlobFromGroup(group);
+        zip.file(`${slugifyText(group.fullName)}_${slugifyText(group.examCode)}_result.pdf`, blob);
+      }
+      showLoading('Building ZIP file...');
+      const zipBlob = await zip.generateAsync({type:'blob'});
+      downloadBlob(zipName, zipBlob);
+    }
+
     function renderResults(){
       const q = $('resultSearchText').value.trim().toLowerCase();
       const examCode = $('resultSearchExamCode').value.trim().toLowerCase();
@@ -1089,7 +1612,8 @@
     async function loadBootstrap(){
       const res = await apiRequest('getAdminBootstrap', {}, 'GET', 'Loading dashboard...');
       bootstrapData = res.data;
-      $('welcomeText').textContent = `Signed in • ${res.data.settings.BRAND_NAME || 'Genz Edutech Innovations'}`;
+      const roleLabel = res.data.currentAdmin && res.data.currentAdmin.isPrincipal ? 'Principal Admin' : 'Sub-admin';
+      $('welcomeText').textContent = `Signed in • ${res.data.settings.BRAND_NAME || 'Genz Edutech Innovations'} • ${roleLabel}`;
       $('studentCategory').innerHTML = `<option value="">Select category</option>` + (res.data.categoryOptions || []).map(opt => `<option value="${esc(opt)}">${esc(opt)}</option>`).join('');
       fillOptions($('resultRegIdSelect'), res.data.students.filter(s => !s.deleted).map(s => s.regId), 'Select student');
       $('resultAcademicSession').value = res.data.settings.ACADEMIC_SESSION || '';
@@ -1098,9 +1622,11 @@
       renderSummary();
       renderStudents();
       renderResults();
+      renderResultExportManager();
       renderAdmins();
       bindSettings();
       syncSubjectOptionsFieldFromData();
+      refreshBulkEmailSummary();
     }
 
     function bindSettings(){
@@ -1472,16 +1998,63 @@
       }
     });
 
+    $('bulkEmailTarget').addEventListener('change', refreshBulkEmailSummary);
+    $('bulkEmailManualRecipients').addEventListener('input', refreshBulkEmailSummary);
+        $('downloadEmailTemplateBtn').addEventListener('click', () => {
+      downloadText('email_template.csv', `email,name
+parent1@example.com,Parent One
+parent2@example.com,Parent Two
+`, 'text/csv;charset=utf-8');
+    });
+    $('importEmailCsvBtn').addEventListener('click', async () => {
+      try{
+        const file = $('bulkEmailCsvFile').files[0];
+        if (!file) throw new Error('Choose an email CSV file first.');
+        const rows = parseCsv(await file.text());
+        uploadedEmailRecipients = extractEmailsFromCsvRows(rows);
+        refreshBulkEmailSummary();
+        showToast(`Imported ${uploadedEmailRecipients.length} email recipient(s) from CSV.`);
+      }catch(err){ showToast(err.message, 'error'); }
+    });
+    $('clearEmailCsvBtn').addEventListener('click', () => {
+      uploadedEmailRecipients = [];
+      if ($('bulkEmailCsvFile')) $('bulkEmailCsvFile').value = '';
+      refreshBulkEmailSummary();
+      showToast('Imported CSV email list cleared.');
+    });
+    $('createDriveStorageBtn').addEventListener('click', async () => {
+      try{
+        const res = await apiRequest('checkDriveStorageReady', {}, 'POST', 'Preparing Drive storage folder...');
+        $('driveStorageStatus').textContent = res.message;
+        $('driveStorageStatus').className = 'status ok';
+        if (res.data && res.data.folderUrl){
+          $('driveStorageLink').style.display = 'inline-block';
+          $('driveStorageLink').href = res.data.folderUrl;
+          $('driveStorageLink').textContent = 'Open Drive storage folder';
+        }
+        showToast(res.message);
+      }catch(err){
+        $('driveStorageStatus').textContent = err.message;
+        $('driveStorageStatus').className = 'status error';
+        showToast(err.message, 'error');
+      }
+    });
+
     $('sendBulkEmailBtn').addEventListener('click', async () => {
       try{
         const selected = $('bulkEmailTarget').value === 'students' ? [...selectedStudentIds] : [];
+        const manualEmails = parseManualEmails($('bulkEmailManualRecipients').value);
+        const recipientEmails = [...new Set([...(uploadedEmailRecipients || []), ...manualEmails])];
         const res = await apiRequest('sendBulkEmail', {
           target: $('bulkEmailTarget').value,
           subject: $('bulkEmailSubject').value,
           message: $('bulkEmailMessage').value,
-          selected
+          selected,
+          recipientEmails,
+          manualEmails: $('bulkEmailManualRecipients').value,
+          batchSize: $('bulkEmailBatchSize').value
         }, 'POST', 'Sending bulk email...');
-        $('bulkEmailStatus').textContent = `${res.message} Recipients: ${res.data.recipients}`;
+        $('bulkEmailStatus').textContent = `${res.message} Sent: ${res.data.recipients} • Matched: ${res.data.totalMatched} • Remaining after batch: ${res.data.remainingAfterBatch}`;
         $('bulkEmailStatus').className = 'status ok';
         showToast(res.message);
       }catch(err){
@@ -1530,6 +2103,61 @@
         const res = await apiRequest('exportResultsCsv', {}, 'POST', 'Preparing result export...');
         downloadText(res.data.filename, res.data.csv, 'text/csv;charset=utf-8');
       }catch(err){ showToast(err.message, 'error'); }
+    });
+
+
+    $('openResultExportManagerBtn').addEventListener('click', () => {
+      $('resultExportManagerCard').scrollIntoView({behavior:'smooth', block:'start'});
+    });
+    ['reportExportSearch','reportExportExamCode','reportExportClassFilter','reportExportScoreMode','reportExportScoreValue'].forEach(id => {
+      const el = $(id);
+      if (el) el.addEventListener(id === 'reportExportScoreValue' ? 'input' : 'input', renderResultExportManager);
+      if (el && el.tagName === 'SELECT') el.addEventListener('change', renderResultExportManager);
+    });
+    $('refreshResultExportManagerBtn').addEventListener('click', renderResultExportManager);
+    $('selectVisibleReportsBtn').addEventListener('click', selectVisibleReportGroups);
+    $('clearReportSelectionBtn').addEventListener('click', clearReportSelection);
+    $('downloadPreviewPdfBtn').addEventListener('click', async () => {
+      if (!currentPreviewReportKey) {
+        showToast('Preview a result first before exporting from preview.', 'error');
+        return;
+      }
+      await downloadSingleReportPdfByKey(currentPreviewReportKey);
+    });
+    $('exportSelectedZipBtn').addEventListener('click', async () => {
+      try{
+        const groups = getResultReportGroups().filter(group => selectedReportKeys.has(group.key));
+        await downloadReportsZip(groups, 'selected_result_pdfs.zip');
+        showToast('Selected result PDFs exported successfully.');
+      }catch(err){ showToast(err.message, 'error'); }
+      finally{ hideLoading(); }
+    });
+    $('exportVisibleZipBtn').addEventListener('click', async () => {
+      try{
+        await downloadReportsZip(getFilteredReportGroups(), 'filtered_result_pdfs.zip');
+        showToast('Visible result PDFs exported successfully.');
+      }catch(err){ showToast(err.message, 'error'); }
+      finally{ hideLoading(); }
+    });
+    $('exportClassZipBtn').addEventListener('click', async () => {
+      const selectedClass = String($('reportExportClassFilter').value || '').trim();
+      if (!selectedClass) {
+        showToast('Choose a class filter first before exporting class-by-class PDFs.', 'error');
+        return;
+      }
+      try{
+        const groups = getFilteredReportGroups().filter(group => String(group.classLevel || '').toLowerCase() === selectedClass.toLowerCase());
+        await downloadReportsZip(groups, `${slugifyText(selectedClass)}_class_result_pdfs.zip`);
+        showToast('Class result PDFs exported successfully.');
+      }catch(err){ showToast(err.message, 'error'); }
+      finally{ hideLoading(); }
+    });
+    $('exportAllZipBtn').addEventListener('click', async () => {
+      try{
+        await downloadReportsZip(getResultReportGroups(), 'all_result_pdfs.zip');
+        showToast('All result PDFs exported successfully.');
+      }catch(err){ showToast(err.message, 'error'); }
+      finally{ hideLoading(); }
     });
 
     $('refreshBtn').addEventListener('click', loadBootstrap);
