@@ -250,18 +250,18 @@
 
       <div class="nav-group">
         <div class="nav-title">Workspace</div>
-        <button class="nav-btn active" data-section="dashboardSection">Dashboard</button>
-        <button class="nav-btn" data-section="studentsSection">Students</button>
-        <button class="nav-btn" data-section="resultsSection">Results</button>
-        <button class="nav-btn" data-section="adminsSection">Admins</button>
-        <button class="nav-btn" data-section="communicationsSection">Bulk Email / SMS</button>
-        <button class="nav-btn" data-section="settingsSection">Settings</button>
+        <button type="button" class="nav-btn active" data-section="dashboardSection">Dashboard</button>
+        <button type="button" class="nav-btn" data-section="studentsSection">Students</button>
+        <button type="button" class="nav-btn" data-section="resultsSection">Results</button>
+        <button type="button" class="nav-btn" data-section="adminsSection">Admins</button>
+        <button type="button" class="nav-btn" data-section="communicationsSection">Bulk Email / SMS</button>
+        <button type="button" class="nav-btn" data-section="settingsSection">Settings</button>
       </div>
 
       <div class="nav-group">
         <div class="nav-title">Quick links</div>
-        <button class="nav-btn" id="refreshBtn">Refresh data</button>
-        <button class="nav-btn" id="logoutBtn">Logout</button>
+        <button type="button" class="nav-btn" id="refreshBtn">Refresh data</button>
+        <button type="button" class="nav-btn" id="logoutBtn">Logout</button>
       </div>
     </aside>
 
@@ -2066,6 +2066,12 @@
     });
 
 
+
+    function bindClick(id, handler){
+      const el = $(id);
+      if (el) el.addEventListener('click', handler);
+    }
+
     $('openResultExportManagerBtn').addEventListener('click', () => {
       $('resultExportManagerCard').scrollIntoView({behavior:'smooth', block:'start'});
     });
@@ -2074,27 +2080,27 @@
       if (el) el.addEventListener(id === 'reportExportScoreValue' ? 'input' : 'input', renderResultExportManager);
       if (el && el.tagName === 'SELECT') el.addEventListener('change', renderResultExportManager);
     });
-    $('refreshResultExportManagerBtn').addEventListener('click', renderResultExportManager);
-    $('selectVisibleResultsBtn').addEventListener('click', () => { getFilteredResultRows().forEach(r => selectedResultIds.add(String(r.resultId || ''))); renderResults(); });
-    $('clearResultSelectionBtn').addEventListener('click', () => { selectedResultIds.clear(); renderResults(); });
-    $('archiveSelectedResultsBtn').addEventListener('click', () => runBulkResultState('archive'));
-    $('deleteSelectedResultsBtn').addEventListener('click', () => runBulkResultState('delete'));
-    $('restoreSelectedResultsBtn').addEventListener('click', () => runBulkResultState('restore'));
-    $('hardDeleteSelectedResultsBtn').addEventListener('click', () => runBulkResultState('harddelete'));
-    $('exportVisibleStudentsPdfBtn').addEventListener('click', () => exportStudentsPdfByMode('visible'));
-    $('exportSelectedStudentsPdfBtn').addEventListener('click', () => exportStudentsPdfByMode('selected'));
-    $('exportClassStudentsPdfBtn').addEventListener('click', () => exportStudentsPdfByMode('class'));
-    $('exportAllStudentsPdfBtn').addEventListener('click', () => exportStudentsPdfByMode('all'));
-    $('selectVisibleReportsBtn').addEventListener('click', selectVisibleReportGroups);
-    $('clearReportSelectionBtn').addEventListener('click', clearReportSelection);
-    $('downloadPreviewPdfBtn').addEventListener('click', async () => {
+    bindClick('refreshResultExportManagerBtn', renderResultExportManager);
+    bindClick('selectVisibleResultsBtn', () => { getFilteredResultRows().forEach(r => selectedResultIds.add(String(r.resultId || ''))); renderResults(); });
+    bindClick('clearResultSelectionBtn', () => { selectedResultIds.clear(); renderResults(); });
+    bindClick('archiveSelectedResultsBtn', () => runBulkResultState('archive'));
+    bindClick('deleteSelectedResultsBtn', () => runBulkResultState('delete'));
+    bindClick('restoreSelectedResultsBtn', () => runBulkResultState('restore'));
+    bindClick('hardDeleteSelectedResultsBtn', () => runBulkResultState('harddelete'));
+    bindClick('exportVisibleStudentsPdfBtn', () => exportStudentsPdfByMode('visible'));
+    bindClick('exportSelectedStudentsPdfBtn', () => exportStudentsPdfByMode('selected'));
+    bindClick('exportClassStudentsPdfBtn', () => exportStudentsPdfByMode('class'));
+    bindClick('exportAllStudentsPdfBtn', () => exportStudentsPdfByMode('all'));
+    bindClick('selectVisibleReportsBtn', selectVisibleReportGroups);
+    bindClick('clearReportSelectionBtn', clearReportSelection);
+    bindClick('downloadPreviewPdfBtn', async () => {
       if (!currentPreviewReportKey) {
         showToast('Preview a result first before exporting from preview.', 'error');
         return;
       }
       await downloadSingleReportPdfByKey(currentPreviewReportKey);
     });
-    $('exportSelectedZipBtn').addEventListener('click', async () => {
+    bindClick('exportSelectedZipBtn', async () => {
       try{
         const groups = getResultReportGroups().filter(group => selectedReportKeys.has(group.key));
         await downloadReportsZip(groups, 'selected_result_pdfs.zip');
@@ -2102,14 +2108,14 @@
       }catch(err){ showToast(err.message, 'error'); }
       finally{ hideLoading(); }
     });
-    $('exportVisibleZipBtn').addEventListener('click', async () => {
+    bindClick('exportVisibleZipBtn', async () => {
       try{
         await downloadReportsZip(getFilteredReportGroups(), 'filtered_result_pdfs.zip');
         showToast('Visible result PDFs exported successfully.');
       }catch(err){ showToast(err.message, 'error'); }
       finally{ hideLoading(); }
     });
-    $('exportClassZipBtn').addEventListener('click', async () => {
+    bindClick('exportClassZipBtn', async () => {
       const selectedClass = String($('reportExportClassFilter').value || '').trim();
       if (!selectedClass) {
         showToast('Choose a class filter first before exporting class-by-class PDFs.', 'error');
@@ -2122,7 +2128,7 @@
       }catch(err){ showToast(err.message, 'error'); }
       finally{ hideLoading(); }
     });
-    $('exportAllZipBtn').addEventListener('click', async () => {
+    bindClick('exportAllZipBtn', async () => {
       try{
         await downloadReportsZip(getResultReportGroups(), 'all_result_pdfs.zip');
         showToast('All result PDFs exported successfully.');
@@ -2130,8 +2136,8 @@
       finally{ hideLoading(); }
     });
 
-    $('refreshBtn').addEventListener('click', loadBootstrap);
-    $('logoutBtn').addEventListener('click', () => { clearToken(); location.reload(); });
+    bindClick('refreshBtn', loadBootstrap);
+    bindClick('logoutBtn', () => { clearToken(); location.reload(); });
 
     async function runBulkResultState(state){
       if (!selectedResultIds.size) return showToast('Select at least one result first.', 'error');
@@ -2209,8 +2215,17 @@
       } finally { hideLoading(); }
     }
 
-    $('menuBtn').addEventListener('click', () => $('sidebar').classList.toggle('open'));
-    document.querySelectorAll('.nav-btn[data-section]').forEach(btn => btn.addEventListener('click', ()=> activateSection(btn.dataset.section)));
+    bindClick('menuBtn', () => $('sidebar').classList.toggle('open'));
+    const sidebarEl = $('sidebar');
+    if (sidebarEl) {
+      sidebarEl.addEventListener('click', (event) => {
+        const btn = event.target.closest('.nav-btn[data-section]');
+        if (!btn) return;
+        event.preventDefault();
+        activateSection(btn.dataset.section);
+      });
+    }
+    document.querySelectorAll('.nav-btn[data-section]').forEach(btn => btn.setAttribute('type', 'button'));
 
     (async function init(){
       setAuthTab('login');
