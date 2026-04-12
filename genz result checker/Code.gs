@@ -1,7 +1,5 @@
-const GOOGLE_SHEET_ID = '1eOq3_XOmL8NqMbXIC3ysa0d3K8B9jQdmT9z6y-iBiOw';
-const SESSION_TTL_SECONDS = 60 * 60 * 24 * 3;
-const PRINCIPAL_REMEMBER_TTL_SECONDS = 60 * 60 * 24 * 30;
-const CACHE_SESSION_TTL_SECONDS = 60 * 60 * 6;
+const GOOGLE_SHEET_ID = '1zyjmnpFIgtpIhrYhJvqo668yqjIQbGCbaxJhvK1LWzQ';
+const SESSION_TTL_SECONDS = 60 * 60 * 6;
 const REQUEST_TTL_SECONDS = 60 * 5;
 const RESET_CODE_TTL_MINUTES = 15;
 const PASSWORD_HASH_VERSION = 'v2';
@@ -118,6 +116,9 @@ function handleRequest_(e) {
       case 'setResultState':
         result = setResultState_(payload);
         break;
+      case 'bulkSetResultState':
+        result = bulkSetResultState_(payload);
+        break;
       case 'exportResultsCsv':
         result = exportResultsCsv_(payload);
         break;
@@ -144,9 +145,6 @@ function handleRequest_(e) {
         break;
       case 'setAdminState':
         result = setAdminState_(payload);
-        break;
-      case 'checkDriveStorageReady':
-        result = checkDriveStorageReady_(payload);
         break;
       default:
         result = fail_('Unknown action.');
@@ -215,7 +213,7 @@ function validateAction_(action) {
     saveResult: true, saveResultEntries: true, importResultsCsv: true, recalculateResults: true, setResultState: true,
     exportResultsCsv: true, loadStudentExamCodes: true, loadStudentResults: true, sendBulkEmail: true,
     authorizeMailStatus: true, exportSmsContacts: true, requestPasswordReset: true, resetPassword: true,
-    setAdminState: true, checkDriveStorageReady: true
+    setAdminState: true
   };
   if (!allowed[action]) throw new Error('Invalid or missing action.');
 }
@@ -250,9 +248,7 @@ function setupSystem_() {
   ensureSheet_(SHEET_NAMES.AUDIT_LOGS, HEADERS.AUDIT_LOGS);
   bootstrapSettings_();
   bootstrapAdmins_();
-  ensurePrincipalAdminIntegrity_();
   bootstrapRemarks_();
-  ensureStorageFolderSafe_();
   return ok_('System setup completed.');
 }
 
@@ -309,50 +305,23 @@ function bootstrapSettings_() {
 function bootstrapAdmins_() {
   var sh = getSpreadsheet_().getSheetByName(SHEET_NAMES.ADMINS);
   if (countNonBlankRows_(sh) > 0) return;
-  // Fresh onboarding model: do not auto-create a default admin.
-  // The first public admin signup becomes the principal admin automatically.
-}
-
-function ensurePrincipalAdminIntegrity_() {
-  var sh = getSpreadsheet_().getSheetByName(SHEET_NAMES.ADMINS);
-  var rows = getSheetObjectsWithIndex_(sh).filter(function(item) {
-    return !normalizeBoolean_(item.obj.Deleted, false) && !normalizeBoolean_(item.obj.Archived, false) && normalizeBoolean_(item.obj.Active, true);
+  var creds = createPasswordRecord_('admin12345');
+  appendObjectRow_(sh, {
+    Username: 'admin',
+    PasswordHash: creds.hash,
+    PasswordSalt: creds.salt,
+    PasswordVersion: creds.version,
+    DisplayName: 'Principal Admin',
+    Email: '',
+    Phone: '',
+    IsPrincipal: true,
+    Active: true,
+    Archived: false,
+    Deleted: false,
+    CreatedAt: isoNow_(),
+    UpdatedAt: isoNow_(),
+    LastLoginAt: ''
   });
-  if (!rows.length) return;
-  var principals = rows.filter(function(item) { return normalizeBoolean_(item.obj.IsPrincipal, false); });
-  if (principals.length === 1) return;
-  var keeper = principals.length ? principals[0] : rows[0];
-  rows.forEach(function(item) {
-    var shouldBePrincipal = item.rowIndex === keeper.rowIndex;
-    if (normalizeBoolean_(item.obj.IsPrincipal, false) !== shouldBePrincipal) {
-      updateObjectRow_(sh, item.rowIndex, { IsPrincipal: shouldBePrincipal, UpdatedAt: isoNow_() });
-    }
-  });
-}
-
-function ensureStorageFolderSafe_() {
-  try {
-    getRootStorageFolder_();
-  } catch (err) {
-    // Ignore setup-time Drive auth failures. Upload actions will surface a clearer message when needed.
-  }
-}
-
-function authorizeDriveNow() {
-  return getRootStorageFolder_().getId();
-}
-
-function factoryResetFreshOnboarding() {
-  setupSystem_();
-  [SHEET_NAMES.ADMINS, SHEET_NAMES.STUDENTS, SHEET_NAMES.RESULTS, SHEET_NAMES.RESET_CODES, SHEET_NAMES.AUDIT_LOGS].forEach(function(name) {
-    var sh = getSpreadsheet_().getSheetByName(name);
-    if (sh && sh.getLastRow() > 1) sh.deleteRows(2, sh.getLastRow() - 1);
-  });
-  upsertSetting_('STUDENT_SIGNUP_ENABLED', 'false');
-  upsertSetting_('PUBLIC_ADMIN_SIGNUP_ENABLED', 'false');
-  ensurePrincipalAdminIntegrity_();
-  ensureStorageFolderSafe_();
-  return 'Fresh onboarding reset completed. The next public admin signup will become the principal admin.';
 }
 
 function bootstrapRemarks_() {
@@ -403,8 +372,37 @@ function getPublicBootstrap_() {
   });
 }
 
+
+function ensurePrincipalAdminConsistency_() {
+  var sh = getSpreadsheet_().getSheetByName(SHEET_NAMES.ADMINS);
+  var rows = getSheetObjectsWithIndex_(sh).filter(function(item){ return !normalizeBoolean_(item.obj.Deleted,false); });
+  if (!rows.length) return null;
+  var principals = rows.filter(function(item){ return normalizeBoolean_(item.obj.IsPrincipal,false); });
+  if (principals.length === 1) return principals[0];
+  var candidate = null;
+  if (principals.length > 1) {
+    candidate = principals[0];
+  } else {
+    candidate = rows.filter(function(item){ return normalizeBoolean_(item.obj.Active,true) && !normalizeBoolean_(item.obj.Archived,false); })[0] || rows[0];
+  }
+  rows.forEach(function(item){
+    var shouldPrincipal = item.rowIndex === candidate.rowIndex;
+    if (normalizeBoolean_(item.obj.IsPrincipal,false) !== shouldPrincipal) {
+      updateObjectRow_(sh, item.rowIndex, { IsPrincipal: shouldPrincipal, UpdatedAt: isoNow_() });
+      item.obj.IsPrincipal = shouldPrincipal;
+    }
+  });
+  return candidate;
+}
+
+function getAdminRowByUsername_(username) {
+  var sh = getSpreadsheet_().getSheetByName(SHEET_NAMES.ADMINS);
+  return getSheetObjectsWithIndex_(sh).find(function(item) {
+    return String(item.obj.Username || '').toLowerCase() === String(username || '').toLowerCase();
+  });
+}
+
 function adminLogin_(payload) {
-  ensurePrincipalAdminIntegrity_();
   var username = sanitizeValue_(payload.username);
   var password = String(payload.password || '');
   var clientId = sanitizeValue_(payload.clientId);
@@ -412,6 +410,7 @@ function adminLogin_(payload) {
   requireClientId_(clientId);
   enforceRateLimit_('admin-login:' + username.toLowerCase(), 8, 300, 'Too many admin login attempts. Try again later.');
 
+  ensurePrincipalAdminConsistency_();
   var sh = getSpreadsheet_().getSheetByName(SHEET_NAMES.ADMINS);
   var row = getSheetObjectsWithIndex_(sh).find(function(item) {
     return String(item.obj.Username || '').toLowerCase() === username.toLowerCase();
@@ -423,22 +422,15 @@ function adminLogin_(payload) {
     throw new Error('Invalid admin login details.');
   }
   updateObjectRow_(sh, row.rowIndex, { LastLoginAt: isoNow_(), UpdatedAt: isoNow_() });
-  var isPrincipal = normalizeBoolean_(row.obj.IsPrincipal, false);
-  var wantsRemember = normalizeBoolean_(payload.rememberMe, false);
-  var rememberApplied = isPrincipal && wantsRemember;
-  var sessionTtl = rememberApplied ? PRINCIPAL_REMEMBER_TTL_SECONDS : SESSION_TTL_SECONDS;
   var session = createSession_('admin', row.obj.Username, clientId, {
     displayName: row.obj.DisplayName || row.obj.Username,
-    isPrincipal: isPrincipal,
-    rememberMe: rememberApplied
-  }, sessionTtl);
-  logAudit_('admin', row.obj.Username, 'adminLogin', 'OK', rememberApplied ? 'Principal admin logged in with remember-me.' : 'Admin logged in.');
+    isPrincipal: normalizeBoolean_(row.obj.IsPrincipal, false)
+  });
+  logAudit_('admin', row.obj.Username, 'adminLogin', 'OK', 'Admin logged in.');
   return ok_('Login successful.', {
     token: session.token,
     displayName: row.obj.DisplayName || row.obj.Username,
-    isPrincipal: isPrincipal,
-    rememberApplied: rememberApplied,
-    sessionDays: Math.round((sessionTtl / 86400) * 10) / 10
+    isPrincipal: normalizeBoolean_(row.obj.IsPrincipal, false)
   });
 }
 
@@ -449,6 +441,7 @@ function adminSignup_(payload) {
   var phone = sanitizeValue_(payload.phone);
   var password = String(payload.password || '');
   var settings = getSettings_();
+  ensurePrincipalAdminConsistency_();
   var admins = getSheetObjects_(getSpreadsheet_().getSheetByName(SHEET_NAMES.ADMINS)).filter(function(a) {
     return !normalizeBoolean_(a.Deleted, false);
   });
@@ -458,8 +451,8 @@ function adminSignup_(payload) {
   }
   if (admins.length > 0) {
     if (!caller || !caller.isPrincipal) throw new Error('Only the principal admin can create sub-admin accounts.');
-  } else {
-    // Fresh onboarding: when no admin exists yet, the first signup becomes principal admin.
+  } else if (!normalizeBoolean_(settings.PUBLIC_ADMIN_SIGNUP_ENABLED, false) && !caller) {
+    throw new Error('Public admin signup is disabled.');
   }
   validatePasswordStrength_(password, 'Password');
   if (!username || !displayName || !email) throw new Error('Display name, username, and email are required.');
@@ -572,7 +565,7 @@ function validateSession_(payload) {
 }
 
 function getAdminBootstrap_(payload) {
-  ensurePrincipalAdminIntegrity_();
+  ensurePrincipalAdminConsistency_();
   var session = requireSession_(payload.token, 'admin', sanitizeValue_(payload.clientId));
   var settings = getSettings_();
   var admins = getSheetObjects_(getSpreadsheet_().getSheetByName(SHEET_NAMES.ADMINS)).map(cleanAdmin_);
@@ -602,7 +595,7 @@ function getAdminBootstrap_(payload) {
 
 function saveSettings_(payload) {
   requirePrincipalAdmin_(payload.token, sanitizeValue_(payload.clientId));
-  var keys = ['BRAND_NAME','HEAD_OFFICE_ADDRESS','SCHOOL_NAME','SCHOOL_PHONE','SCHOOL_EMAIL','PRINCIPAL_NAME','ACADEMIC_SESSION','TERM','EXAM_TITLE','PASS_MARK_NUMBER','PASS_MARK_PERCENTAGE','SHOW_POSITION_ON_REPORT','SIGNATURE_NAME','SIGNATURE_URL','BRAND_LOGO_URL','PORTAL_NOTICE','CLASS_OPTIONS','CATEGORY_OPTIONS','SUBJECT_OPTIONS','STUDENT_SIGNUP_ENABLED','PUBLIC_ADMIN_SIGNUP_ENABLED','RESULT_FOOTER_NOTE'];
+  var keys = ['BRAND_NAME','HEAD_OFFICE_ADDRESS','SCHOOL_NAME','SCHOOL_PHONE','SCHOOL_EMAIL','PRINCIPAL_NAME','ACADEMIC_SESSION','TERM','EXAM_TITLE','PASS_MARK_NUMBER','PASS_MARK_PERCENTAGE','SHOW_POSITION_ON_REPORT','SIGNATURE_NAME','SIGNATURE_URL','BRAND_LOGO_URL','PORTAL_NOTICE','CLASS_OPTIONS','CATEGORY_OPTIONS','SUBJECT_OPTIONS','STUDENT_SIGNUP_ENABLED','PUBLIC_ADMIN_SIGNUP_ENABLED','RESULT_FOOTER_NOTE','RESULT_DETAIL_FIELDS'];
   keys.forEach(function(key) {
     if (Object.prototype.hasOwnProperty.call(payload, key)) upsertSetting_(key, sanitizeSettingValue_(key, payload[key]));
   });
@@ -908,7 +901,7 @@ function loadStudentResults_(payload) {
   var term = sanitizeValue_(payload.term);
   var student = cleanStudent_(getStudentByRegId_(session.id));
   if (!student) throw new Error('Student account not found.');
-  var results = getSheetObjects_(getSpreadsheet_().getSheetByName(SHEET_NAMES.RESULTS)).map(cleanResult_).filter(function(r) {
+  var results = getSheetObjects_(getSpreadsheet_().getSheetByName(SHEET_NAMES.RESULTS)).map(cleanResult_).map(function(r){ r.classLevel = student.classLevel || ''; return r; }).filter(function(r) {
     return r.regId === session.id &&
       r.examCode.toLowerCase() === examCode.toLowerCase() &&
       r.published && r.viewActive && !r.archived && !r.deleted &&
@@ -930,14 +923,10 @@ function sendBulkEmail_(payload) {
   requireAdmin_(payload.token, sanitizeValue_(payload.clientId));
   var target = sanitizeValue_(payload.target || 'students').toLowerCase();
   var subject = sanitizeValue_(payload.subject);
-  var message = String(payload.message || '').trim();
+  var message = sanitizeValue_(payload.message);
   if (!subject || !message) throw new Error('Subject and message are required.');
   var recipients = [];
-  if (Array.isArray(payload.recipientEmails) && payload.recipientEmails.length) {
-    recipients = payload.recipientEmails.map(sanitizeEmail_).filter(Boolean);
-  } else if (sanitizeValue_(payload.manualEmails)) {
-    recipients = parseEmailList_(payload.manualEmails);
-  } else if (target === 'admins') {
+  if (target === 'admins') {
     recipients = getSheetObjects_(getSpreadsheet_().getSheetByName(SHEET_NAMES.ADMINS)).filter(function(a) {
       return sanitizeEmail_(a.Email) && normalizeBoolean_(a.Active, true) && !normalizeBoolean_(a.Archived, false) && !normalizeBoolean_(a.Deleted, false);
     }).map(function(a) { return sanitizeEmail_(a.Email); });
@@ -948,20 +937,17 @@ function sendBulkEmail_(payload) {
       return sanitizeEmail_(s.ParentEmail) && normalizeBoolean_(s.Active, true) && !normalizeBoolean_(s.Archived, false) && !normalizeBoolean_(s.Deleted, false);
     }).map(function(s) { return sanitizeEmail_(s.ParentEmail); });
   }
-  recipients = uniqueList_(recipients.map(sanitizeEmail_).filter(Boolean));
+  recipients = uniqueList_(recipients);
   if (!recipients.length) throw new Error('No email recipients were found.');
   var quota = MailApp.getRemainingDailyQuota();
-  var requestedBatch = Math.max(1, Math.min(250, Number(payload.batchSize || 50) || 50));
-  var limit = Math.min(quota, requestedBatch, recipients.length);
+  var limit = Math.min(quota, 50, recipients.length);
   if (limit <= 0) throw new Error('Mail quota is exhausted for today.');
   recipients.slice(0, limit).forEach(function(email) {
-    MailApp.sendEmail({ to: email, subject: subject, htmlBody: message });
+    MailApp.sendEmail({ to: email, subject: subject, htmlBody: message.replace(/\n/g, '<br>') });
   });
-  return ok_(limit < recipients.length ? 'Bulk email sent to the selected batch size / quota limit.' : 'Bulk email sent successfully.', {
+  return ok_(limit < recipients.length ? 'Bulk email sent to the allowed quota limit.' : 'Bulk email sent successfully.', {
     recipients: limit,
-    totalMatched: recipients.length,
-    remainingAfterBatch: Math.max(0, recipients.length - limit),
-    requestedBatch: requestedBatch
+    totalMatched: recipients.length
   });
 }
 
@@ -992,6 +978,32 @@ function exportSmsContacts_(payload) {
     filename: target + '_sms_contacts.csv',
     csv: objectsToCsv_(rows, Object.keys(rows[0] || { name:'', phone:'', email:'' }))
   });
+}
+
+
+function bulkSetResultState_(payload) {
+  var session = requireSession_(payload.token, 'admin', sanitizeValue_(payload.clientId));
+  var ids = Array.isArray(payload.resultIds) ? payload.resultIds : [];
+  var state = sanitizeValue_(payload.state).toLowerCase();
+  if (!ids.length) throw new Error('Select at least one result first.');
+  var sh = getSpreadsheet_().getSheetByName(SHEET_NAMES.RESULTS);
+  var rows = getSheetObjectsWithIndex_(sh);
+  var updates = getResultStateUpdate_(state);
+  if (!updates) throw new Error('Invalid result state.');
+  var changed = 0;
+  ids.forEach(function(id) {
+    var row = rows.find(function(item){ return String(item.obj.ResultID || '') === String(id || ''); });
+    if (!row) return;
+    if (state === 'harddelete') {
+      sh.deleteRow(row.rowIndex);
+      rows = getSheetObjectsWithIndex_(sh);
+    } else {
+      updateObjectRow_(sh, row.rowIndex, Object.assign({}, updates, { UpdatedAt: isoNow_() }));
+    }
+    changed++;
+  });
+  logAudit_('admin', session.id, 'bulkSetResultState', 'OK', state + ' x' + changed);
+  return ok_(changed + ' result(s) updated.');
 }
 
 function requestPasswordReset_(payload) {
@@ -1059,82 +1071,36 @@ function requireAdmin_(token, clientId) {
 }
 
 function requirePrincipalAdmin_(token, clientId) {
+  ensurePrincipalAdminConsistency_();
   var session = requireSession_(token, 'admin', clientId);
+  if (!session.isPrincipal) {
+    var row = getAdminRowByUsername_(session.id);
+    if (row && normalizeBoolean_(row.obj.IsPrincipal, false)) {
+      session.isPrincipal = true;
+      touchSession_(session.token, session);
+    }
+  }
   if (!session.isPrincipal) throw new Error('Only the principal admin can perform this action.');
   return session;
-}
-
-function getSessionStore_() {
-  return PropertiesService.getScriptProperties();
-}
-
-function getSessionKey_(token) {
-  return 'SESSION_' + sanitizeValue_(token);
-}
-
-function getCacheSessionTtl_(ttlSeconds) {
-  ttlSeconds = Number(ttlSeconds) || SESSION_TTL_SECONDS;
-  return Math.max(60, Math.min(ttlSeconds, CACHE_SESSION_TTL_SECONDS));
-}
-
-function deleteSession_(token) {
-  token = sanitizeValue_(token);
-  if (!token) return;
-  var key = getSessionKey_(token);
-  CacheService.getScriptCache().remove(key);
-  getSessionStore_().deleteProperty(key);
-}
-
-function saveSession_(session) {
-  if (!session || !session.token) throw new Error('Invalid session payload.');
-  session.ttlSeconds = Number(session.ttlSeconds) || SESSION_TTL_SECONDS;
-  session.expiresAt = new Date(Date.now() + session.ttlSeconds * 1000).toISOString();
-  var raw = JSON.stringify(session);
-  var key = getSessionKey_(session.token);
-  CacheService.getScriptCache().put(key, raw, getCacheSessionTtl_(session.ttlSeconds));
-  getSessionStore_().setProperty(key, raw);
-  return session;
-}
-
-function loadSession_(token) {
-  token = sanitizeValue_(token);
-  if (!token) return null;
-  var key = getSessionKey_(token);
-  var raw = CacheService.getScriptCache().get(key) || getSessionStore_().getProperty(key);
-  if (!raw) return null;
-  var session = parseJson_(raw);
-  if (!session || !session.role) {
-    deleteSession_(token);
-    return null;
-  }
-  if (session.expiresAt && new Date(session.expiresAt).getTime() < Date.now()) {
-    deleteSession_(token);
-    return null;
-  }
-  CacheService.getScriptCache().put(key, JSON.stringify(session), getCacheSessionTtl_(session.ttlSeconds));
-  return session;
-}
-
-function touchSession_(session) {
-  if (!session || !session.token) return session;
-  session.lastSeenAt = isoNow_();
-  return saveSession_(session);
 }
 
 function requireSession_(token, expectedRole, clientId) {
   token = sanitizeValue_(token);
   if (!token) throw new Error('Session expired. Please log in again.');
-  var session = loadSession_(token);
-  if (!session) throw new Error('Session expired. Please log in again.');
+  var raw = CacheService.getScriptCache().get('SESSION_' + token);
+  if (!raw) throw new Error('Session expired. Please log in again.');
+  var session = parseJson_(raw);
+  if (!session || !session.role) throw new Error('Session expired. Please log in again.');
   if (expectedRole && session.role !== expectedRole) throw new Error('You are not authorized for this action.');
   if (clientId && session.clientId && session.clientId !== clientId) throw new Error('This session belongs to another browser. Please log in again.');
-  return touchSession_(session);
+  return session;
 }
 
-function createSession_(role, id, clientId, extra, ttlSeconds) {
+function createSession_(role, id, clientId, extra) {
   var token = Utilities.getUuid();
-  var session = Object.assign({ role: role, id: id, clientId: clientId, createdAt: isoNow_(), token: token, ttlSeconds: Number(ttlSeconds) || SESSION_TTL_SECONDS }, extra || {});
-  return saveSession_(session);
+  var session = Object.assign({ role: role, id: id, clientId: clientId, createdAt: isoNow_(), token: token }, extra || {});
+  CacheService.getScriptCache().put('SESSION_' + token, JSON.stringify(session), SESSION_TTL_SECONDS);
+  return session;
 }
 
 function requireClientId_(clientId) {
@@ -1254,7 +1220,7 @@ function normalizeResultEntry_(src, settings) {
     Position: maybeNumber_(src.position || src.Position, ''),
     Grade: percentage === '' ? '' : getGradeFromPercentage_(Number(percentage)),
     Remark: percentage === '' ? '' : getRemarkFromPercentage_(Number(percentage)),
-    TeacherComment: percentage === '' ? sanitizeValue_(src.teacherComment || src.TeacherComment) : (sanitizeValue_(src.teacherComment || src.TeacherComment) || getAutoCommentFromPercentage_(Number(percentage))),
+    TeacherComment: sanitizeValue_(src.teacherComment || src.TeacherComment),
     AcademicSession: sanitizeValue_(src.academicSession || src.AcademicSession || settings.ACADEMIC_SESSION),
     Term: sanitizeValue_(src.term || src.Term || settings.TERM),
     Published: normalizeBoolean_(src.published || src.Published, false),
@@ -1301,7 +1267,6 @@ function recalculateRankings_(examCode, academicSession, term) {
           Percentage: '',
           Grade: '',
           Remark: '',
-          TeacherComment: '',
           UpdatedAt: isoNow_()
         });
         affected++;
@@ -1315,7 +1280,6 @@ function recalculateRankings_(examCode, academicSession, term) {
         Percentage: percentage,
         Grade: getGradeFromPercentage_(percentage),
         Remark: getRemarkFromPercentage_(percentage),
-        TeacherComment: sanitizeValue_(item.obj.TeacherComment) || getAutoCommentFromPercentage_(percentage),
         UpdatedAt: isoNow_()
       });
       affected++;
@@ -1332,18 +1296,6 @@ function getRemarkFromPercentage_(percentage) {
   return band ? String(band.Remark || '') : 'No remark configured for this score band.';
 }
 
-function getAutoCommentFromPercentage_(percentage) {
-  percentage = Number(percentage);
-  if (isNaN(percentage)) return '';
-  if (percentage >= 90) return 'Outstanding result. Keep leading by example and maintain this excellent standard.';
-  if (percentage >= 80) return 'Excellent work. Your understanding is strong and your effort is clearly showing.';
-  if (percentage >= 70) return 'Very good performance. Stay consistent and keep pushing for even higher mastery.';
-  if (percentage >= 60) return 'Good performance. You are progressing well; keep practicing to move to the next level.';
-  if (percentage >= 50) return 'Fair performance. You met the pass mark, but there is still room for stronger improvement.';
-  if (percentage >= 40) return 'Below average performance. More focused reading, practice, and guidance are needed.';
-  return 'Poor performance. Immediate extra support, revision, and closer follow-up are strongly advised.';
-}
-
 function getGradeFromPercentage_(percentage) {
   percentage = Number(percentage);
   if (percentage >= 90) return 'A+';
@@ -1357,8 +1309,12 @@ function getGradeFromPercentage_(percentage) {
 }
 
 function getResultStatus_(score, percentage, passMarkNumber, passMarkPercentage) {
-  if (score === '' || percentage === '') return 'PENDING';
-  return (Number(score) >= Number(passMarkNumber || 0) && Number(percentage) >= Number(passMarkPercentage || 0)) ? 'PASS' : 'FAIL';
+  var hasScore = !(score === '' || score == null);
+  var hasPct = !(percentage === '' || percentage == null);
+  if (!hasScore && !hasPct) return 'PENDING';
+  var numberOk = hasScore ? Number(score) >= Number(passMarkNumber || 0) : true;
+  var pctOk = hasPct ? Number(percentage) >= Number(passMarkPercentage || 0) : true;
+  return (numberOk && pctOk) ? 'PASS' : 'FAIL';
 }
 
 function cleanAdmin_(r) {
@@ -1525,15 +1481,8 @@ function normalizeImageUrl_(url) {
   if (imgMatch && imgMatch[1]) url = sanitizeValue_(imgMatch[1]);
   var cssMatch = url.match(/url\((['"]?)(.*?)\1\)/i);
   if (cssMatch && cssMatch[2]) url = sanitizeValue_(cssMatch[2]);
-  url = url.replace(/^['"]|['"]$/g, '');
   var match = extractDriveFileId_(url);
   if (match) return 'https://drive.google.com/thumbnail?id=' + match + '&sz=w1600';
-  if (/dropbox\.com\//i.test(url)) {
-    return url.replace(/\?dl=0/i, '?raw=1').replace(/\?dl=1/i, '?raw=1');
-  }
-  if (/github\.com\//i.test(url) && /\/blob\//i.test(url)) {
-    return url.replace('github.com/', 'raw.githubusercontent.com/').replace('/blob/', '/');
-  }
   return url;
 }
 
@@ -1565,17 +1514,9 @@ function safeName_(value) {
 }
 
 function getRootStorageFolder_() {
-  try {
-    var folderName = 'Genz Result Checker Storage';
-    var iter = DriveApp.getFoldersByName(folderName);
-    return iter.hasNext() ? iter.next() : DriveApp.createFolder(folderName);
-  } catch (err) {
-    var msg = String(err && err.message || '');
-    if (/permission|authorization|required|scope/i.test(msg)) {
-      throw new Error('Drive permission is not active yet. Replace appsscript.json, save the project, run authorizeDriveNow() once in the Apps Script editor, approve Drive access, then redeploy the web app.');
-    }
-    throw new Error('Unable to prepare the Google Drive storage folder. ' + msg);
-  }
+  var folderName = 'Genz Result Checker Storage';
+  var iter = DriveApp.getFoldersByName(folderName);
+  return iter.hasNext() ? iter.next() : DriveApp.createFolder(folderName);
 }
 
 function getNestedFolder_(parts) {
@@ -1667,12 +1608,6 @@ function uploadBrandingAsset_(payload) {
   });
 }
 
-function checkDriveStorageReady_(payload) {
-  requireAdmin_(payload.token, sanitizeValue_(payload.clientId));
-  var folder = getRootStorageFolder_();
-  return ok_('Drive storage folder is ready.', { folderId: folder.getId(), folderName: folder.getName(), folderUrl: folder.getUrl() });
-}
-
 function parseListSetting_(value) {
   return uniqueList_(sanitizeValue_(value).split(',').map(function(part) { return sanitizeValue_(part); }).filter(Boolean));
 }
@@ -1685,10 +1620,6 @@ function uniqueList_(arr) {
     seen[key] = true;
     return true;
   });
-}
-
-function parseEmailList_(value) {
-  return uniqueList_(String(value || '').split(/[\n,;\t ]+/).map(function(part) { return sanitizeEmail_(part); }).filter(Boolean));
 }
 
 function normalizeBoolean_(value, defaultValue) {

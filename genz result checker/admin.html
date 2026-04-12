@@ -30,7 +30,7 @@
     .btn-danger{background:rgba(255,111,134,.16);border:1px solid rgba(255,111,134,.25);color:#ffe9ee}
     .btn-warn{background:rgba(255,184,76,.16);border:1px solid rgba(255,184,76,.28);color:#fff4de}
     .shell{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
-    .sidebar{background:rgba(8,14,28,.78);backdrop-filter:blur(20px);border-right:1px solid var(--line);padding:18px;position:sticky;top:0;height:100vh;overflow:auto;z-index:8;isolation:isolate}
+    .sidebar{background:rgba(8,14,28,.78);backdrop-filter:blur(20px);border-right:1px solid var(--line);padding:18px;position:sticky;top:0;height:100vh;overflow:auto}
     .brand{display:flex;align-items:center;gap:12px;margin-bottom:18px}
     .brand-badge{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,var(--primary),var(--primary2))}
     .brand h1{margin:0;font-size:1.08rem}
@@ -39,7 +39,7 @@
     .nav-title{font-size:12px;text-transform:uppercase;color:#93a9c7;letter-spacing:.08em;margin-bottom:8px}
     .nav-btn{width:100%;text-align:left;background:transparent;color:var(--text);border:1px solid transparent;padding:12px 14px;border-radius:14px;margin-bottom:8px;cursor:pointer;font-weight:700}
     .nav-btn.active,.nav-btn:hover{background:rgba(255,255,255,.08);border-color:var(--line)}
-    .content{padding:22px;max-width:100%;overflow-x:hidden;position:relative;z-index:1}
+    .content{padding:22px;max-width:100%;overflow-x:hidden}
     .topbar{display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
     .hamburger{display:none;width:46px;height:46px;border-radius:14px}
     .glass{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);backdrop-filter:blur(18px);box-shadow:var(--shadow)}
@@ -67,8 +67,8 @@
     .section{display:none}
     .section.active{display:block}
     .table-wrap{overflow:auto;max-width:100%;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.05)}
-    table{width:100%;border-collapse:collapse;min-width:720px;table-layout:auto}
-    th,td{padding:12px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;vertical-align:top;font-size:14px;word-break:break-word}
+    table{width:100%;border-collapse:separate;border-spacing:0;min-width:760px;table-layout:fixed}
+    th,td{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;vertical-align:top;font-size:14px;word-break:break-word;overflow-wrap:anywhere;white-space:normal;line-height:1.45}
     th{position:sticky;top:0;background:rgba(14,22,39,.98);z-index:1}
     .toolbar{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
     .toolbar .actions{display:flex;gap:10px;flex-wrap:wrap}
@@ -94,14 +94,8 @@
     .toast-error{background:rgba(255,111,134,.16);color:#fff1f4}
     .avatar-preview{width:92px;height:110px;border-radius:16px;border:1px solid var(--line);background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;overflow:hidden}
     .avatar-preview img{width:100%;height:100%;object-fit:cover}
-    .inline-note{padding:12px 14px;border-radius:16px;background:rgba(34,199,255,.10);border:1px solid rgba(34,199,255,.18);color:#dff8ff;font-size:14px;overflow-wrap:anywhere;word-break:break-word}
-    .status,.muted,.panel-title,.field,.card,.glass{overflow-wrap:anywhere}
-    .code-note{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:#e8f2ff;display:block}
+    .inline-note{padding:12px 14px;border-radius:16px;background:rgba(34,199,255,.10);border:1px solid rgba(34,199,255,.18);color:#dff8ff;font-size:14px}
     .small{font-size:12px}
-
-    .student-directory-table{width:100%;min-width:0}
-    .student-directory-table th,.student-directory-table td{font-size:13px}
-    .student-directory-empty{padding:18px;border-radius:16px;background:#fff;border:1px dashed #d9e5f7;color:#5b738f;text-align:center}
     @keyframes spin{to{transform:rotate(360deg)}}
     @media (max-width:1150px){
       .summary-grid,.grid-4{grid-template-columns:1fr 1fr}
@@ -143,6 +137,23 @@
     .pdf-subject-table-wrap{overflow:auto;border:1px solid #dfe8f7;border-radius:18px;background:#fff;margin-top:18px}
     .pdf-subject-table-wrap th{background:#f4f8ff;color:#16304d;position:static}
     .pdf-subject-table-wrap td{color:#16304d;border-bottom:1px solid #edf2fa}
+    .compact-table td,.compact-table th{font-size:13px}
+    .table-wrap table tbody tr:hover{background:rgba(255,255,255,.04)}
+    .slip-shell{width:210mm;min-height:297mm;background:linear-gradient(180deg,#f8fbff 0%,#edf5ff 100%);color:#16304d;padding:16mm 14mm;box-sizing:border-box;position:relative;font-family:Inter,Segoe UI,Arial,sans-serif}
+    .slip-shell::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at top right, rgba(77,91,255,.10), transparent 28%),radial-gradient(circle at top left, rgba(33,184,255,.08), transparent 24%);pointer-events:none}
+    .slip-body{position:relative;z-index:1}
+    .slip-head{display:grid;grid-template-columns:84px 1fr 88px;gap:14px;align-items:center;padding:12px 14px;border-radius:22px;background:rgba(255,255,255,.82);border:1px solid #dce8fb;backdrop-filter:blur(8px);box-shadow:0 16px 34px rgba(51,84,138,.10)}
+    .slip-logo,.slip-passport{width:84px;height:84px;border-radius:20px;border:1px solid #dce8fb;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .slip-logo img,.slip-passport img{width:100%;height:100%;object-fit:cover}
+    .slip-title{font-size:24px;font-weight:900;margin:0;color:#16304d}.slip-sub{font-size:13px;color:#60738f;margin-top:4px}
+    .slip-chip-row{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 18px}.slip-chip{padding:8px 12px;border-radius:999px;background:#fff;border:1px solid #dce8fb;font-size:12px;font-weight:800;color:#294564}
+    .slip-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;margin-bottom:14px}.slip-card{background:rgba(255,255,255,.86);border:1px solid #dce8fb;border-radius:20px;padding:14px;box-shadow:0 10px 24px rgba(51,84,138,.08)}
+    .slip-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px}.slip-meta .item{padding:10px 12px;border-radius:14px;background:#f8fbff;border:1px solid #e5eefb}.slip-meta .label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#6a7d98;margin-bottom:5px}.slip-meta .value{font-size:14px;font-weight:700;color:#17304d}
+    .slip-table{width:100%;border-collapse:collapse;table-layout:fixed;background:#fff;border:1px solid #dce8fb;border-radius:18px;overflow:hidden}.slip-table th,.slip-table td{padding:10px 12px;border-bottom:1px solid #e8eef9;color:#17304d;font-size:12px;word-break:break-word}.slip-table th{background:#eff5ff;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#5a708f}.slip-table tr:last-child td{border-bottom:none}
+    .slip-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}.slip-summary .box{padding:12px;border-radius:16px;background:#fff;border:1px solid #dce8fb;text-align:center}.slip-summary .k{font-size:11px;color:#6a7d98;text-transform:uppercase;letter-spacing:.06em}.slip-summary .v{font-size:20px;font-weight:900;color:#183457;margin-top:4px}
+    .slip-foot{display:grid;grid-template-columns:1fr 180px;gap:14px;align-items:end;margin-top:16px}.slip-sign{min-height:84px;border-radius:18px;background:#fff;border:1px dashed #cbdcf6;padding:12px;text-align:center}.slip-sign img{max-width:160px;max-height:54px;object-fit:contain;display:block;margin:0 auto 6px}
+    .slip-muted{font-size:12px;color:#6a7d98}.toolbar-scroll{overflow:auto hidden;padding-bottom:4px}.toolbar-scroll .actions{flex-wrap:nowrap;min-width:max-content}
+
     .pdf-lite-card{padding:16px;border-radius:20px;background:#ffffff;border:1px solid #dfe8f7}
     .pdf-signature-wrap{margin-top:20px;display:grid;grid-template-columns:1fr 180px;gap:18px;align-items:end}
     .pdf-signature-box{border-top:1px solid #cdd9eb;padding-top:8px;text-align:center;color:#16304d}
@@ -175,12 +186,11 @@
         <p class="muted">Use your admin credentials to manage students, results, and publishing controls.</p>
         <div class="field"><label>Username</label><input name="username" required /></div>
         <div class="field"><label>Password</label><input type="password" name="password" required /></div>
-        <label class="inline-check" style="margin:8px 0 14px"><input type="checkbox" name="rememberMe" value="true" /> <span>Remember me <span class="muted">(principal admin only, extends session on this browser)</span></span></label>
         <button class="btn btn-primary" style="width:100%" type="submit">Login</button>
       </form>
 
       <form id="signupForm" class="hidden">
-        <h2 class="panel-title">Create admin account</h2><p class="muted">If no admin exists yet, this signup becomes the <strong>principal admin</strong>. After that, only the principal admin can create sub-admins from inside the dashboard.</p>
+        <h2 class="panel-title">Create admin account</h2><p class="muted">This public signup is only for the first setup admin. After that, only the principal admin can create sub-admins from inside the dashboard.</p>
         <div class="grid grid-2">
           <div class="field"><label>Display Name</label><input name="displayName" required /></div>
           <div class="field"><label>Username</label><input name="username" required /></div>
@@ -221,8 +231,8 @@
           <p class="muted">This portal uses the same request style as your working CBT app: <strong>fetch + action + payload</strong>.</p>
         </div>
         <div class="glass card" style="padding:16px">
-          <strong>Fresh onboarding</strong>
-          <p class="muted">This rebuild no longer depends on a seeded default admin. If there is no admin record yet, the <strong>first admin signup becomes the principal admin</strong>.</p><div class="code-note">Need a clean restart later? Run <strong>factoryResetFreshOnboarding()</strong> once in the Apps Script editor, then sign up again as principal admin.</div>
+          <strong>Default admin</strong>
+          <p class="muted">Username: <strong>admin</strong><br>Password: <strong>admin123</strong></p>
         </div>
       </div>
     </div>
@@ -240,18 +250,18 @@
 
       <div class="nav-group">
         <div class="nav-title">Workspace</div>
-        <button class="nav-btn active" type="button" data-section="dashboardSection">Dashboard</button>
-        <button class="nav-btn" type="button" data-section="studentsSection">Students</button>
-        <button class="nav-btn" type="button" data-section="resultsSection">Results</button>
-        <button class="nav-btn" type="button" data-section="adminsSection">Admins</button>
-        <button class="nav-btn" type="button" data-section="communicationsSection">Bulk Email / SMS</button>
-        <button class="nav-btn" type="button" data-section="settingsSection">Settings</button>
+        <button class="nav-btn active" data-section="dashboardSection">Dashboard</button>
+        <button class="nav-btn" data-section="studentsSection">Students</button>
+        <button class="nav-btn" data-section="resultsSection">Results</button>
+        <button class="nav-btn" data-section="adminsSection">Admins</button>
+        <button class="nav-btn" data-section="communicationsSection">Bulk Email / SMS</button>
+        <button class="nav-btn" data-section="settingsSection">Settings</button>
       </div>
 
       <div class="nav-group">
         <div class="nav-title">Quick links</div>
-        <button class="nav-btn" type="button" id="refreshBtn">Refresh data</button>
-        <button class="nav-btn" type="button" id="logoutBtn">Logout</button>
+        <button class="nav-btn" id="refreshBtn">Refresh data</button>
+        <button class="nav-btn" id="logoutBtn">Logout</button>
       </div>
     </aside>
 
@@ -278,7 +288,7 @@
                 <h2 class="panel-title">Recent students</h2>
                 <div class="muted">Alphabetical listing is used globally.</div>
               </div>
-              <div class="actions"><button class="btn btn-soft" id="exportStudentsBtn" type="button">Export Students CSV</button><button class="btn btn-soft" id="exportStudentsPdfQuickBtn" type="button">Export Students PDF</button></div>
+              <button class="btn btn-soft" id="exportStudentsBtn">Export Students CSV</button>
             </div>
             <div class="table-wrap"><table><thead><tr><th>Reg ID</th><th>Name</th><th>Class</th><th>Status</th></tr></thead><tbody id="recentStudentsBody"></tbody></table></div>
           </div>
@@ -434,24 +444,22 @@
               <h2 class="panel-title">Student list</h2>
               <div class="muted">Activate, archive, delete, restore, or delete forever.</div>
             </div>
-            <div class="actions">
+            <div class="toolbar-scroll"><div class="actions">
               <input id="studentSearch" placeholder="Search by name, reg ID, class, or category" style="min-width:280px;max-width:100%" />
+              <select id="studentFilterClass"></select>
               <select id="studentFilterState">
                 <option value="all">All states</option>
                 <option value="active">Active only</option>
                 <option value="archived">Archived only</option>
                 <option value="deleted">Deleted only</option>
               </select>
-              <select id="studentClassFilter">
-                <option value="">All classes</option>
-              </select>
               <button class="btn btn-soft" type="button" id="selectVisibleStudentsBtn">Select Visible</button>
               <button class="btn btn-soft" type="button" id="clearStudentSelectionToolbarBtn">Clear Selection</button>
-              <button class="btn btn-soft" type="button" id="exportVisibleStudentsPdfBtn">Visible PDF</button>
+              <button class="btn btn-primary" type="button" id="exportVisibleStudentsPdfBtn">Visible PDF</button>
               <button class="btn btn-soft" type="button" id="exportSelectedStudentsPdfBtn">Selected PDF</button>
               <button class="btn btn-soft" type="button" id="exportClassStudentsPdfBtn">Class PDF</button>
               <button class="btn btn-soft" type="button" id="exportAllStudentsPdfBtn">All PDF</button>
-            </div>
+            </div></div>
           </div>
           <div class="selection-info" id="studentSelectionInfo">No student selected.</div>
           <div class="table-wrap"><table><thead><tr><th>Select</th><th>Reg ID</th><th>Full Name</th><th>Class</th><th>Category</th><th>Passport</th><th>Email / Phone</th><th>Status</th><th>Actions</th></tr></thead><tbody id="studentsBody"></tbody></table></div>
@@ -577,30 +585,15 @@
           <div class="glass card">
             <h2 class="panel-title">Bulk email</h2>
             <div class="grid grid-3">
-              <div class="field"><label>Audience</label><select id="bulkEmailTarget"><option value="students">Students / Parents</option><option value="admins">Admins</option><option value="custom">Custom Email List</option></select></div>
-              <div class="field"><label>Recipients per send</label><select id="bulkEmailBatchSize"><option value="10">10</option><option value="20">20</option><option value="50" selected>50</option><option value="100">100</option><option value="150">150</option><option value="250">250</option></select></div>
-              <div class="field"><label>Subject</label><input id="bulkEmailSubject" placeholder="Email subject" /></div>
+              <div class="field"><label>Audience</label><select id="bulkEmailTarget"><option value="students">Students / Parents</option><option value="admins">Admins</option></select></div>
+              <div class="field"><label>Subject</label><input id="bulkEmailSubject" /></div>
+              <div class="field"><label>Recipients per send</label><input id="bulkEmailBatchSize" type="number" min="1" max="100" value="50" /></div>
             </div>
-            <div class="field"><label>HTML Message</label><textarea id="bulkEmailMessage" placeholder="You can type normal text or full HTML email markup here."></textarea></div>
-            <div class="grid grid-2">
-              <div class="field">
-                <label>Manual recipient emails</label>
-                <textarea id="bulkEmailManualRecipients" placeholder="Enter one or more emails separated by comma, space, or new line."></textarea>
-                <div class="small muted" style="margin-top:8px">When this box or the CSV below has emails, they override the audience list and send only to those addresses.</div>
-              </div>
-              <div class="field">
-                <label>CSV email upload</label>
-                <input id="bulkEmailCsvFile" type="file" accept=".csv,text/csv" />
-                <div class="actions" style="margin-top:10px">
-                  <button class="btn btn-soft" id="downloadEmailTemplateBtn" type="button">Download Email CSV Template</button>
-                  <button class="btn btn-soft" id="importEmailCsvBtn" type="button">Import Email CSV</button>
-                  <button class="btn btn-soft" id="clearEmailCsvBtn" type="button">Clear Imported Emails</button>
-                </div>
-                <div class="selection-info" id="bulkEmailRecipientsSummary">No imported CSV email list yet.</div>
-              </div>
-            </div>
+            <div class="field"><label>Manual recipient emails (comma, space, or line separated)</label><textarea id="bulkEmailRecipients" placeholder="you@example.com, person@example.com"></textarea></div>
+            <div class="actions" style="margin-bottom:10px"><button class="btn btn-soft" id="downloadEmailCsvTemplateBtn" type="button">Download Email CSV Template</button><button class="btn btn-soft" id="importEmailCsvBtn" type="button">Import Email CSV</button><input type="file" id="emailCsvFile" accept=".csv,text/csv" hidden /></div>
+            <div class="field"><label>HTML Message</label><textarea id="bulkEmailMessage" placeholder="<h2>Hello</h2><p>Design your message with HTML.</p>"></textarea></div>
             <div class="actions"><button class="btn btn-primary" id="sendBulkEmailBtn" type="button">Send Bulk Email</button><button class="btn btn-soft" id="checkMailAuthBtn" type="button">Check Mail Permission</button></div>
-            <div class="inline-note" style="margin-top:10px">HTML is allowed in the email message box. If Apps Script says mail permission is missing, run <strong>authorizeMailAccess()</strong> once in the Apps Script editor, approve the permission, then redeploy the web app.</div>
+            <div class="inline-note" style="margin-top:10px">If Apps Script says mail permission is missing, run <strong>authorizeMailAccess()</strong> once in the Apps Script editor, approve the permission, then redeploy the web app. CSV should contain one column named <strong>email</strong>.</div>
             <div class="status" id="bulkEmailStatus"></div>
           </div>
 
@@ -659,26 +652,13 @@
                 <div class="avatar-preview" id="brandLogoPreview">No image</div>
               </div>
             </div>
-            <div class="grid grid-2">
-              <div class="field">
-                <label>Drive storage folder</label>
-                <div class="actions">
-                  <button class="btn btn-soft" type="button" id="createDriveStorageBtn">Create / Open Drive Storage Folder</button>
-                </div>
-                <div class="status" id="driveStorageStatus" style="margin-top:10px"></div>
-                <a id="driveStorageLink" class="small" target="_blank" rel="noopener" style="display:none"></a>
-              </div>
-              <div class="field">
-                <label>Fresh onboarding reset</label>
-                <div class="inline-note">To onboard from scratch as principal admin later, run <strong>factoryResetFreshOnboarding()</strong> once in the Apps Script editor. The next admin signup becomes the principal admin automatically.</div>
-              </div>
-            </div>
             <div class="field"><label>Portal Notice</label><textarea name="PORTAL_NOTICE"></textarea></div>
             <div class="grid grid-3">
               <div class="field"><label>Class / Level Options (comma separated, optional)</label><textarea name="CLASS_OPTIONS"></textarea></div>
               <div class="field"><label>Category Options (comma separated)</label><textarea name="CATEGORY_OPTIONS"></textarea></div>
               <div class="field"><label>Subject Options (comma separated)</label><textarea name="SUBJECT_OPTIONS" id="subjectOptionsField"></textarea></div>
             </div>
+            <div class="field"><label>Student result detail fields (comma separated keys)</label><input name="RESULT_DETAIL_FIELDS" id="resultDetailFieldsInput" placeholder="fullName,regId,classLevel,category,schoolName,gender,parentName,parentPhone,parentEmail" /><div class="muted small">Available keys: fullName, regId, classLevel, category, schoolName, gender, age, dob, parentName, parentPhone, parentEmail, state, cityLGA, address, status.</div></div>
             <div class="grid grid-2"><div class="field"><label>Add Subject Manually</label><input id="newSubjectInput" placeholder="e.g. Agricultural Science" /></div><div class="field"><label>Delete Selected Subjects</label><div class="actions"><button class="btn btn-soft" type="button" id="openSubjectPickerBtn">Pick Subjects Below</button><button class="btn btn-danger" type="button" id="deleteSelectedSubjectsBtn">Delete Selected Subjects</button></div></div></div><div id="subjectPickerBox" class="subject-boxes" style="margin-bottom:14px"></div><div class="actions">
               <button class="btn btn-soft" type="button" id="addSubjectBtn">Add Subject</button>
               <button class="btn btn-primary" type="submit">Save Settings</button>
@@ -700,9 +680,9 @@
 
     let bootstrapData = {settings:{},students:[],results:[],admins:[],classOptions:[],categoryOptions:[],subjectOptions:[],examCodes:[],currentAdmin:{}};
     let selectedStudentIds = new Set();
+    let selectedResultIds = new Set();
     let selectedReportKeys = new Set();
     let currentPreviewReportKey = '';
-    let uploadedEmailRecipients = [];
 
     const $ = id => document.getElementById(id);
     const overlay = $('overlay');
@@ -721,14 +701,9 @@
     function esc(v){
       return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     }
-    function token(){ return localStorage.getItem(ADMIN_TOKEN_KEY) || sessionStorage.getItem(ADMIN_TOKEN_KEY) || ''; }
-    function setToken(v, remember=false){
-      clearToken();
-      if (!v) return;
-      if (remember) localStorage.setItem(ADMIN_TOKEN_KEY, v);
-      else sessionStorage.setItem(ADMIN_TOKEN_KEY, v);
-    }
-    function clearToken(){ localStorage.removeItem(ADMIN_TOKEN_KEY); sessionStorage.removeItem(ADMIN_TOKEN_KEY); }
+    function token(){ return localStorage.getItem(ADMIN_TOKEN_KEY) || ''; }
+    function setToken(v){ localStorage.setItem(ADMIN_TOKEN_KEY, v); }
+    function clearToken(){ localStorage.removeItem(ADMIN_TOKEN_KEY); }
     function clientId(){
       let v = localStorage.getItem(ADMIN_CLIENT_KEY) || '';
       if (!v){
@@ -809,37 +784,6 @@
         const obj={}; headers.forEach((h,i)=> obj[h] = (cols[i] || '').trim()); return obj;
       });
     }
-    function extractEmailsFromCsvRows(rows){
-      const candidates = [];
-      (rows || []).forEach(row => {
-        const keys = Object.keys(row || {});
-        const emailKey = keys.find(key => /email/i.test(key));
-        if (emailKey && row[emailKey]) candidates.push(String(row[emailKey]).trim());
-      });
-      return [...new Set(candidates.map(v => v.toLowerCase()).filter(v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)))];
-    }
-
-    function parseManualEmails(value){
-      return [...new Set(String(value || '').split(/[\n,;\t ]+/).map(v => v.trim().toLowerCase()).filter(v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)))];
-    }
-
-    function refreshBulkEmailSummary(){
-      const manual = parseManualEmails($('bulkEmailManualRecipients') ? $('bulkEmailManualRecipients').value : '');
-      const imported = uploadedEmailRecipients || [];
-      const summary = $('bulkEmailRecipientsSummary');
-      if (!summary) return;
-      const totalCustom = [...new Set([...manual, ...imported])].length;
-      if (totalCustom) {
-        summary.textContent = `${imported.length} imported from CSV • ${manual.length} from manual list • ${totalCustom} unique custom recipient(s).`;
-      } else {
-        summary.textContent = $('bulkEmailTarget').value === 'students'
-          ? `No custom email list loaded. Sending will use the selected student audience (${selectedStudentIds.size || 'all visible'}).`
-          : $('bulkEmailTarget').value === 'admins'
-            ? 'No custom email list loaded. Sending will use active admin emails.'
-            : 'No custom email list yet. Add manual emails or import a CSV file.';
-      }
-    }
-
     function downloadText(filename, text, mime='text/plain;charset=utf-8'){
       const blob = new Blob([text], {type:mime});
       const a = document.createElement('a');
@@ -894,14 +838,32 @@
       return candidates[0] || '';
     }
 
-    function getFilteredStudents(){
-      const q = $('studentSearch') ? $('studentSearch').value.trim().toLowerCase() : '';
-      const filter = $('studentFilterState') ? $('studentFilterState').value : 'all';
-      const classFilter = $('studentClassFilter') ? String($('studentClassFilter').value || '').trim().toLowerCase() : '';
-      return (bootstrapData.students || []).filter(s => {
+    function updateStudentSelectionInfo(){
+      const box = $('studentSelectionInfo');
+      if (box) box.textContent = selectedStudentIds.size ? `${selectedStudentIds.size} student(s) selected.` : 'No student selected.';
+    }
+
+
+    function updateResultSelectionInfo(){
+      const box = $('resultSelectionInfo');
+      if (box) box.textContent = selectedResultIds.size ? `${selectedResultIds.size} result(s) selected.` : 'No result selected.';
+    }
+
+    window.toggleResultSelection = function(resultId, checked){
+      const key = String(resultId || '');
+      if (!key) return;
+      if (checked) selectedResultIds.add(key); else selectedResultIds.delete(key);
+      updateResultSelectionInfo();
+    }
+
+    function getFilteredStudentRows(){
+      const q = $('studentSearch').value.trim().toLowerCase();
+      const filter = $('studentFilterState').value;
+      const classFilter = ($('studentFilterClass')?.value || '').trim().toLowerCase();
+      return bootstrapData.students.filter(s => {
         const hay = `${s.regId} ${s.fullName} ${s.classLevel} ${s.category}`.toLowerCase();
         if (q && !hay.includes(q)) return false;
-        if (classFilter && String(s.classLevel || '').trim().toLowerCase() !== classFilter) return false;
+        if (classFilter && String(s.classLevel || '').toLowerCase() !== classFilter) return false;
         if (filter === 'active' && (!s.active || s.archived || s.deleted)) return false;
         if (filter === 'archived' && !s.archived) return false;
         if (filter === 'deleted' && !s.deleted) return false;
@@ -909,10 +871,24 @@
       });
     }
 
-    function updateStudentSelectionInfo(){
-      const box = $('studentSelectionInfo');
-      if (box) box.textContent = selectedStudentIds.size ? `${selectedStudentIds.size} student(s) selected.` : 'No student selected.';
-      refreshBulkEmailSummary();
+    function getFilteredResultRows(){
+      const q = $('resultSearchText').value.trim().toLowerCase();
+      const examCode = $('resultSearchExamCode').value.trim().toLowerCase();
+      const session = $('resultSearchSession').value.trim().toLowerCase();
+      const term = $('resultSearchTerm').value.trim().toLowerCase();
+      const state = $('resultStateFilter').value;
+      return bootstrapData.results.filter(r => {
+        const hay = `${r.examCode} ${r.subject} ${r.regId} ${r.examTitle} ${r.classLevel || ''}`.toLowerCase();
+        if (q && !hay.includes(q)) return false;
+        if (examCode && !String(r.examCode).toLowerCase().includes(examCode)) return false;
+        if (session && !String(r.academicSession).toLowerCase().includes(session)) return false;
+        if (term && !String(r.term).toLowerCase().includes(term)) return false;
+        if (state === 'published' && !r.published) return false;
+        if (state === 'viewActive' && !r.viewActive) return false;
+        if (state === 'archived' && !r.archived) return false;
+        if (state === 'deleted' && !r.deleted) return false;
+        return true;
+      });
     }
 
     function toggleStudentSelection(regId, checked){
@@ -923,7 +899,16 @@
     window.toggleStudentSelection = toggleStudentSelection;
 
     function selectVisibleStudents(){
-      getFilteredStudents().forEach(s => selectedStudentIds.add(String(s.regId).toUpperCase()));
+      const q = $('studentSearch').value.trim().toLowerCase();
+      const filter = $('studentFilterState').value;
+      bootstrapData.students.filter(s => {
+        const hay = `${s.regId} ${s.fullName} ${s.classLevel} ${s.category}`.toLowerCase();
+        if (q && !hay.includes(q)) return false;
+        if (filter === 'active' && (!s.active || s.archived || s.deleted)) return false;
+        if (filter === 'archived' && !s.archived) return false;
+        if (filter === 'deleted' && !s.deleted) return false;
+        return true;
+      }).forEach(s => selectedStudentIds.add(String(s.regId).toUpperCase()));
       renderStudents();
     }
 
@@ -1086,10 +1071,12 @@
 
     function renderStudents(){
       fillOptions($('resultRegIdSelect'), bootstrapData.students.filter(s => !s.deleted).map(s => s.regId), 'Select student');
-      fillOptions($('studentClassFilter'), uniqueValues((bootstrapData.students || []).map(s => s.classLevel)).sort((a,b)=> String(a).localeCompare(String(b))), 'All classes');
-      const classFilterValue = $('studentClassFilter') ? ($('studentClassFilter').dataset.keepValue || $('studentClassFilter').value || '') : '';
-      if ($('studentClassFilter')) $('studentClassFilter').value = classFilterValue;
-      const rows = getFilteredStudents();
+      const classOptions = [...new Set(bootstrapData.students.map(s => String(s.classLevel || '').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+      fillOptions($('studentFilterClass'), classOptions, 'All classes');
+      const previousClass = $('studentFilterClass').dataset.currentValue || $('studentFilterClass').value || '';
+      if (previousClass && classOptions.includes(previousClass)) $('studentFilterClass').value = previousClass;
+      const rows = getFilteredStudentRows();
+      $('studentFilterClass').dataset.currentValue = $('studentFilterClass').value || '';
 
       $('studentsBody').innerHTML = rows.map(s => `
         <tr>
@@ -1276,8 +1263,6 @@
         if ($('reportPreviewMount')) $('reportPreviewMount').innerHTML = 'Click <strong>Preview</strong> on any result row to inspect it here before export.';
       }
     }
-    const renderResultExportManager = renderReportExportManager;
-    window.renderResultExportManager = renderReportExportManager;
     function toggleReportSelection(key, checked){
       if (checked) selectedReportKeys.add(key); else selectedReportKeys.delete(key);
       updateReportSelectionInfo();
@@ -1520,130 +1505,21 @@
       downloadBlob(zipName, zipBlob);
     }
 
-    function buildStudentDirectoryMarkup(students, title, subtitle=''){
-      const settings = bootstrapData.settings || {};
-      return `
-        <div class="pdf-export-surface">
-          <div class="pdf-export-head">
-            <div class="pdf-brand-line">
-              <div class="pdf-passport contain" data-role="studentDirectoryLogo">LOGO</div>
-              <div>
-                <div class="pdf-brand-name">${esc(settings.BRAND_NAME || 'Genz Edutech Innovations')}</div>
-                <div class="pdf-school-title">${esc(title || 'Student Directory')}</div>
-                <div class="pdf-school-sub">${esc(settings.SCHOOL_NAME || 'Result Portal')}</div>
-                <div class="pdf-school-sub">${esc(subtitle || 'Generated from the student workspace')}</div>
-              </div>
-            </div>
-          </div>
-          <div class="pdf-export-body">
-            ${students.length ? `
-            <div class="pdf-subject-table-wrap">
-              <table class="student-directory-table">
-                <thead>
-                  <tr>
-                    <th>S/N</th><th>Registration ID</th><th>Full Name</th><th>Class</th><th>Category</th><th>Gender</th><th>Parent Email</th><th>Parent Phone</th><th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${students.map((s,idx)=>`
-                    <tr>
-                      <td>${idx+1}</td>
-                      <td>${esc(s.regId || '—')}</td>
-                      <td>${esc(s.fullName || '—')}</td>
-                      <td>${esc(s.classLevel || '—')}</td>
-                      <td>${esc(s.category || '—')}</td>
-                      <td>${esc(s.gender || '—')}</td>
-                      <td>${esc(s.parentEmail || '—')}</td>
-                      <td>${esc(s.parentPhone || '—')}</td>
-                      <td>${esc(s.deleted ? 'Deleted' : s.archived ? 'Archived' : s.active ? 'Active' : 'Inactive')}</td>
-                    </tr>`).join('')}
-                </tbody>
-              </table>
-            </div>` : `<div class="student-directory-empty">No students matched this export selection.</div>`}
-          </div>
-        </div>`;
-    }
-
-    async function renderStudentDirectoryInto(target, students, title, subtitle=''){
-      if (!target) return;
-      target.innerHTML = buildStudentDirectoryMarkup(students, title, subtitle);
-      await loadImageIntoBox(target.querySelector('[data-role="studentDirectoryLogo"]'), (bootstrapData.settings || {}).BRAND_LOGO_URL || '', 'Brand Logo', true, 'LOGO');
-      await new Promise(resolve => setTimeout(resolve, 120));
-    }
-
-    async function createStudentDirectoryPdfBlob(students, title, subtitle=''){
-      const workbench = $('reportWorkbench');
-      if (!workbench) throw new Error('Report workbench is missing.');
-      const holder = document.createElement('div');
-      workbench.innerHTML = '';
-      workbench.appendChild(holder);
-      await renderStudentDirectoryInto(holder, students, title, subtitle);
-      const capture = holder.firstElementChild;
-      if (!capture) throw new Error('Failed to prepare the student directory for export.');
-      const canvas = await html2canvas(capture, {scale: 2.2, useCORS: true, backgroundColor: '#ffffff'});
-      const imgData = canvas.toDataURL('image/png');
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pageW = pdf.internal.pageSize.getWidth();
-      const pageH = pdf.internal.pageSize.getHeight();
-      const imgW = pageW;
-      const imgH = canvas.height * imgW / canvas.width;
-      let heightLeft = imgH;
-      let position = 0;
-      pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH, undefined, 'FAST');
-      heightLeft -= pageH;
-      while (heightLeft > 0) {
-        position = heightLeft - imgH;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH, undefined, 'FAST');
-        heightLeft -= pageH;
-      }
-      workbench.innerHTML = '';
-      return pdf.output('blob');
-    }
-
-    async function downloadStudentDirectoryPdf(students, filename, title, subtitle=''){
-      if (!students.length) throw new Error('No students matched that export request.');
-      showLoading(`Preparing ${students.length} student record(s) for PDF export...`);
-      try{
-        const blob = await createStudentDirectoryPdfBlob(students, title, subtitle);
-        downloadBlob(filename, blob);
-      } finally {
-        hideLoading();
-      }
-    }
-
     function renderResults(){
-      const q = $('resultSearchText').value.trim().toLowerCase();
-      const examCode = $('resultSearchExamCode').value.trim().toLowerCase();
-      const session = $('resultSearchSession').value.trim().toLowerCase();
-      const term = $('resultSearchTerm').value.trim().toLowerCase();
-      const state = $('resultStateFilter').value;
-
-      const rows = bootstrapData.results.filter(r => {
-        const hay = `${r.examCode} ${r.subject} ${r.regId} ${r.examTitle}`.toLowerCase();
-        if (q && !hay.includes(q)) return false;
-        if (examCode && !String(r.examCode).toLowerCase().includes(examCode)) return false;
-        if (session && !String(r.academicSession).toLowerCase().includes(session)) return false;
-        if (term && !String(r.term).toLowerCase().includes(term)) return false;
-        if (state === 'published' && !r.published) return false;
-        if (state === 'viewActive' && !r.viewActive) return false;
-        if (state === 'archived' && !r.archived) return false;
-        if (state === 'deleted' && !r.deleted) return false;
-        return true;
-      });
-
+      const rows = getFilteredResultRows();
       $('resultsBody').innerHTML = rows.map(r => `
         <tr>
+          <td><input type="checkbox" ${selectedResultIds.has(String(r.resultId || '')) ? 'checked' : ''} onchange="toggleResultSelection('${esc(r.resultId)}', this.checked)" /></td>
           <td>${esc(r.examCode)}<br><span class="muted small">${esc(r.examTitle)}</span></td>
           <td>${esc(r.subject)}<br><span class="muted small">${esc(r.academicSession)} • ${esc(r.term)}</span></td>
           <td>${esc(r.regId)}</td>
+          <td>${esc(r.classLevel || '—')}</td>
           <td>${esc(r.studentScore || '—')} / ${esc(r.maxScore || '—')}<br><span class="muted">${esc(r.percentage || '—')}%</span></td>
           <td>${esc(r.positionText || '—')}</td>
           <td>${r.published ? '<span class="tag">Yes</span>' : '<span class="tag">No</span>'}</td>
           <td>${r.viewActive ? '<span class="tag">Active</span>' : '<span class="tag">Inactive</span>'}<br><span class="muted small">Code: ${esc(r.examCode)}</span></td>
           <td>${esc(r.publishedAt || '—')}</td>
-          <td>${r.deleted ? '<span class="tag" style="color:#ffdce4">Deleted</span>' : r.archived ? '<span class="tag" style="color:#fff0d8">Archived</span>' : '<span class="tag">'+esc(r.resultStatus || 'PENDING')+'</span>'}</td>
+          <td>${r.deleted ? '<span class="tag" style="color:#ffdce4">Deleted</span>' : r.archived ? '<span class="tag" style="color:#fff0d8">Archived</span>' : `<span class="tag">${esc(r.resultStatus || 'PENDING')}</span>`}</td>
           <td>
             <div class="actions">
               <button class="btn btn-soft" onclick="editResult('${esc(r.resultId)}')">Edit</button>
@@ -1655,7 +1531,8 @@
             </div>
           </td>
         </tr>
-      `).join('') || `<tr><td colspan="10" class="muted">No results found.</td></tr>`;
+      `).join('') || `<tr><td colspan="12" class="muted">No results found.</td></tr>`;
+      updateResultSelectionInfo();
     }
 
     window.editResult = function(resultId){
@@ -1693,20 +1570,20 @@
       $('adminsBody').innerHTML = bootstrapData.admins.map(a => {
         const principalBadge = a.isPrincipal ? '<span class="tag" style="color:#dff8ff">Principal Admin</span>' : '<span class="tag">Sub-admin</span>';
         const locked = !current.isPrincipal || a.isPrincipal;
+        const actionsHtml = a.isPrincipal ? '<span class="muted">Principal admin actions are protected.</span>' : `
+            <div class="actions">
+              <button class="btn btn-soft" onclick="changeAdminState('${esc(a.username)}','${a.active ? 'deactivate':'activate'}')" ${locked ? 'disabled' : ''}>${a.active ? 'Deactivate':'Activate'}</button>
+              <button class="btn btn-warn" onclick="changeAdminState('${esc(a.username)}','${a.archived ? 'restore':'archive'}')" ${locked ? 'disabled' : ''}>${a.archived ? 'Restore':'Archive'}</button>
+              <button class="btn btn-danger" onclick="changeAdminState('${esc(a.username)}','${a.deleted ? 'restore':'delete'}')" ${locked ? 'disabled' : ''}>${a.deleted ? 'Restore':'Delete'}</button>
+              <button class="btn btn-danger" onclick="changeAdminState('${esc(a.username)}','harddelete')" ${locked ? 'disabled' : ''}>Delete Forever</button>
+            </div>`;
         return `
         <tr>
           <td>${esc(a.username)}<br>${principalBadge}</td>
           <td>${esc(a.displayName)}</td>
           <td>${esc(a.email || '—')}<br>${esc(a.phone || '')}</td>
           <td>${statusBadge(a)}</td>
-          <td>
-            <div class="actions">
-              <button class="btn btn-soft" onclick="changeAdminState('${esc(a.username)}','${a.active ? 'deactivate':'activate'}')" ${locked ? 'disabled' : ''}>${a.active ? 'Deactivate':'Activate'}</button>
-              <button class="btn btn-warn" onclick="changeAdminState('${esc(a.username)}','${a.archived ? 'restore':'archive'}')" ${locked ? 'disabled' : ''}>${a.archived ? 'Restore':'Archive'}</button>
-              <button class="btn btn-danger" onclick="changeAdminState('${esc(a.username)}','${a.deleted ? 'restore':'delete'}')" ${locked ? 'disabled' : ''}>${a.deleted ? 'Restore':'Delete'}</button>
-              <button class="btn btn-danger" onclick="changeAdminState('${esc(a.username)}','harddelete')" ${locked ? 'disabled' : ''}>Delete Forever</button>
-            </div>
-          </td>
+          <td>${actionsHtml}</td>
         </tr>`;
       }).join('') || `<tr><td colspan="5" class="muted">No admins found.</td></tr>`;
     }
@@ -1724,10 +1601,8 @@
     async function loadBootstrap(){
       const res = await apiRequest('getAdminBootstrap', {}, 'GET', 'Loading dashboard...');
       bootstrapData = res.data;
-      const roleLabel = res.data.currentAdmin && res.data.currentAdmin.isPrincipal ? 'Principal Admin' : 'Sub-admin';
-      $('welcomeText').textContent = `Signed in • ${res.data.settings.BRAND_NAME || 'Genz Edutech Innovations'} • ${roleLabel}`;
+      $('welcomeText').textContent = `Signed in • ${res.data.settings.BRAND_NAME || 'Genz Edutech Innovations'}`;
       $('studentCategory').innerHTML = `<option value="">Select category</option>` + (res.data.categoryOptions || []).map(opt => `<option value="${esc(opt)}">${esc(opt)}</option>`).join('');
-      if ($('studentClassFilter')) $('studentClassFilter').dataset.keepValue = $('studentClassFilter').value || '';
       fillOptions($('resultRegIdSelect'), res.data.students.filter(s => !s.deleted).map(s => s.regId), 'Select student');
       $('resultAcademicSession').value = res.data.settings.ACADEMIC_SESSION || '';
       $('resultTerm').value = res.data.settings.TERM || '';
@@ -1739,7 +1614,6 @@
       renderAdmins();
       bindSettings();
       syncSubjectOptionsFieldFromData();
-      refreshBulkEmailSummary();
     }
 
     function bindSettings(){
@@ -1879,14 +1753,12 @@
       e.preventDefault();
       try{
         const data = serializeForm(e.target);
-        const wantsRemember = ['true','on','1','yes'].includes(String(data.rememberMe || '').toLowerCase());
         const res = await apiRequest('adminLogin', data, 'POST', 'Signing in...');
-        const rememberApplied = !!(res.data && res.data.rememberApplied);
-        setToken(res.data.token, rememberApplied);
+        setToken(res.data.token);
         $('authView').classList.add('hidden');
         $('appView').classList.remove('hidden');
         await loadBootstrap();
-        showToast(rememberApplied ? `Login successful. Principal admin remember me is active for about ${res.data.sessionDays || 30} days on this browser.` : (wantsRemember ? 'Login successful. Standard session used because remember me is only for the principal admin.' : res.message));
+        showToast(res.message);
       }catch(err){ showToast(err.message, 'error'); }
     });
 
@@ -2070,8 +1942,8 @@
 
     $('refreshResultsBtn').addEventListener('click', loadBootstrap);
     $('studentSearch').addEventListener('input', renderStudents);
+    $('studentFilterClass').addEventListener('change', renderStudents);
     $('studentFilterState').addEventListener('change', renderStudents);
-    if ($('studentClassFilter')) $('studentClassFilter').addEventListener('change', renderStudents);
     $('resultSearchText').addEventListener('input', renderResults);
     $('resultSearchExamCode').addEventListener('input', renderResults);
     $('resultSearchSession').addEventListener('input', renderResults);
@@ -2114,63 +1986,19 @@
       }
     });
 
-    $('bulkEmailTarget').addEventListener('change', refreshBulkEmailSummary);
-    $('bulkEmailManualRecipients').addEventListener('input', refreshBulkEmailSummary);
-        $('downloadEmailTemplateBtn').addEventListener('click', () => {
-      downloadText('email_template.csv', `email,name
-parent1@example.com,Parent One
-parent2@example.com,Parent Two
-`, 'text/csv;charset=utf-8');
-    });
-    $('importEmailCsvBtn').addEventListener('click', async () => {
-      try{
-        const file = $('bulkEmailCsvFile').files[0];
-        if (!file) throw new Error('Choose an email CSV file first.');
-        const rows = parseCsv(await file.text());
-        uploadedEmailRecipients = extractEmailsFromCsvRows(rows);
-        refreshBulkEmailSummary();
-        showToast(`Imported ${uploadedEmailRecipients.length} email recipient(s) from CSV.`);
-      }catch(err){ showToast(err.message, 'error'); }
-    });
-    $('clearEmailCsvBtn').addEventListener('click', () => {
-      uploadedEmailRecipients = [];
-      if ($('bulkEmailCsvFile')) $('bulkEmailCsvFile').value = '';
-      refreshBulkEmailSummary();
-      showToast('Imported CSV email list cleared.');
-    });
-    $('createDriveStorageBtn').addEventListener('click', async () => {
-      try{
-        const res = await apiRequest('checkDriveStorageReady', {}, 'POST', 'Preparing Drive storage folder...');
-        $('driveStorageStatus').textContent = res.message;
-        $('driveStorageStatus').className = 'status ok';
-        if (res.data && res.data.folderUrl){
-          $('driveStorageLink').style.display = 'inline-block';
-          $('driveStorageLink').href = res.data.folderUrl;
-          $('driveStorageLink').textContent = 'Open Drive storage folder';
-        }
-        showToast(res.message);
-      }catch(err){
-        $('driveStorageStatus').textContent = err.message;
-        $('driveStorageStatus').className = 'status error';
-        showToast(err.message, 'error');
-      }
-    });
-
     $('sendBulkEmailBtn').addEventListener('click', async () => {
       try{
         const selected = $('bulkEmailTarget').value === 'students' ? [...selectedStudentIds] : [];
-        const manualEmails = parseManualEmails($('bulkEmailManualRecipients').value);
-        const recipientEmails = [...new Set([...(uploadedEmailRecipients || []), ...manualEmails])];
+        const recipients = parseEmailList($('bulkEmailRecipients').value);
         const res = await apiRequest('sendBulkEmail', {
           target: $('bulkEmailTarget').value,
           subject: $('bulkEmailSubject').value,
           message: $('bulkEmailMessage').value,
           selected,
-          recipientEmails,
-          manualEmails: $('bulkEmailManualRecipients').value,
+          recipients,
           batchSize: $('bulkEmailBatchSize').value
         }, 'POST', 'Sending bulk email...');
-        $('bulkEmailStatus').textContent = `${res.message} Sent: ${res.data.recipients} • Matched: ${res.data.totalMatched} • Remaining after batch: ${res.data.remainingAfterBatch}`;
+        $('bulkEmailStatus').textContent = `${res.message} Sent: ${res.data.recipientsSent} / ${res.data.totalRecipients || res.data.recipientsSent}`;
         $('bulkEmailStatus').className = 'status ok';
         showToast(res.message);
       }catch(err){
@@ -2178,6 +2006,18 @@ parent2@example.com,Parent Two
         $('bulkEmailStatus').className = 'status error';
         showToast(err.message, 'error');
       }
+    });
+
+    $('downloadEmailCsvTemplateBtn').addEventListener('click', () => downloadText('email_template.csv', 'email\nexample@domain.com\n'));
+    $('importEmailCsvBtn').addEventListener('click', () => $('emailCsvFile').click());
+    $('emailCsvFile').addEventListener('change', async e => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const text = await file.text();
+      const emails = parseEmailCsvText(text);
+      $('bulkEmailRecipients').value = emails.join(', ');
+      showToast(`${emails.length} email(s) imported.`);
+      e.target.value = '';
     });
 
     $('checkMailAuthBtn').addEventListener('click', async () => {
@@ -2214,49 +2054,6 @@ parent2@example.com,Parent Two
       }catch(err){ showToast(err.message, 'error'); }
     });
 
-    if ($('exportStudentsPdfQuickBtn')) $('exportStudentsPdfQuickBtn').addEventListener('click', async () => {
-      try{
-        const students = (bootstrapData.students || []).filter(s => !s.deleted);
-        await downloadStudentDirectoryPdf(students, 'students_directory.pdf', 'Student Directory', 'All non-deleted students exported from the dashboard.');
-        showToast('Student PDF exported successfully.');
-      }catch(err){ showToast(err.message, 'error'); }
-    });
-
-    if ($('exportVisibleStudentsPdfBtn')) $('exportVisibleStudentsPdfBtn').addEventListener('click', async () => {
-      try{
-        const students = getFilteredStudents();
-        const classFilter = $('studentClassFilter') ? $('studentClassFilter').value : '';
-        await downloadStudentDirectoryPdf(students, `students_${slugifyText(classFilter || 'visible')}.pdf`, 'Student Directory', 'Visible students from the current student list filter.');
-        showToast('Visible students PDF exported successfully.');
-      }catch(err){ showToast(err.message, 'error'); }
-    });
-
-    if ($('exportSelectedStudentsPdfBtn')) $('exportSelectedStudentsPdfBtn').addEventListener('click', async () => {
-      try{
-        const students = (bootstrapData.students || []).filter(s => selectedStudentIds.has(String(s.regId).toUpperCase()) && !s.deleted);
-        await downloadStudentDirectoryPdf(students, 'selected_students.pdf', 'Selected Students Directory', 'Only the students checked in the student list are included here.');
-        showToast('Selected students PDF exported successfully.');
-      }catch(err){ showToast(err.message, 'error'); }
-    });
-
-    if ($('exportClassStudentsPdfBtn')) $('exportClassStudentsPdfBtn').addEventListener('click', async () => {
-      const selectedClass = String(($('studentClassFilter') && $('studentClassFilter').value) || '').trim();
-      if (!selectedClass) return showToast('Choose a class first before exporting class PDF.', 'error');
-      try{
-        const students = (bootstrapData.students || []).filter(s => !s.deleted && String(s.classLevel || '').trim().toLowerCase() === selectedClass.toLowerCase());
-        await downloadStudentDirectoryPdf(students, `${slugifyText(selectedClass)}_students.pdf`, `${selectedClass} Student Directory`, `Class-based student export for ${selectedClass}.`);
-        showToast('Class students PDF exported successfully.');
-      }catch(err){ showToast(err.message, 'error'); }
-    });
-
-    if ($('exportAllStudentsPdfBtn')) $('exportAllStudentsPdfBtn').addEventListener('click', async () => {
-      try{
-        const students = (bootstrapData.students || []).filter(s => !s.deleted);
-        await downloadStudentDirectoryPdf(students, 'all_students.pdf', 'All Students Directory', 'All non-deleted student records in the portal.');
-        showToast('All students PDF exported successfully.');
-      }catch(err){ showToast(err.message, 'error'); }
-    });
-
     $('exportResultsBtn').addEventListener('click', async () => {
       try{
         const res = await apiRequest('exportResultsCsv', {}, 'POST', 'Preparing result export...');
@@ -2274,6 +2071,16 @@ parent2@example.com,Parent Two
       if (el && el.tagName === 'SELECT') el.addEventListener('change', renderResultExportManager);
     });
     $('refreshResultExportManagerBtn').addEventListener('click', renderResultExportManager);
+    $('selectVisibleResultsBtn').addEventListener('click', () => { getFilteredResultRows().forEach(r => selectedResultIds.add(String(r.resultId || ''))); renderResults(); });
+    $('clearResultSelectionBtn').addEventListener('click', () => { selectedResultIds.clear(); renderResults(); });
+    $('archiveSelectedResultsBtn').addEventListener('click', () => runBulkResultState('archive'));
+    $('deleteSelectedResultsBtn').addEventListener('click', () => runBulkResultState('delete'));
+    $('restoreSelectedResultsBtn').addEventListener('click', () => runBulkResultState('restore'));
+    $('hardDeleteSelectedResultsBtn').addEventListener('click', () => runBulkResultState('harddelete'));
+    $('exportVisibleStudentsPdfBtn').addEventListener('click', () => exportStudentsPdfByMode('visible'));
+    $('exportSelectedStudentsPdfBtn').addEventListener('click', () => exportStudentsPdfByMode('selected'));
+    $('exportClassStudentsPdfBtn').addEventListener('click', () => exportStudentsPdfByMode('class'));
+    $('exportAllStudentsPdfBtn').addEventListener('click', () => exportStudentsPdfByMode('all'));
     $('selectVisibleReportsBtn').addEventListener('click', selectVisibleReportGroups);
     $('clearReportSelectionBtn').addEventListener('click', clearReportSelection);
     $('downloadPreviewPdfBtn').addEventListener('click', async () => {
@@ -2321,29 +2128,85 @@ parent2@example.com,Parent Two
 
     $('refreshBtn').addEventListener('click', loadBootstrap);
     $('logoutBtn').addEventListener('click', () => { clearToken(); location.reload(); });
+
+    async function runBulkResultState(state){
+      if (!selectedResultIds.size) return showToast('Select at least one result first.', 'error');
+      const confirmText = state === 'harddelete' ? 'Delete selected results forever?' : `Proceed with ${state} for selected results?`;
+      if (!confirm(confirmText)) return;
+      try{
+        const res = await apiRequest('bulkSetResultState', { resultIds:[...selectedResultIds], state }, 'POST', 'Updating selected results...');
+        showToast(res.message);
+        if (state !== 'restore') selectedResultIds.clear();
+        await loadBootstrap();
+      }catch(err){ showToast(err.message, 'error'); }
+    }
+
+    function buildStudentSlipHtml(student){
+      const logo = normalizeImageUrl((bootstrapData.settings && bootstrapData.settings.BRAND_LOGO_URL) || '');
+      const passport = normalizeImageUrl(student.passportUrl || '');
+      const brandName = bootstrapData.settings.BRAND_NAME || 'Genz Edutech Innovations';
+      const schoolName = bootstrapData.settings.SCHOOL_NAME || brandName;
+      const address = bootstrapData.settings.HEAD_OFFICE_ADDRESS || '';
+      const contact = [bootstrapData.settings.SCHOOL_PHONE || '', bootstrapData.settings.SCHOOL_EMAIL || ''].filter(Boolean).join(' • ');
+      const status = student.deleted ? 'Deleted' : student.archived ? 'Archived' : (student.active ? 'Active' : 'Inactive');
+      const rows = [
+        ['Full Name', student.fullName], ['Registration ID', student.regId], ['Class Level', student.classLevel || '—'], ['Category', student.category || '—'],
+        ['Gender', student.gender || '—'], ['Age', student.age || '—'], ['Parent Name', student.parentName || '—'], ['Parent Phone', student.parentPhone || '—'],
+        ['Parent Email', student.parentEmail || '—'], ['School', student.schoolName || schoolName], ['Location', [student.state, student.cityLGA].filter(Boolean).join(' / ') || '—'], ['Status', status]
+      ];
+      return `<div class="slip-shell"><div class="slip-body">
+        <div class="slip-head">
+          <div class="slip-logo">${logo ? `<img src="${esc(logo)}" alt="Logo" />` : 'LOGO'}</div>
+          <div><h1 class="slip-title">Student Profile Slip</h1><div class="slip-sub">${esc(brandName)}</div><div class="slip-sub">${esc(schoolName)}</div><div class="slip-sub">${esc(address)} ${contact ? ' • ' + esc(contact) : ''}</div></div>
+          <div class="slip-passport">${passport ? `<img src="${esc(passport)}" alt="Passport" />` : 'PHOTO'}</div>
+        </div>
+        <div class="slip-chip-row"><div class="slip-chip">Modern student profile export</div><div class="slip-chip">Class: ${esc(student.classLevel || '—')}</div><div class="slip-chip">Category: ${esc(student.category || '—')}</div></div>
+        <div class="slip-grid"><div class="slip-card"><div class="slip-meta">${rows.map(([label,val])=>`<div class="item"><div class="label">${esc(label)}</div><div class="value">${esc(val || '—')}</div></div>`).join('')}</div></div>
+        <div class="slip-card"><div class="slip-summary"><div class="box"><div class="k">Portal</div><div class="v">Secure</div></div><div class="box"><div class="k">State</div><div class="v">${esc(student.state || '—')}</div></div><div class="box"><div class="k">City/LGA</div><div class="v">${esc(student.cityLGA || '—')}</div></div><div class="box"><div class="k">Status</div><div class="v">${esc(status)}</div></div></div><div class="slip-muted">This slip was generated from the secure student registry. Contact the portal administrator for any correction.</div></div></div>
+        <div class="slip-foot"><div class="slip-muted">Generated on ${esc(new Date().toLocaleString())}</div><div class="slip-sign">${logo ? `<img src="${esc(logo)}" alt="Brand" />` : ''}<div>${esc(bootstrapData.settings.PRINCIPAL_NAME || 'Portal Administrator')}</div></div></div>
+      </div></div>`;
+    }
+
+    async function exportStudentsPdfByMode(mode){
+      let rows = [];
+      if (mode === 'selected') rows = bootstrapData.students.filter(s => selectedStudentIds.has(String(s.regId).toUpperCase()));
+      else if (mode === 'class') {
+        const classVal = $('studentFilterClass').value;
+        if (!classVal) return showToast('Choose a class first.', 'error');
+        rows = bootstrapData.students.filter(s => String(s.classLevel || '') === classVal && !s.deleted);
+      } else if (mode === 'all') rows = bootstrapData.students.filter(s => !s.deleted);
+      else rows = getFilteredStudentRows();
+      if (!rows.length) return showToast('No students matched this export.', 'error');
+      showLoading('Building student PDF export...');
+      try{
+        const host = document.createElement('div');
+        host.style.position='fixed';host.style.left='-99999px';host.style.top='0';host.style.zIndex='-1';
+        document.body.appendChild(host);
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p','mm','a4');
+        for (let i=0;i<rows.length;i++){
+          const wrap = document.createElement('div');
+          wrap.innerHTML = buildStudentSlipHtml(rows[i]);
+          host.appendChild(wrap.firstElementChild);
+          const target = host.lastElementChild;
+          const canvas = await html2canvas(target, { scale: 2, useCORS: true, backgroundColor: '#ffffff' });
+          const img = canvas.toDataURL('image/jpeg', 0.95);
+          if (i) pdf.addPage();
+          pdf.addImage(img, 'JPEG', 0, 0, 210, 297, undefined, 'FAST');
+          target.remove();
+        }
+        host.remove();
+        const suffix = mode === 'class' ? ($('studentFilterClass').value || 'class') : mode;
+        pdf.save(`students_${suffix}.pdf`);
+        showToast('Student PDF exported successfully.');
+      } catch (err) {
+        console.error(err);
+        showToast('Failed to export student PDF.', 'error');
+      } finally { hideLoading(); }
+    }
+
     $('menuBtn').addEventListener('click', () => $('sidebar').classList.toggle('open'));
     document.querySelectorAll('.nav-btn[data-section]').forEach(btn => btn.addEventListener('click', ()=> activateSection(btn.dataset.section)));
-    $('sidebar').addEventListener('click', e => {
-      const sectionBtn = e.target.closest('.nav-btn[data-section]');
-      if (sectionBtn){
-        e.preventDefault();
-        e.stopPropagation();
-        activateSection(sectionBtn.dataset.section);
-        return;
-      }
-      const refreshBtn = e.target.closest('#refreshBtn');
-      if (refreshBtn){
-        e.preventDefault();
-        loadBootstrap();
-        return;
-      }
-      const logoutBtn = e.target.closest('#logoutBtn');
-      if (logoutBtn){
-        e.preventDefault();
-        clearToken();
-        location.reload();
-      }
-    });
 
     (async function init(){
       setAuthTab('login');
