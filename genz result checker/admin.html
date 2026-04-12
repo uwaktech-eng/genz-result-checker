@@ -1263,6 +1263,10 @@
         if ($('reportPreviewMount')) $('reportPreviewMount').innerHTML = 'Click <strong>Preview</strong> on any result row to inspect it here before export.';
       }
     }
+    function renderResultExportManager(){
+      return renderReportExportManager();
+    }
+    window.renderResultExportManager = renderResultExportManager;
     function toggleReportSelection(key, checked){
       if (checked) selectedReportKeys.add(key); else selectedReportKeys.delete(key);
       updateReportSelectionInfo();
