@@ -214,8 +214,9 @@ function shouldBypassFreshRequest_(action) {
 }
 
 function validateFreshRequest_(params, action) {
-  var ts = Number(params.requestTs || 0);
-  var nonce = sanitizeValue_(params.requestNonce);
+  var payload = parseJson_(params.payload);
+  var ts = Number(params.requestTs || (payload && payload.requestTs) || 0);
+  var nonce = sanitizeValue_(params.requestNonce || (payload && payload.requestNonce));
   if (!ts || !nonce) throw new Error('Security check failed. Refresh and try again.');
   if (Math.abs(Date.now() - ts) > REQUEST_TTL_SECONDS * 1000) throw new Error('This request expired. Refresh and try again.');
   var cache = CacheService.getScriptCache();

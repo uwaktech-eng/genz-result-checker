@@ -332,6 +332,9 @@
       try{
         payload = payload || {};
         if (!payload.token && action !== 'studentLogin' && action !== 'studentSignup' && action !== 'requestPasswordReset' && action !== 'resetPassword' && action !== 'getPublicBootstrap') payload.token = token();
+        if (!payload.clientId) payload.clientId = clientId();
+        payload.requestTs = Date.now();
+        payload.requestNonce = requestNonce();
         let res;
         if (method === 'GET'){
           const url = new URL(WEB_APP_URL);
