@@ -7,6 +7,7 @@
   <title>Student Result Portal | Genz Edutech Innovations</title>
   <link rel="icon" id="faviconLink" href="data:," />
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
     :root{
@@ -66,6 +67,29 @@
     .result-footer-item{padding:14px 16px;border-radius:18px;background:linear-gradient(180deg, rgba(255,255,255,.92), rgba(243,248,255,.96));border:1px solid rgba(214,226,244,.96);box-shadow:0 12px 24px rgba(44,71,120,.06)}
     .result-footer-item strong{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#607592;margin-bottom:8px}
     .result-footer-item span{font-weight:800;color:#162845}
+    .report-head-grid{display:grid;grid-template-columns:78px 1fr auto;gap:14px;align-items:center;position:relative;z-index:1}
+    .report-meta-stack{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+    .report-meta-chip{display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;background:rgba(255,255,255,.84);color:#173459;border:1px solid rgba(255,255,255,.96);box-shadow:0 10px 20px rgba(42,67,118,.08);font-size:12px;font-weight:900;letter-spacing:.04em;text-transform:uppercase}
+    .report-hero-note{padding:12px 14px;border-radius:18px;background:linear-gradient(135deg,rgba(255,255,255,.82),rgba(243,248,255,.9));border:1px solid rgba(214,226,244,.9);box-shadow:0 12px 24px rgba(44,71,120,.06);min-width:210px}
+    .report-hero-note strong{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#5d7392;margin-bottom:7px}
+    .report-hero-note span{display:block;font-weight:900;color:#18304f}
+    .summary-box{padding:16px 15px;border-radius:20px;background:linear-gradient(180deg,rgba(255,255,255,.94),rgba(242,247,255,.98));border:1px solid rgba(214,226,244,.96);box-shadow:0 14px 30px rgba(44,71,120,.08)}
+    .summary-label{font-size:11px;text-transform:uppercase;color:#647a98;letter-spacing:.08em;font-weight:900}
+    .summary-value{margin-top:10px;font-size:1.08rem;font-weight:900;color:#162845}
+    .performance-banner{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+    .performance-card{padding:16px;border-radius:20px;background:linear-gradient(180deg,rgba(255,255,255,.94),rgba(242,247,255,.98));border:1px solid rgba(214,226,244,.96);box-shadow:0 14px 28px rgba(44,71,120,.08)}
+    .performance-card .k{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#647a98;font-weight:900}
+    .performance-card .v{margin-top:10px;font-size:1.18rem;font-weight:900;color:#162845}
+    .performance-card .s{margin-top:7px;color:#5c7190;font-size:13px}
+    .signature-wrap{margin-top:22px;display:grid;grid-template-columns:1fr 240px;gap:18px;align-items:end}
+    .signature-box{border-top:1px dashed #9fb4d2;padding:14px 14px 10px;text-align:center;background:linear-gradient(180deg,rgba(255,255,255,.88),rgba(244,248,255,.96));border-radius:20px;box-shadow:0 16px 28px rgba(44,71,120,.08);min-height:148px;display:flex;flex-direction:column;justify-content:flex-end}
+    .signature-box img{max-width:180px;max-height:74px;display:block;margin:0 auto 10px;object-fit:contain;filter:drop-shadow(0 6px 14px rgba(31,55,97,.12))}
+    .signature-role{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#617793;font-weight:900}
+    .signature-name{margin-top:6px;font-size:14px;font-weight:900;color:#173459}
+    .signature-caption{margin-top:8px;padding-top:8px;border-top:1px solid rgba(159,180,210,.55);font-size:12px;color:#536987;font-weight:700}
+    .result-seal{display:inline-flex;align-items:center;gap:8px;padding:9px 12px;border-radius:999px;background:rgba(27,169,114,.10);border:1px solid rgba(27,169,114,.18);color:#0f7f54;font-size:12px;font-weight:900;margin-top:12px}
+    .result-generated-note{margin-top:12px;font-size:13px;color:#5c7190}
+    .pdf-ready .report-hero-note,.pdf-ready .performance-card,.pdf-ready .summary-box,.pdf-ready .signature-box{box-shadow:none !important}
     .pdf-ready{background:#fff !important;border:0 !important;box-shadow:none !important;border-radius:0 !important}
     .pdf-ready::before{display:none !important}
     .pdf-ready .report-head{border-radius:0 !important;padding:28px 26px 24px !important}
@@ -117,7 +141,7 @@
     #toast.show{display:block}.toast-success{background:#edfff6;color:#0d7f50}.toast-error{background:#fff0f3;color:#b52e4e}
     @keyframes spin{to{transform:rotate(360deg)}}
     @media (max-width:980px){
-      .auth-grid,.grid-2,.grid-3,.summary-strip,.info-grid,.signature-wrap,.profile-grid,.result-design-row,.result-footer{grid-template-columns:1fr}
+      .auth-grid,.grid-2,.grid-3,.summary-strip,.info-grid,.signature-wrap,.profile-grid,.result-design-row,.result-footer,.performance-banner,.report-head-grid{grid-template-columns:1fr}
       .wrap{padding:16px}
       table{min-width:560px}
     }
@@ -257,13 +281,23 @@
             <div class="report-badge" id="resultBadgeLeft">Official Result Sheet</div>
             <div class="report-badge" id="resultBadgeRight">Verified Student Record</div>
           </div>
-          <div style="display:grid;grid-template-columns:78px 1fr;gap:14px;align-items:center;position:relative;z-index:1">
+          <div class="report-head-grid">
             <div class="passport report-brand-logo" id="brandLogoBox">LOGO</div>
             <div>
               <div class="brand" id="brandName">Genz Edutech Innovations</div>
               <h2 class="report-title" id="schoolName">Result Portal</h2>
               <div class="report-sub" id="schoolAddress"></div>
               <div class="report-sub"><span id="schoolPhone"></span> • <span id="schoolEmail"></span></div>
+              <div class="report-meta-stack">
+                <span class="report-meta-chip" id="metaExamCode">Exam Code • —</span>
+                <span class="report-meta-chip" id="metaSessionTerm">Session • —</span>
+                <span class="report-meta-chip" id="metaGeneratedOn">Generated • —</span>
+              </div>
+            </div>
+            <div class="report-hero-note">
+              <strong>Official Verification</strong>
+              <span id="heroVerificationText">Published academic result record.</span>
+              <div class="result-generated-note" id="heroGeneratedText">Ready for secure viewing and PDF download.</div>
             </div>
           </div>
           <div class="report-watermark">RESULT</div>
@@ -287,6 +321,7 @@
           </div>
 
           <div class="summary-strip" id="summaryStrip"></div>
+          <div class="performance-banner" id="performanceBanner"></div>
 
           <div class="subject-table-wrap">
             <div class="table-card-title" style="padding:16px 16px 0">
@@ -542,6 +577,186 @@
       `).join('');
     }
 
+    function formatDisplayDate(value){
+      if (!value) return '—';
+      const dt = new Date(value);
+      if (Number.isNaN(dt.getTime())) return String(value);
+      return dt.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
+    }
+
+    function safeNumber(value){
+      const num = Number(value);
+      return Number.isFinite(num) ? num : 0;
+    }
+
+    function getFilteredResults(){
+      const loadedSession = $('sessionFilter').value;
+      const loadedTerm = $('termFilter').value;
+      return currentResults.filter(r => (!loadedSession || r.academicSession === loadedSession) && (!loadedTerm || r.term === loadedTerm));
+    }
+
+    function initialsFromText(text){
+      return String(text || '').trim().split(/\s+/).slice(0,2).map(v => v.charAt(0).toUpperCase()).join('') || 'LG';
+    }
+
+    function getPdfPalette(name){
+      const base = String(name || currentDesign || 'royal').split('-')[0];
+      return {
+        royal:{ header:[38,72,196], accent:[18,162,255], light:[241,246,255], line:[204,218,244] },
+        emerald:{ header:[14,129,104], accent:[39,199,161], light:[239,252,248], line:[196,235,223] },
+        sunset:{ header:[207,97,26], accent:[255,148,77], light:[255,245,236], line:[245,214,188] },
+        violet:{ header:[101,73,190], accent:[188,117,255], light:[247,242,255], line:[220,210,244] },
+        carbon:{ header:[38,52,77], accent:[104,132,171], light:[244,247,252], line:[206,214,228] },
+        rose:{ header:[192,62,97], accent:[255,126,168], light:[255,242,247], line:[245,205,221] },
+        ocean:{ header:[16,119,172], accent:[39,191,233], light:[238,250,255], line:[196,228,241] },
+        gold:{ header:[163,115,20], accent:[242,177,43], light:[255,248,234], line:[241,223,178] },
+        forest:{ header:[42,114,58], accent:[90,186,110], light:[241,252,243], line:[204,229,209] },
+        candy:{ header:[191,63,132], accent:[86,139,255], light:[255,243,250], line:[236,208,224] }
+      }[base] || { header:[38,72,196], accent:[18,162,255], light:[241,246,255], line:[204,218,244] };
+    }
+
+    function publicImageCandidates(url){
+      const raw = extractImageSource(url);
+      if (!raw) return [];
+      const out = [];
+      const push = v => { if (v && !out.includes(v)) out.push(v); };
+      push(raw);
+      const normalized = normalizeImageUrl(raw);
+      push(normalized);
+      let match = raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/i) || raw.match(/drive\.google\.com\/open\?id=([^&]+)/i) || raw.match(/[?&]id=([a-zA-Z0-9_-]+)/i) || raw.match(/thumbnail\?[^#]*id=([a-zA-Z0-9_-]+)/i) || raw.match(/\/uc\?export=(?:view|download)&id=([a-zA-Z0-9_-]+)/i);
+      if (!match && /^[A-Za-z0-9_-]{20,}$/.test(raw)) match = [raw, raw];
+      if (match && match[1]) {
+        push(`https://drive.google.com/thumbnail?id=${match[1]}&sz=w2000`);
+        push(`https://drive.google.com/uc?export=view&id=${match[1]}`);
+      }
+      return out;
+    }
+
+    async function blobToDataUrl(blob){
+      return await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result || ''));
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    async function silentApiRequest(action, payload={}, method='GET'){
+      payload = payload || {};
+      if (!payload.token && action !== 'studentLogin' && action !== 'studentSignup' && action !== 'requestPasswordReset' && action !== 'resetPassword' && action !== 'getPublicBootstrap') payload.token = token();
+      if (!payload.clientId) payload.clientId = clientId();
+      payload.requestTs = Date.now();
+      payload.requestNonce = requestNonce();
+      let res;
+      if (method === 'GET'){
+        const url = new URL(WEB_APP_URL);
+        url.searchParams.set('action', action);
+        Object.keys(payload).forEach(key => {
+          const value = payload[key];
+          if (value !== undefined && value !== null) url.searchParams.set(key, typeof value === 'object' ? JSON.stringify(value) : String(value));
+        });
+        res = await fetch(url.toString(), {method:'GET'});
+      } else {
+        const form = new URLSearchParams();
+        form.set('action', action);
+        form.set('payload', JSON.stringify(payload));
+        res = await fetch(WEB_APP_URL, {
+          method:'POST',
+          headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+          body:form.toString()
+        });
+      }
+      const text = await res.text();
+      let json;
+      try{ json = JSON.parse(text); }catch(err){ throw new Error('Server returned non-JSON response.'); }
+      if (!json.ok) throw new Error(json.message || 'Request failed.');
+      return json;
+    }
+
+    async function fetchCandidateAsDataUrl(candidate){
+      try{
+        const res = await fetch(candidate, { mode:'cors', credentials:'omit', cache:'no-store' });
+        if (res.ok){
+          const blob = await res.blob();
+          if (blob && /^image\//i.test(blob.type || '')) return await blobToDataUrl(blob);
+        }
+      }catch(err){}
+      return await new Promise(resolve => {
+        try{
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.referrerPolicy = 'no-referrer';
+          img.onload = function(){
+            try{
+              const canvas = document.createElement('canvas');
+              canvas.width = this.naturalWidth || this.width || 1;
+              canvas.height = this.naturalHeight || this.height || 1;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(this, 0, 0);
+              resolve(canvas.toDataURL('image/png'));
+            }catch(err){ resolve(''); }
+          };
+          img.onerror = () => resolve('');
+          img.src = candidate + (candidate.includes('?') ? '&' : '?') + '_pdfimg=' + Date.now();
+        }catch(err){ resolve(''); }
+      });
+    }
+
+    async function fetchImageDataUrlFromBackend(url){
+      const raw = String(url || '').trim();
+      if (!raw || !token()) return '';
+      try{
+        const res = await silentApiRequest('getImageDataUrl', { url: raw }, 'GET');
+        if (res && res.data && res.data.dataUrl) return String(res.data.dataUrl || '');
+      }catch(err){}
+      return '';
+    }
+
+    async function fetchImageDataUrl(url){
+      const raw = normalizeImageUrl(url || '');
+      if (!raw) return '';
+      for (const candidate of publicImageCandidates(raw)){
+        const dataUrl = await fetchCandidateAsDataUrl(candidate);
+        if (dataUrl) return dataUrl;
+      }
+      return await fetchImageDataUrlFromBackend(raw);
+    }
+
+    async function preparePdfImage(url){
+      const dataUrl = await fetchImageDataUrl(url || '');
+      return String(dataUrl || '').trim();
+    }
+
+    function detectImageFormatFromDataUrl(dataUrl){
+      const m = String(dataUrl || '').match(/^data:image\/(png|jpeg|jpg|webp|gif);/i);
+      const fmt = m && m[1] ? m[1].toUpperCase() : 'PNG';
+      return fmt === 'JPG' ? 'JPEG' : fmt;
+    }
+
+    async function getImageDimensions(dataUrl){
+      return await new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => resolve({ width: img.naturalWidth || img.width || 1, height: img.naturalHeight || img.height || 1 });
+        img.onerror = () => resolve({ width: 1, height: 1 });
+        img.src = dataUrl;
+      });
+    }
+
+    async function addPdfImage(doc, dataUrl, x, y, w, h, fit='contain'){
+      if (!dataUrl) return null;
+      const fmt = detectImageFormatFromDataUrl(dataUrl);
+      const dim = await getImageDimensions(dataUrl);
+      const ratio = Math.max(dim.width, 1) / Math.max(dim.height, 1);
+      let drawW = w, drawH = h;
+      if (fit === 'contain') {
+        if (w / h > ratio) { drawH = h; drawW = h * ratio; } else { drawW = w; drawH = w / ratio; }
+      }
+      const dx = x + (w - drawW) / 2;
+      const dy = y + (h - drawH) / 2;
+      doc.addImage(dataUrl, fmt, dx, dy, drawW, drawH, undefined, 'FAST');
+      return { x: dx, y: dy, w: drawW, h: drawH };
+    }
+
     function renderReport(resultData){
       currentStudent = resultData.student;
       currentResults = resultData.results || [];
@@ -555,7 +770,7 @@
       $('schoolPhone').textContent = currentSettings.SCHOOL_PHONE || '';
       $('schoolEmail').textContent = currentSettings.SCHOOL_EMAIL || '';
       const logoUrl = normalizeImageUrl(currentSettings.BRAND_LOGO_URL || '');
-      $('brandLogoBox').innerHTML = logoUrl ? `<img src="${esc(logoUrl)}" alt="Logo" crossorigin="anonymous" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:contain" />` : 'LOGO';
+      $('brandLogoBox').innerHTML = logoUrl ? `<img src="${esc(logoUrl)}" alt="Logo" crossorigin="anonymous" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:contain" />` : initialsFromText(currentSettings.BRAND_NAME || 'Logo');
 
       renderStudentProfile(resultData.student);
 
@@ -568,29 +783,40 @@
       if (prevSession && sessions.includes(prevSession)) $('sessionFilter').value = prevSession;
       if (prevTerm && terms.includes(prevTerm)) $('termFilter').value = prevTerm;
 
-      const loadedSession = $('sessionFilter').value;
-      const loadedTerm = $('termFilter').value;
-
-      const filtered = currentResults.filter(r => (!loadedSession || r.academicSession === loadedSession) && (!loadedTerm || r.term === loadedTerm));
-
+      const filtered = getFilteredResults();
+      const first = filtered[0] || currentResults[0] || {};
       const totalSubjects = filtered.length;
       const passed = filtered.filter(r => String(r.resultStatus).toUpperCase() === 'PASS').length;
-      const avg = totalSubjects ? (filtered.reduce((sum,r)=> sum + Number(r.percentage || 0), 0) / totalSubjects).toFixed(2) : '0.00';
-      const publishedDate = filtered[0]?.publishedAt || '—';
+      const failed = filtered.filter(r => String(r.resultStatus).toUpperCase() === 'FAIL').length;
+      const avg = totalSubjects ? (filtered.reduce((sum,r)=> sum + safeNumber(r.percentage), 0) / totalSubjects).toFixed(2) : '0.00';
+      const best = filtered.slice().sort((a,b)=> safeNumber(b.percentage) - safeNumber(a.percentage))[0];
+      const publishedDate = first?.publishedAt || '—';
+      const statusText = resultData.student.deleted ? 'Deleted Record' : resultData.student.archived ? 'Archived Record' : (resultData.student.active ? 'Active Record' : 'Inactive Record');
+      const badgeTerm = (first?.term || currentResults[0]?.term || 'Result');
+
       $('summaryStrip').innerHTML = [
         ['Exam Code', resultData.examCode || '—'],
         ['Class', resultData.student.classLevel || '—'],
         ['Subjects', totalSubjects],
         ['Average %', avg],
-        ['Published', publishedDate]
+        ['Published', formatDisplayDate(publishedDate)]
       ].map(item => `<div class="summary-box"><div class="summary-label">${esc(item[0])}</div><div class="summary-value">${esc(item[1])}</div></div>`).join('');
 
-      const statusText = resultData.student.deleted ? 'Deleted Record' : resultData.student.archived ? 'Archived Record' : (resultData.student.active ? 'Active Record' : 'Inactive Record');
+      $('performanceBanner').innerHTML = [
+        ['Pass Performance', `${passed}/${totalSubjects || 0}`, `${failed} subject(s) below pass mark`],
+        ['Best Subject', best ? `${best.subject || '—'} • ${best.percentage || '0'}%` : '—', best ? `${best.grade || 'No grade'} grade obtained` : 'No record yet'],
+        ['Verification', first?.academicSession || 'Official Record', `${badgeTerm} • ${formatDisplayDate(publishedDate)}`]
+      ].map(item => `<div class="performance-card"><div class="k">${esc(item[0])}</div><div class="v">${esc(item[1])}</div><div class="s">${esc(item[2])}</div></div>`).join('');
+
       $('studentStatusBadge').textContent = statusText;
       $('studentHeadlineSub').textContent = `${resultData.student.fullName || 'Student'} • ${resultData.student.regId || 'No Registration ID'} • ${resultData.student.classLevel || 'Class not set'}`;
-      const badgeTerm = (filtered[0]?.term || currentResults[0]?.term || 'Result');
       $('resultBadgeLeft').textContent = `${String(badgeTerm).toUpperCase()} RESULT SHEET`;
-      $('resultBadgeRight').textContent = `${(filtered[0]?.academicSession || currentResults[0]?.academicSession || 'Verified Record')}`;
+      $('resultBadgeRight').textContent = `${(first?.academicSession || currentResults[0]?.academicSession || 'Verified Record')}`;
+      $('metaExamCode').textContent = `Exam Code • ${resultData.examCode || '—'}`;
+      $('metaSessionTerm').textContent = `Session • ${first?.academicSession || '—'}${first?.term ? ' / ' + first.term : ''}`;
+      $('metaGeneratedOn').textContent = `Generated • ${formatDisplayDate(new Date())}`;
+      $('heroVerificationText').textContent = `${statusText}. Published academic result with active view permission.`;
+      $('heroGeneratedText').textContent = `This generated result includes the admin signature and is ready for PDF download.`;
 
       $('resultTableBody').innerHTML = filtered.length ? filtered.map(r => `
         <tr>
@@ -602,15 +828,14 @@
           <td>${esc(r.grade || '—')}</td>
           <td>${esc(r.positionText || '—')}</td>
           <td><span class="tag ${String(r.resultStatus).toUpperCase()==='PASS'?'tag-pass':String(r.resultStatus).toUpperCase()==='FAIL'?'tag-fail':'tag-pending'}">${esc(r.resultStatus || 'PENDING')}</span></td>
-          <td>${esc(r.publishedAt || '—')}</td>
+          <td>${esc(formatDisplayDate(r.publishedAt || '—'))}</td>
         </tr>
       `).join('') : `<tr><td colspan="9" class="muted">No result rows were found for the selected filters.</td></tr>`;
 
-      const first = filtered[0] || currentResults[0] || {};
       $('examMetaGrid').innerHTML = [
         ['Exam Code', first.examCode], ['Exam Title', first.examTitle], ['Academic Session', first.academicSession],
-        ['Term', first.term], ['Exam Date', first.examDate], ['Account Status', resultData.student.deleted ? 'Deleted' : resultData.student.archived ? 'Archived' : (resultData.student.active ? 'Active' : 'Inactive')], ['Pass Mark Number', first.passMarkNumber],
-        ['Pass Mark Percentage', first.passMarkPercentage + '%'], ['Published Date', first.publishedAt]
+        ['Term', first.term], ['Exam Date', first.examDate], ['Account Status', statusText], ['Pass Mark Number', first.passMarkNumber],
+        ['Pass Mark Percentage', first.passMarkPercentage ? first.passMarkPercentage + '%' : '—'], ['Published Date', formatDisplayDate(first.publishedAt)]
       ].map(([label,value]) => `<div class="info-item"><div class="info-label">${esc(label)}</div><div class="info-value">${esc(value || '—')}</div></div>`).join('');
 
       $('resultFooterMeta').innerHTML = [
@@ -628,10 +853,10 @@
       `).join('') : `<div class="muted">No remarks available.</div>`;
 
       const signatureUrl = normalizeImageUrl(first.signatureUrl || currentSettings.SIGNATURE_URL || '');
-      const signatureName = currentSettings.SIGNATURE_NAME || 'Authorized Signatory';
+      const signatureName = currentSettings.SIGNATURE_NAME || currentSettings.PRINCIPAL_NAME || 'Authorized Signatory';
       $('signatureBox').innerHTML = signatureUrl
-        ? `<img src="${esc(signatureUrl)}" alt="Signature" /><div>${esc(signatureName)}</div>`
-        : `<div class="muted">No signature added</div><div>${esc(signatureName)}</div>`;
+        ? `<img src="${esc(signatureUrl)}" alt="Signature" crossorigin="anonymous" referrerpolicy="no-referrer" /><div class="signature-role">Signed by Admin</div><div class="signature-name">${esc(signatureName)}</div><div class="signature-caption">Official approval signature appears on both this generated result and the downloaded PDF.</div>`
+        : `<div class="muted">No signature added</div><div class="signature-role">Signatory</div><div class="signature-name">${esc(signatureName)}</div><div class="signature-caption">Add admin signature in settings so it shows on both generated and downloaded result.</div>`;
     }
 
     async function ensureImagesReady(root){
@@ -673,79 +898,194 @@
         showToast('Load a result first before downloading the PDF.', 'error');
         return;
       }
-      if (!window.html2canvas || !window.jspdf) {
-        showToast('PDF library did not load. Refresh the page and try again.', 'error');
+      if (!window.jspdf || !window.jspdf.jsPDF || typeof window.jspdf.jsPDF.API.autoTable !== 'function') {
+        showToast('PDF library did not load completely. Refresh the page and try again.', 'error');
         return;
       }
-      showLoading('Generating high-quality PDF...');
-      const target = $('reportCapture');
-      document.body.classList.add('pdf-export-mode');
+      showLoading('Preparing designed PDF result...');
       try{
-        if (document.fonts && document.fonts.ready) await document.fonts.ready;
-        await ensureImagesReady(target);
-        const cloneHost = document.createElement('div');
-        cloneHost.style.position = 'fixed';
-        cloneHost.style.left = '-99999px';
-        cloneHost.style.top = '0';
-        cloneHost.style.width = '210mm';
-        cloneHost.style.padding = '0';
-        cloneHost.style.background = '#ffffff';
-
-        const clone = target.cloneNode(true);
-        clone.classList.add('pdf-ready');
-        clone.style.width = '210mm';
-        clone.style.maxWidth = '210mm';
-        clone.style.margin = '0';
-        clone.style.borderRadius = '0';
-        clone.style.boxShadow = 'none';
-        clone.querySelectorAll('img').forEach(img => {
-          img.setAttribute('crossorigin', 'anonymous');
-          img.setAttribute('referrerpolicy', 'no-referrer');
-          img.style.imageRendering = 'auto';
-        });
-        cloneHost.appendChild(clone);
-        document.body.appendChild(cloneHost);
-        await ensureImagesReady(clone);
-
-        const canvas = await html2canvas(clone, {
-          scale: Math.min(window.devicePixelRatio || 2, 3),
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: '#ffffff',
-          logging: false,
-          width: clone.scrollWidth,
-          windowWidth: clone.scrollWidth,
-          scrollX: 0,
-          scrollY: 0
-        });
-        cloneHost.remove();
-
-        const imgData = canvas.toDataURL('image/jpeg', 0.98);
+        const filtered = getFilteredResults();
+        const rows = filtered.length ? filtered : currentResults;
+        const first = rows[0] || {};
+        const palette = getPdfPalette(currentDesign);
         const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const pageW = 210;
-        const pageH = 297;
-        const imgW = pageW;
-        const imgH = canvas.height * imgW / canvas.width;
-        let remaining = imgH;
-        let y = 0;
-        pdf.addImage(imgData, 'JPEG', 0, y, imgW, imgH, undefined, 'FAST');
-        remaining -= pageH;
-        while (remaining > 0) {
-          y = remaining - imgH;
-          pdf.addPage();
-          pdf.addImage(imgData, 'JPEG', 0, y, imgW, imgH, undefined, 'FAST');
-          remaining -= pageH;
+        const doc = new jsPDF({ orientation:'portrait', unit:'pt', format:'a4' });
+        const pageW = doc.internal.pageSize.getWidth();
+        const pageH = doc.internal.pageSize.getHeight();
+        const brandName = currentSettings.BRAND_NAME || 'Genz Edutech Innovations';
+        const schoolName = currentSettings.SCHOOL_NAME || 'Result Portal';
+        const signatureName = currentSettings.SIGNATURE_NAME || currentSettings.PRINCIPAL_NAME || 'Authorized Signatory';
+        const publishedDate = formatDisplayDate(first.publishedAt || '—');
+        const totalSubjects = rows.length;
+        const passed = rows.filter(r => String(r.resultStatus).toUpperCase() === 'PASS').length;
+        const avg = totalSubjects ? (rows.reduce((sum,r)=> sum + safeNumber(r.percentage), 0) / totalSubjects).toFixed(2) : '0.00';
+        const [logoData, passportData, signatureData] = await Promise.all([
+          preparePdfImage(currentSettings.BRAND_LOGO_URL || ''),
+          preparePdfImage(currentStudent.passportUrl || ''),
+          preparePdfImage(first.signatureUrl || currentSettings.SIGNATURE_URL || '')
+        ]);
+
+        doc.setFillColor(...palette.header);
+        doc.rect(0, 0, pageW, 128, 'F');
+        doc.setFillColor(255,255,255);
+        if (doc.setGState && doc.GState) doc.setGState(new doc.GState({opacity:0.06}));
+        doc.setFont('helvetica','bold');
+        doc.setFontSize(70);
+        doc.text('RESULT', pageW - 26, 106, { align:'right', angle: -10 });
+        if (doc.setGState && doc.GState) doc.setGState(new doc.GState({opacity:1}));
+
+        if (logoData) await addPdfImage(doc, logoData, 34, 22, 60, 60);
+        doc.setTextColor(255,255,255);
+        doc.setFont('helvetica','bold');
+        doc.setFontSize(19);
+        doc.text(brandName, 108, 42);
+        doc.setFontSize(15);
+        doc.text(schoolName, 108, 64);
+        doc.setFont('helvetica','normal');
+        doc.setFontSize(10.5);
+        doc.text(String(currentSettings.HEAD_OFFICE_ADDRESS || '').slice(0, 68), 108, 82);
+        doc.text(`${currentSettings.SCHOOL_PHONE || 'Phone not set'}   •   ${currentSettings.SCHOOL_EMAIL || 'Email not set'}`, 108, 98);
+
+        doc.setFillColor(255,255,255);
+        doc.roundedRect(420, 26, 144, 34, 12, 12, 'F');
+        doc.setTextColor(...palette.header);
+        doc.setFont('helvetica','bold');
+        doc.setFontSize(10);
+        doc.text(String(first.resultStatus || 'Published').toUpperCase(), 492, 47, { align:'center' });
+
+        doc.setFillColor(250,252,255);
+        doc.setDrawColor(...palette.line);
+        doc.roundedRect(26, 146, 543, 118, 18, 18, 'FD');
+        doc.setTextColor(23,38,64);
+        doc.setFont('helvetica','bold');
+        doc.setFontSize(14);
+        doc.text('Student Performance Summary', 42, 172);
+        doc.setFont('helvetica','normal');
+        doc.setFontSize(10.5);
+        doc.text(`${currentStudent.fullName || 'Student'} • ${currentStudent.regId || '—'} • ${currentStudent.classLevel || 'Class not set'}`, 42, 190);
+        doc.text(`Exam: ${first.examTitle || first.examCode || '—'} • Session: ${first.academicSession || '—'}${first.term ? ' / ' + first.term : ''}`, 42, 206);
+        doc.text(`Published: ${publishedDate} • Average: ${avg}% • Passed: ${passed}/${totalSubjects || 0}`, 42, 222);
+        doc.setFillColor(...palette.light);
+        doc.roundedRect(42, 228, 250, 24, 10, 10, 'F');
+        doc.setTextColor(...palette.header);
+        doc.setFont('helvetica','bold');
+        doc.setFontSize(10);
+        doc.text('This PDF includes the official brand logo, student passport, and admin signature.', 52, 244);
+
+        doc.setDrawColor(...palette.line);
+        doc.roundedRect(446, 166, 94, 82, 14, 14, 'S');
+        if (passportData) {
+          await addPdfImage(doc, passportData, 452, 172, 82, 70, 'contain');
+        } else {
+          doc.setTextColor(103,120,146);
+          doc.setFont('helvetica','bold');
+          doc.setFontSize(10);
+          doc.text('No Passport', 493, 208, { align:'center' });
         }
-        const code = currentResults[0]?.examCode || 'result';
-        const safeName = `${currentStudent.fullName || 'student'}_${code}_result.pdf`.replace(/[^a-z0-9_\-.]+/gi,'_');
-        pdf.save(safeName);
-        showToast('PDF downloaded successfully.');
+
+        const cardY = 284;
+        const cardW = 122;
+        const cardGap = 11;
+        const cards = [
+          ['Exam Code', first.examCode || '—'],
+          ['Subjects', String(totalSubjects || 0)],
+          ['Average %', `${avg}%`],
+          ['Published', publishedDate]
+        ];
+        cards.forEach((card, idx) => {
+          const x = 26 + idx * (cardW + cardGap);
+          doc.setFillColor(...palette.light);
+          doc.setDrawColor(...palette.line);
+          doc.roundedRect(x, cardY, cardW, 62, 16, 16, 'FD');
+          doc.setTextColor(95,116,146);
+          doc.setFont('helvetica','bold');
+          doc.setFontSize(9.5);
+          doc.text(card[0].toUpperCase(), x + 12, cardY + 18);
+          doc.setTextColor(24,48,80);
+          doc.setFontSize(14);
+          const lines = doc.splitTextToSize(String(card[1]), cardW - 20);
+          doc.text(lines, x + 12, cardY + 40);
+        });
+
+        doc.autoTable({
+          startY: 366,
+          margin: { left: 26, right: 26 },
+          head: [['Subject', 'Score', 'Percent', 'Grade', 'Rank', 'Status']],
+          body: rows.map(r => [
+            r.subject || '—',
+            `${r.studentScore || '—'} / ${r.maxScore || '—'}`,
+            `${r.percentage || '—'}%`,
+            r.grade || '—',
+            r.positionText || '—',
+            r.resultStatus || 'PENDING'
+          ]),
+          theme: 'grid',
+          styles: { fontSize: 9.5, cellPadding: 7, lineColor: palette.line, lineWidth: 0.8, textColor:[23,38,64], overflow:'linebreak' },
+          headStyles: { fillColor: palette.header, textColor:[255,255,255], fontStyle:'bold' },
+          alternateRowStyles: { fillColor: [250,252,255] },
+          bodyStyles: { valign:'middle' }
+        });
+
+        let y = doc.lastAutoTable.finalY + 16;
+        doc.autoTable({
+          startY: y,
+          margin: { left: 26, right: 26 },
+          head: [['Subject', 'Remark', 'Teacher Comment']],
+          body: rows.map(r => [r.subject || '—', r.remark || '—', r.teacherComment || 'No teacher comment']),
+          theme: 'grid',
+          styles: { fontSize: 9.2, cellPadding: 7, lineColor: palette.line, lineWidth: 0.8, textColor:[23,38,64], overflow:'linebreak' },
+          headStyles: { fillColor: palette.accent, textColor:[255,255,255], fontStyle:'bold' },
+          alternateRowStyles: { fillColor: [252,254,255] }
+        });
+
+        y = doc.lastAutoTable.finalY + 18;
+        if (y > pageH - 130) { doc.addPage(); y = 60; }
+
+        doc.setFillColor(...palette.light);
+        doc.setDrawColor(...palette.line);
+        doc.roundedRect(26, y, 320, 82, 18, 18, 'FD');
+        doc.setTextColor(...palette.header);
+        doc.setFont('helvetica','bold');
+        doc.setFontSize(12);
+        doc.text('Official Verification Note', 42, y + 22);
+        doc.setTextColor(83,102,129);
+        doc.setFont('helvetica','normal');
+        doc.setFontSize(9.8);
+        const noteLines = doc.splitTextToSize(`This result was generated from the official student result portal on ${formatDisplayDate(new Date())}. The brand logo, student passport, published result rows, and admin signature form part of this verified academic record.`, 286);
+        doc.text(noteLines, 42, y + 40);
+
+        doc.setDrawColor(...palette.line);
+        doc.line(392, y + 58, 548, y + 58);
+        if (signatureData) await addPdfImage(doc, signatureData, 402, y + 2, 136, 44, 'contain');
+        doc.setTextColor(...palette.header);
+        doc.setFont('helvetica','bold');
+        doc.setFontSize(10.5);
+        doc.text(signatureName, 470, y + 74, { align:'center' });
+        doc.setTextColor(98,115,139);
+        doc.setFont('helvetica','normal');
+        doc.setFontSize(9);
+        doc.text('Authorized Admin Signature', 470, y + 88, { align:'center' });
+
+        const totalPages = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
+          doc.setPage(i);
+          doc.setDrawColor(...palette.line);
+          doc.line(26, pageH - 28, pageW - 26, pageH - 28);
+          doc.setTextColor(114,128,149);
+          doc.setFont('helvetica','normal');
+          doc.setFontSize(8.5);
+          doc.text(`${brandName} • Verified Result Sheet`, 26, pageH - 12);
+          doc.text(`Page ${i} of ${totalPages}`, pageW - 26, pageH - 12, { align:'right' });
+        }
+
+        const code = first?.examCode || currentResults[0]?.examCode || 'result';
+        const safeName = `${currentStudent.fullName || 'student'}_${code}_result_designed.pdf`.replace(/[^a-z0-9_\-.]+/gi,'_');
+        doc.save(safeName);
+        showToast('Designed PDF downloaded successfully.');
       }catch(err){
         console.error(err);
-        showToast('Failed to generate the PDF.', 'error');
+        showToast('Failed to generate the designed PDF.', 'error');
       }finally{
-        document.body.classList.remove('pdf-export-mode');
         hideLoading();
       }
     }

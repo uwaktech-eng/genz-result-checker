@@ -128,6 +128,9 @@ function handleRequest_(e) {
       case 'loadStudentResults':
         result = loadStudentResults_(payload);
         break;
+      case 'getImageDataUrl':
+        result = getImageDataUrl_(payload);
+        break;
       case 'sendBulkEmail':
         result = sendBulkEmail_(payload);
         break;
@@ -211,7 +214,7 @@ function validateAction_(action) {
     validateSession: true, getAdminBootstrap: true, saveSettings: true, saveStudent: true, uploadStudentPassport: true, uploadBrandingAsset: true, setStudentState: true,
     importStudentsCsv: true, exportStudentsCsv: true, bulkUpdatePassports: true, importPassportsCsv: true,
     saveResult: true, saveResultEntries: true, importResultsCsv: true, recalculateResults: true, setResultState: true, bulkSetResultState: true,
-    exportResultsCsv: true, loadStudentExamCodes: true, loadStudentResults: true, sendBulkEmail: true,
+    exportResultsCsv: true, loadStudentExamCodes: true, loadStudentResults: true, getImageDataUrl: true, sendBulkEmail: true,
     authorizeMailStatus: true, exportSmsContacts: true, requestPasswordReset: true, resetPassword: true,
     setAdminState: true
   };
@@ -932,6 +935,28 @@ function loadStudentResults_(payload) {
     sessions: uniqueList_(results.map(function(r) { return r.academicSession; }).filter(Boolean)),
     terms: uniqueList_(results.map(function(r) { return r.term; }).filter(Boolean))
   });
+}
+
+function getImageDataUrl_(payload) {
+  requireSession_(payload.token, '', sanitizeValue_(payload.clientId));
+  var url = normalizeImageUrl_(payload.url || payload.imageUrl || '');
+  if (!url) throw new Error('Image URL is required.');
+  try {
+    var response = UrlFetchApp.fetch(url, {
+      muteHttpExceptions: true,
+      followRedirects: true,
+      headers: { 'User-Agent': 'Mozilla/5.0 AppsScript PDF Image Fetcher' }
+    });
+    var code = Number(response.getResponseCode() || 0);
+    if (code >= 400) throw new Error('Image fetch failed with status ' + code + '.');
+    var blob = response.getBlob();
+    var contentType = sanitizeValue_(blob.getContentType() || response.getHeaders()['Content-Type'] || 'image/png').toLowerCase();
+    if (contentType.indexOf('image/') !== 0) contentType = 'image/png';
+    var dataUrl = 'data:' + contentType + ';base64,' + Utilities.base64Encode(blob.getBytes());
+    return ok_('Image data prepared.', { dataUrl: dataUrl, contentType: contentType });
+  } catch (err) {
+    throw new Error('Unable to prepare image for PDF rendering.');
+  }
 }
 
 function sendBulkEmail_(payload) {
