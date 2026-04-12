@@ -30,7 +30,7 @@
     .btn-danger{background:rgba(255,111,134,.16);border:1px solid rgba(255,111,134,.25);color:#ffe9ee}
     .btn-warn{background:rgba(255,184,76,.16);border:1px solid rgba(255,184,76,.28);color:#fff4de}
     .shell{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
-    .sidebar{background:rgba(8,14,28,.78);backdrop-filter:blur(20px);border-right:1px solid var(--line);padding:18px;position:sticky;top:0;height:100vh;overflow:auto}
+    .sidebar{background:rgba(8,14,28,.78);backdrop-filter:blur(20px);border-right:1px solid var(--line);padding:18px;position:sticky;top:0;height:100vh;overflow:auto;z-index:8;isolation:isolate}
     .brand{display:flex;align-items:center;gap:12px;margin-bottom:18px}
     .brand-badge{width:42px;height:42px;border-radius:14px;background:linear-gradient(135deg,var(--primary),var(--primary2))}
     .brand h1{margin:0;font-size:1.08rem}
@@ -39,7 +39,7 @@
     .nav-title{font-size:12px;text-transform:uppercase;color:#93a9c7;letter-spacing:.08em;margin-bottom:8px}
     .nav-btn{width:100%;text-align:left;background:transparent;color:var(--text);border:1px solid transparent;padding:12px 14px;border-radius:14px;margin-bottom:8px;cursor:pointer;font-weight:700}
     .nav-btn.active,.nav-btn:hover{background:rgba(255,255,255,.08);border-color:var(--line)}
-    .content{padding:22px;max-width:100%;overflow-x:hidden}
+    .content{padding:22px;max-width:100%;overflow-x:hidden;position:relative;z-index:1}
     .topbar{display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
     .hamburger{display:none;width:46px;height:46px;border-radius:14px}
     .glass{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);backdrop-filter:blur(18px);box-shadow:var(--shadow)}
@@ -98,6 +98,10 @@
     .status,.muted,.panel-title,.field,.card,.glass{overflow-wrap:anywhere}
     .code-note{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:#e8f2ff;display:block}
     .small{font-size:12px}
+
+    .student-directory-table{width:100%;min-width:0}
+    .student-directory-table th,.student-directory-table td{font-size:13px}
+    .student-directory-empty{padding:18px;border-radius:16px;background:#fff;border:1px dashed #d9e5f7;color:#5b738f;text-align:center}
     @keyframes spin{to{transform:rotate(360deg)}}
     @media (max-width:1150px){
       .summary-grid,.grid-4{grid-template-columns:1fr 1fr}
@@ -236,18 +240,18 @@
 
       <div class="nav-group">
         <div class="nav-title">Workspace</div>
-        <button class="nav-btn active" data-section="dashboardSection">Dashboard</button>
-        <button class="nav-btn" data-section="studentsSection">Students</button>
-        <button class="nav-btn" data-section="resultsSection">Results</button>
-        <button class="nav-btn" data-section="adminsSection">Admins</button>
-        <button class="nav-btn" data-section="communicationsSection">Bulk Email / SMS</button>
-        <button class="nav-btn" data-section="settingsSection">Settings</button>
+        <button class="nav-btn active" type="button" data-section="dashboardSection">Dashboard</button>
+        <button class="nav-btn" type="button" data-section="studentsSection">Students</button>
+        <button class="nav-btn" type="button" data-section="resultsSection">Results</button>
+        <button class="nav-btn" type="button" data-section="adminsSection">Admins</button>
+        <button class="nav-btn" type="button" data-section="communicationsSection">Bulk Email / SMS</button>
+        <button class="nav-btn" type="button" data-section="settingsSection">Settings</button>
       </div>
 
       <div class="nav-group">
         <div class="nav-title">Quick links</div>
-        <button class="nav-btn" id="refreshBtn">Refresh data</button>
-        <button class="nav-btn" id="logoutBtn">Logout</button>
+        <button class="nav-btn" type="button" id="refreshBtn">Refresh data</button>
+        <button class="nav-btn" type="button" id="logoutBtn">Logout</button>
       </div>
     </aside>
 
@@ -274,7 +278,7 @@
                 <h2 class="panel-title">Recent students</h2>
                 <div class="muted">Alphabetical listing is used globally.</div>
               </div>
-              <button class="btn btn-soft" id="exportStudentsBtn">Export Students CSV</button>
+              <div class="actions"><button class="btn btn-soft" id="exportStudentsBtn" type="button">Export Students CSV</button><button class="btn btn-soft" id="exportStudentsPdfQuickBtn" type="button">Export Students PDF</button></div>
             </div>
             <div class="table-wrap"><table><thead><tr><th>Reg ID</th><th>Name</th><th>Class</th><th>Status</th></tr></thead><tbody id="recentStudentsBody"></tbody></table></div>
           </div>
@@ -438,8 +442,15 @@
                 <option value="archived">Archived only</option>
                 <option value="deleted">Deleted only</option>
               </select>
+              <select id="studentClassFilter">
+                <option value="">All classes</option>
+              </select>
               <button class="btn btn-soft" type="button" id="selectVisibleStudentsBtn">Select Visible</button>
               <button class="btn btn-soft" type="button" id="clearStudentSelectionToolbarBtn">Clear Selection</button>
+              <button class="btn btn-soft" type="button" id="exportVisibleStudentsPdfBtn">Visible PDF</button>
+              <button class="btn btn-soft" type="button" id="exportSelectedStudentsPdfBtn">Selected PDF</button>
+              <button class="btn btn-soft" type="button" id="exportClassStudentsPdfBtn">Class PDF</button>
+              <button class="btn btn-soft" type="button" id="exportAllStudentsPdfBtn">All PDF</button>
             </div>
           </div>
           <div class="selection-info" id="studentSelectionInfo">No student selected.</div>
@@ -883,6 +894,21 @@
       return candidates[0] || '';
     }
 
+    function getFilteredStudents(){
+      const q = $('studentSearch') ? $('studentSearch').value.trim().toLowerCase() : '';
+      const filter = $('studentFilterState') ? $('studentFilterState').value : 'all';
+      const classFilter = $('studentClassFilter') ? String($('studentClassFilter').value || '').trim().toLowerCase() : '';
+      return (bootstrapData.students || []).filter(s => {
+        const hay = `${s.regId} ${s.fullName} ${s.classLevel} ${s.category}`.toLowerCase();
+        if (q && !hay.includes(q)) return false;
+        if (classFilter && String(s.classLevel || '').trim().toLowerCase() !== classFilter) return false;
+        if (filter === 'active' && (!s.active || s.archived || s.deleted)) return false;
+        if (filter === 'archived' && !s.archived) return false;
+        if (filter === 'deleted' && !s.deleted) return false;
+        return true;
+      });
+    }
+
     function updateStudentSelectionInfo(){
       const box = $('studentSelectionInfo');
       if (box) box.textContent = selectedStudentIds.size ? `${selectedStudentIds.size} student(s) selected.` : 'No student selected.';
@@ -897,16 +923,7 @@
     window.toggleStudentSelection = toggleStudentSelection;
 
     function selectVisibleStudents(){
-      const q = $('studentSearch').value.trim().toLowerCase();
-      const filter = $('studentFilterState').value;
-      bootstrapData.students.filter(s => {
-        const hay = `${s.regId} ${s.fullName} ${s.classLevel} ${s.category}`.toLowerCase();
-        if (q && !hay.includes(q)) return false;
-        if (filter === 'active' && (!s.active || s.archived || s.deleted)) return false;
-        if (filter === 'archived' && !s.archived) return false;
-        if (filter === 'deleted' && !s.deleted) return false;
-        return true;
-      }).forEach(s => selectedStudentIds.add(String(s.regId).toUpperCase()));
+      getFilteredStudents().forEach(s => selectedStudentIds.add(String(s.regId).toUpperCase()));
       renderStudents();
     }
 
@@ -1069,16 +1086,10 @@
 
     function renderStudents(){
       fillOptions($('resultRegIdSelect'), bootstrapData.students.filter(s => !s.deleted).map(s => s.regId), 'Select student');
-      const q = $('studentSearch').value.trim().toLowerCase();
-      const filter = $('studentFilterState').value;
-      const rows = bootstrapData.students.filter(s => {
-        const hay = `${s.regId} ${s.fullName} ${s.classLevel} ${s.category}`.toLowerCase();
-        if (q && !hay.includes(q)) return false;
-        if (filter === 'active' && (!s.active || s.archived || s.deleted)) return false;
-        if (filter === 'archived' && !s.archived) return false;
-        if (filter === 'deleted' && !s.deleted) return false;
-        return true;
-      });
+      fillOptions($('studentClassFilter'), uniqueValues((bootstrapData.students || []).map(s => s.classLevel)).sort((a,b)=> String(a).localeCompare(String(b))), 'All classes');
+      const classFilterValue = $('studentClassFilter') ? ($('studentClassFilter').dataset.keepValue || $('studentClassFilter').value || '') : '';
+      if ($('studentClassFilter')) $('studentClassFilter').value = classFilterValue;
+      const rows = getFilteredStudents();
 
       $('studentsBody').innerHTML = rows.map(s => `
         <tr>
@@ -1507,6 +1518,99 @@
       downloadBlob(zipName, zipBlob);
     }
 
+    function buildStudentDirectoryMarkup(students, title, subtitle=''){
+      const settings = bootstrapData.settings || {};
+      return `
+        <div class="pdf-export-surface">
+          <div class="pdf-export-head">
+            <div class="pdf-brand-line">
+              <div class="pdf-passport contain" data-role="studentDirectoryLogo">LOGO</div>
+              <div>
+                <div class="pdf-brand-name">${esc(settings.BRAND_NAME || 'Genz Edutech Innovations')}</div>
+                <div class="pdf-school-title">${esc(title || 'Student Directory')}</div>
+                <div class="pdf-school-sub">${esc(settings.SCHOOL_NAME || 'Result Portal')}</div>
+                <div class="pdf-school-sub">${esc(subtitle || 'Generated from the student workspace')}</div>
+              </div>
+            </div>
+          </div>
+          <div class="pdf-export-body">
+            ${students.length ? `
+            <div class="pdf-subject-table-wrap">
+              <table class="student-directory-table">
+                <thead>
+                  <tr>
+                    <th>S/N</th><th>Registration ID</th><th>Full Name</th><th>Class</th><th>Category</th><th>Gender</th><th>Parent Email</th><th>Parent Phone</th><th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${students.map((s,idx)=>`
+                    <tr>
+                      <td>${idx+1}</td>
+                      <td>${esc(s.regId || '—')}</td>
+                      <td>${esc(s.fullName || '—')}</td>
+                      <td>${esc(s.classLevel || '—')}</td>
+                      <td>${esc(s.category || '—')}</td>
+                      <td>${esc(s.gender || '—')}</td>
+                      <td>${esc(s.parentEmail || '—')}</td>
+                      <td>${esc(s.parentPhone || '—')}</td>
+                      <td>${esc(s.deleted ? 'Deleted' : s.archived ? 'Archived' : s.active ? 'Active' : 'Inactive')}</td>
+                    </tr>`).join('')}
+                </tbody>
+              </table>
+            </div>` : `<div class="student-directory-empty">No students matched this export selection.</div>`}
+          </div>
+        </div>`;
+    }
+
+    async function renderStudentDirectoryInto(target, students, title, subtitle=''){
+      if (!target) return;
+      target.innerHTML = buildStudentDirectoryMarkup(students, title, subtitle);
+      await loadImageIntoBox(target.querySelector('[data-role="studentDirectoryLogo"]'), (bootstrapData.settings || {}).BRAND_LOGO_URL || '', 'Brand Logo', true, 'LOGO');
+      await new Promise(resolve => setTimeout(resolve, 120));
+    }
+
+    async function createStudentDirectoryPdfBlob(students, title, subtitle=''){
+      const workbench = $('reportWorkbench');
+      if (!workbench) throw new Error('Report workbench is missing.');
+      const holder = document.createElement('div');
+      workbench.innerHTML = '';
+      workbench.appendChild(holder);
+      await renderStudentDirectoryInto(holder, students, title, subtitle);
+      const capture = holder.firstElementChild;
+      if (!capture) throw new Error('Failed to prepare the student directory for export.');
+      const canvas = await html2canvas(capture, {scale: 2.2, useCORS: true, backgroundColor: '#ffffff'});
+      const imgData = canvas.toDataURL('image/png');
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const imgW = pageW;
+      const imgH = canvas.height * imgW / canvas.width;
+      let heightLeft = imgH;
+      let position = 0;
+      pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH, undefined, 'FAST');
+      heightLeft -= pageH;
+      while (heightLeft > 0) {
+        position = heightLeft - imgH;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH, undefined, 'FAST');
+        heightLeft -= pageH;
+      }
+      workbench.innerHTML = '';
+      return pdf.output('blob');
+    }
+
+    async function downloadStudentDirectoryPdf(students, filename, title, subtitle=''){
+      if (!students.length) throw new Error('No students matched that export request.');
+      showLoading(`Preparing ${students.length} student record(s) for PDF export...`);
+      try{
+        const blob = await createStudentDirectoryPdfBlob(students, title, subtitle);
+        downloadBlob(filename, blob);
+      } finally {
+        hideLoading();
+      }
+    }
+
     function renderResults(){
       const q = $('resultSearchText').value.trim().toLowerCase();
       const examCode = $('resultSearchExamCode').value.trim().toLowerCase();
@@ -1621,6 +1725,7 @@
       const roleLabel = res.data.currentAdmin && res.data.currentAdmin.isPrincipal ? 'Principal Admin' : 'Sub-admin';
       $('welcomeText').textContent = `Signed in • ${res.data.settings.BRAND_NAME || 'Genz Edutech Innovations'} • ${roleLabel}`;
       $('studentCategory').innerHTML = `<option value="">Select category</option>` + (res.data.categoryOptions || []).map(opt => `<option value="${esc(opt)}">${esc(opt)}</option>`).join('');
+      if ($('studentClassFilter')) $('studentClassFilter').dataset.keepValue = $('studentClassFilter').value || '';
       fillOptions($('resultRegIdSelect'), res.data.students.filter(s => !s.deleted).map(s => s.regId), 'Select student');
       $('resultAcademicSession').value = res.data.settings.ACADEMIC_SESSION || '';
       $('resultTerm').value = res.data.settings.TERM || '';
@@ -1964,6 +2069,7 @@
     $('refreshResultsBtn').addEventListener('click', loadBootstrap);
     $('studentSearch').addEventListener('input', renderStudents);
     $('studentFilterState').addEventListener('change', renderStudents);
+    if ($('studentClassFilter')) $('studentClassFilter').addEventListener('change', renderStudents);
     $('resultSearchText').addEventListener('input', renderResults);
     $('resultSearchExamCode').addEventListener('input', renderResults);
     $('resultSearchSession').addEventListener('input', renderResults);
@@ -2106,6 +2212,49 @@ parent2@example.com,Parent Two
       }catch(err){ showToast(err.message, 'error'); }
     });
 
+    if ($('exportStudentsPdfQuickBtn')) $('exportStudentsPdfQuickBtn').addEventListener('click', async () => {
+      try{
+        const students = (bootstrapData.students || []).filter(s => !s.deleted);
+        await downloadStudentDirectoryPdf(students, 'students_directory.pdf', 'Student Directory', 'All non-deleted students exported from the dashboard.');
+        showToast('Student PDF exported successfully.');
+      }catch(err){ showToast(err.message, 'error'); }
+    });
+
+    if ($('exportVisibleStudentsPdfBtn')) $('exportVisibleStudentsPdfBtn').addEventListener('click', async () => {
+      try{
+        const students = getFilteredStudents();
+        const classFilter = $('studentClassFilter') ? $('studentClassFilter').value : '';
+        await downloadStudentDirectoryPdf(students, `students_${slugifyText(classFilter || 'visible')}.pdf`, 'Student Directory', 'Visible students from the current student list filter.');
+        showToast('Visible students PDF exported successfully.');
+      }catch(err){ showToast(err.message, 'error'); }
+    });
+
+    if ($('exportSelectedStudentsPdfBtn')) $('exportSelectedStudentsPdfBtn').addEventListener('click', async () => {
+      try{
+        const students = (bootstrapData.students || []).filter(s => selectedStudentIds.has(String(s.regId).toUpperCase()) && !s.deleted);
+        await downloadStudentDirectoryPdf(students, 'selected_students.pdf', 'Selected Students Directory', 'Only the students checked in the student list are included here.');
+        showToast('Selected students PDF exported successfully.');
+      }catch(err){ showToast(err.message, 'error'); }
+    });
+
+    if ($('exportClassStudentsPdfBtn')) $('exportClassStudentsPdfBtn').addEventListener('click', async () => {
+      const selectedClass = String(($('studentClassFilter') && $('studentClassFilter').value) || '').trim();
+      if (!selectedClass) return showToast('Choose a class first before exporting class PDF.', 'error');
+      try{
+        const students = (bootstrapData.students || []).filter(s => !s.deleted && String(s.classLevel || '').trim().toLowerCase() === selectedClass.toLowerCase());
+        await downloadStudentDirectoryPdf(students, `${slugifyText(selectedClass)}_students.pdf`, `${selectedClass} Student Directory`, `Class-based student export for ${selectedClass}.`);
+        showToast('Class students PDF exported successfully.');
+      }catch(err){ showToast(err.message, 'error'); }
+    });
+
+    if ($('exportAllStudentsPdfBtn')) $('exportAllStudentsPdfBtn').addEventListener('click', async () => {
+      try{
+        const students = (bootstrapData.students || []).filter(s => !s.deleted);
+        await downloadStudentDirectoryPdf(students, 'all_students.pdf', 'All Students Directory', 'All non-deleted student records in the portal.');
+        showToast('All students PDF exported successfully.');
+      }catch(err){ showToast(err.message, 'error'); }
+    });
+
     $('exportResultsBtn').addEventListener('click', async () => {
       try{
         const res = await apiRequest('exportResultsCsv', {}, 'POST', 'Preparing result export...');
@@ -2172,6 +2321,27 @@ parent2@example.com,Parent Two
     $('logoutBtn').addEventListener('click', () => { clearToken(); location.reload(); });
     $('menuBtn').addEventListener('click', () => $('sidebar').classList.toggle('open'));
     document.querySelectorAll('.nav-btn[data-section]').forEach(btn => btn.addEventListener('click', ()=> activateSection(btn.dataset.section)));
+    $('sidebar').addEventListener('click', e => {
+      const sectionBtn = e.target.closest('.nav-btn[data-section]');
+      if (sectionBtn){
+        e.preventDefault();
+        e.stopPropagation();
+        activateSection(sectionBtn.dataset.section);
+        return;
+      }
+      const refreshBtn = e.target.closest('#refreshBtn');
+      if (refreshBtn){
+        e.preventDefault();
+        loadBootstrap();
+        return;
+      }
+      const logoutBtn = e.target.closest('#logoutBtn');
+      if (logoutBtn){
+        e.preventDefault();
+        clearToken();
+        location.reload();
+      }
+    });
 
     (async function init(){
       setAuthTab('login');
