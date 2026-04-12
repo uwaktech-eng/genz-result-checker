@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://script.google.com https://script.googleusercontent.com https://cdnjs.cloudflare.com data: blob:; img-src * data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; connect-src https://script.google.com https://script.googleusercontent.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://script.google.com" />
   <title>Student Result Portal | Genz Edutech Innovations</title>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -275,8 +276,10 @@
   </div>
 
   <script>
+    try{ if(window.top !== window.self){ window.top.location = window.self.location.href; } }catch(_err){}
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxkqab1CGlVVZ1No0Q5XF3vg6QMgDF7avYLAvaV5DhW_fR8AASqhn_O8lx3nAgXDG_NtQ/exec';
     const STUDENT_TOKEN_KEY = 'gei_student_token_v3';
+    const STUDENT_CLIENT_KEY = 'gei_student_client_v1';
 
     let publicData = {settings:{},classOptions:[],categoryOptions:[],subjectOptions:[]};
     let currentStudent = null;
@@ -300,6 +303,17 @@
     function token(){ return localStorage.getItem(STUDENT_TOKEN_KEY) || ''; }
     function setToken(v){ localStorage.setItem(STUDENT_TOKEN_KEY, v); }
     function clearToken(){ localStorage.removeItem(STUDENT_TOKEN_KEY); }
+    function clientId(){
+      let v = localStorage.getItem(STUDENT_CLIENT_KEY) || '';
+      if (!v){
+        v = 'stu_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+        localStorage.setItem(STUDENT_CLIENT_KEY, v);
+      }
+      return v;
+    }
+    function requestNonce(){
+      return 'req_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    }
     function esc(v){ return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
     function normalizeImageUrl(url){
@@ -373,6 +387,9 @@
       $('portalNote').innerHTML = currentSettings.PORTAL_NOTICE || 'Use your exam code to load results.';
       if ($('signupClassLevel')) $('signupClassLevel').placeholder = 'e.g. Year 5 / JSS 1 / Undergraduate';
       if ($('signupCategory') && (publicData.categoryOptions || []).length){ fillOptions($('signupCategory'), publicData.categoryOptions || [], 'Select category'); }
+      const signupTab = document.querySelector('[data-auth-tab="signup"]');
+      if (signupTab) signupTab.classList.toggle('hidden', !(publicData.allowStudentSignup));
+      if (!(publicData.allowStudentSignup)) $('signupForm').classList.add('hidden');
     }
 
     async function validateSavedSession(){

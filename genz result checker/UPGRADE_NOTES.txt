@@ -1,0 +1,26 @@
+RESULT CHECKER UPGRADE NOTES
+
+Main upgrades applied
+- Backend rebuilt to match the richer admin/student UI already present in the project.
+- Stronger security: browser-bound sessions, request freshness nonce + timestamp checks, login/reset rate limiting, salted password hashing with automatic upgrade from old hashes, audit logging, anti-embed protection, and admin-only export routes.
+- Full admin actions wired: bootstrap, create sub-admin, student create/update, student/result state changes, CSV imports/exports, ranking recalculation, bulk email, SMS contact export, password reset, and student result loading by exam code.
+- Result builder model improved: per-subject rows with exam code, session, term, publish state, view-active state, published date, signature URL, ranking, and pass/fail status.
+- Public portal tightened: student signup is disabled by default, admin public signup is disabled by default, and both can be controlled from settings.
+
+Files changed
+- Code.gs
+- admin.html
+- student.html
+- index.html
+
+Deployment reminder
+1. Replace the files in your Apps Script project / frontend.
+2. Save all files.
+3. Run setupSystem() once in the Apps Script editor.
+4. Redeploy the web app.
+5. Hard refresh the browser.
+
+Default first admin
+- Username: admin
+- Password: admin12345
+Change it immediately after first login by creating your real principal admin or resetting the password.

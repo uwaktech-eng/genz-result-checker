@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://script.google.com https://script.googleusercontent.com https://cdnjs.cloudflare.com data: blob:; img-src * data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; connect-src https://script.google.com https://script.googleusercontent.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://script.google.com" />
   <title>Admin Portal | Genz Edutech Innovations</title>
   <style>
     :root{
@@ -528,8 +529,10 @@
   </section>
 
   <script>
+    try{ if(window.top !== window.self){ window.top.location = window.self.location.href; } }catch(_err){}
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxkqab1CGlVVZ1No0Q5XF3vg6QMgDF7avYLAvaV5DhW_fR8AASqhn_O8lx3nAgXDG_NtQ/exec';
     const ADMIN_TOKEN_KEY = 'gei_admin_token_v3';
+    const ADMIN_CLIENT_KEY = 'gei_admin_client_v1';
 
     let bootstrapData = {settings:{},students:[],results:[],admins:[],classOptions:[],categoryOptions:[],subjectOptions:[],examCodes:[],currentAdmin:{}};
     let selectedStudentIds = new Set();
@@ -554,6 +557,17 @@
     function token(){ return localStorage.getItem(ADMIN_TOKEN_KEY) || ''; }
     function setToken(v){ localStorage.setItem(ADMIN_TOKEN_KEY, v); }
     function clearToken(){ localStorage.removeItem(ADMIN_TOKEN_KEY); }
+    function clientId(){
+      let v = localStorage.getItem(ADMIN_CLIENT_KEY) || '';
+      if (!v){
+        v = 'adm_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+        localStorage.setItem(ADMIN_CLIENT_KEY, v);
+      }
+      return v;
+    }
+    function requestNonce(){
+      return 'req_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    }
 
     async function apiRequest(action, payload={}, method='POST', loadingText='Loading...'){
       if (!WEB_APP_URL || WEB_APP_URL.includes('PASTE_YOUR_APPS_SCRIPT_EXEC_URL_HERE')) {
@@ -562,10 +576,11 @@
       showLoading(loadingText);
       try{
         payload = payload || {};
-        const noTokenActions = ['adminLogin', 'requestPasswordReset', 'resetPassword', 'getPublicBootstrap'];
-        if (!payload.token && !noTokenActions.includes(action)) {
-          payload.token = token();
-        }
+        const noTokenActions = ['adminLogin', 'adminSignup', 'requestPasswordReset', 'resetPassword', 'getPublicBootstrap'];
+        if (!payload.token && !noTokenActions.includes(action)) payload.token = token();
+        if (!payload.clientId) payload.clientId = clientId();
+        payload.requestTs = Date.now();
+        payload.requestNonce = requestNonce();
         let res;
         if (method === 'GET'){
           const url = new URL(WEB_APP_URL);
@@ -574,7 +589,7 @@
             const value = payload[key];
             if (value !== undefined && value !== null) url.searchParams.set(key, typeof value === 'object' ? JSON.stringify(value) : String(value));
           });
-          res = await fetch(url.toString(), {method:'GET'});
+          res = await fetch(url.toString(), {method:'GET', credentials:'omit'});
         } else {
           const form = new URLSearchParams();
           form.set('action', action);
@@ -582,7 +597,8 @@
           res = await fetch(WEB_APP_URL, {
             method:'POST',
             headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
-            body:form.toString()
+            body:form.toString(),
+            credentials:'omit'
           });
         }
         const text = await res.text();
@@ -678,6 +694,16 @@
       $('resetRequestForm').classList.toggle('hidden', name !== 'reset');
       $('resetApplyForm').classList.toggle('hidden', name !== 'reset');
     }
+    async function loadAdminPublicBootstrap(){
+      const res = await apiRequest('getPublicBootstrap', {}, 'GET', 'Loading portal...');
+      const allow = !!(res.data && res.data.allowAdminSignup);
+      const signupTab = document.querySelector('[data-auth-tab="signup"]');
+      if (signupTab) signupTab.classList.toggle('hidden', !allow);
+      if (!allow && signupTab && signupTab.classList.contains('active')) setAuthTab('login');
+      const signupNote = document.querySelector('#signupForm .muted');
+      if (signupNote && !allow) signupNote.textContent = 'Public admin signup is disabled. Ask the principal admin to create sub-admin accounts from inside the dashboard.';
+    }
+
 
     function fillOptions(selectEl, options, placeholder='Select'){
       if (!selectEl) return;
@@ -1343,6 +1369,7 @@
 
     (async function init(){
       setAuthTab('login');
+      await loadAdminPublicBootstrap();
       const ok = await validateSavedSession();
       if (ok){
         $('authView').classList.add('hidden');
