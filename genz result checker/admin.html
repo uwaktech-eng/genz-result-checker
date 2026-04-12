@@ -47,6 +47,10 @@
     .field{margin-bottom:14px}
     label{display:block;margin-bottom:8px;font-size:14px;color:#edf5ff;font-weight:700}
     input,select,textarea{width:100%;padding:13px 14px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.08);color:var(--text);outline:none}
+    select{background:linear-gradient(180deg,rgba(16,26,46,.96),rgba(12,20,36,.96));color:#f4f8ff;color-scheme:dark}
+    select option,select optgroup{background:#13213b;color:#f4f8ff}
+    select option[disabled]{color:#93a9c7}
+    select:focus{border-color:rgba(34,199,255,.45);box-shadow:0 0 0 3px rgba(34,199,255,.12)}
     textarea{min-height:96px;resize:vertical}
     input::placeholder,textarea::placeholder{color:#94a8c7}
     .grid{display:grid;gap:18px}
