@@ -286,6 +286,7 @@ function bootstrapSettings_() {
     PASS_MARK_PERCENTAGE: '50',
     SHOW_POSITION_ON_REPORT: 'true',
     BRAND_LOGO_URL: '',
+    FAVICON_URL: '',
     SIGNATURE_NAME: 'Authorized Signatory',
     SIGNATURE_URL: '',
     PORTAL_NOTICE: 'Use your exam code to load results.',
@@ -596,7 +597,7 @@ function getAdminBootstrap_(payload) {
 
 function saveSettings_(payload) {
   requirePrincipalAdmin_(payload.token, sanitizeValue_(payload.clientId));
-  var keys = ['BRAND_NAME','HEAD_OFFICE_ADDRESS','SCHOOL_NAME','SCHOOL_PHONE','SCHOOL_EMAIL','PRINCIPAL_NAME','ACADEMIC_SESSION','TERM','EXAM_TITLE','PASS_MARK_NUMBER','PASS_MARK_PERCENTAGE','SHOW_POSITION_ON_REPORT','SIGNATURE_NAME','SIGNATURE_URL','BRAND_LOGO_URL','PORTAL_NOTICE','CLASS_OPTIONS','CATEGORY_OPTIONS','SUBJECT_OPTIONS','STUDENT_SIGNUP_ENABLED','PUBLIC_ADMIN_SIGNUP_ENABLED','RESULT_FOOTER_NOTE','RESULT_DETAIL_FIELDS'];
+  var keys = ['BRAND_NAME','HEAD_OFFICE_ADDRESS','SCHOOL_NAME','SCHOOL_PHONE','SCHOOL_EMAIL','PRINCIPAL_NAME','ACADEMIC_SESSION','TERM','EXAM_TITLE','PASS_MARK_NUMBER','PASS_MARK_PERCENTAGE','SHOW_POSITION_ON_REPORT','SIGNATURE_NAME','SIGNATURE_URL','BRAND_LOGO_URL','FAVICON_URL','PORTAL_NOTICE','CLASS_OPTIONS','CATEGORY_OPTIONS','SUBJECT_OPTIONS','STUDENT_SIGNUP_ENABLED','PUBLIC_ADMIN_SIGNUP_ENABLED','RESULT_FOOTER_NOTE','RESULT_DETAIL_FIELDS'];
   keys.forEach(function(key) {
     if (Object.prototype.hasOwnProperty.call(payload, key)) upsertSetting_(key, sanitizeSettingValue_(key, payload[key]));
   });
@@ -989,8 +990,6 @@ function bulkSetResultState_(payload) {
   if (!ids.length) throw new Error('Select at least one result first.');
   var sh = getSpreadsheet_().getSheetByName(SHEET_NAMES.RESULTS);
   var rows = getSheetObjectsWithIndex_(sh);
-  var updates = getResultStateUpdate_(state);
-  if (!updates) throw new Error('Invalid result state.');
   var changed = 0;
   ids.forEach(function(id) {
     var row = rows.find(function(item){ return String(item.obj.ResultID || '') === String(id || ''); });
@@ -999,7 +998,9 @@ function bulkSetResultState_(payload) {
       sh.deleteRow(row.rowIndex);
       rows = getSheetObjectsWithIndex_(sh);
     } else {
-      updateObjectRow_(sh, row.rowIndex, Object.assign({}, updates, { UpdatedAt: isoNow_() }));
+      var patch = resultStatePatch_(state, row.obj);
+      patch.UpdatedAt = isoNow_();
+      updateObjectRow_(sh, row.rowIndex, patch);
     }
     changed++;
   });
@@ -1508,7 +1509,7 @@ function sanitizeRegId_(value) {
 }
 
 function sanitizeSettingValue_(key, value) {
-  if (key === 'BRAND_LOGO_URL' || key === 'SIGNATURE_URL') return normalizeImageUrl_(value);
+  if (key === 'BRAND_LOGO_URL' || key === 'SIGNATURE_URL' || key === 'FAVICON_URL') return normalizeImageUrl_(value);
   if (key === 'SHOW_POSITION_ON_REPORT' || key === 'STUDENT_SIGNUP_ENABLED' || key === 'PUBLIC_ADMIN_SIGNUP_ENABLED') return String(normalizeBoolean_(value, false));
   return sanitizeValue_(value);
 }

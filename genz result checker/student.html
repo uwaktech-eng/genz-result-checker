@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://script.google.com https://script.googleusercontent.com https://cdnjs.cloudflare.com data: blob:; img-src * data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; connect-src https://script.google.com https://script.googleusercontent.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://script.google.com" />
   <title>Student Result Portal | Genz Edutech Innovations</title>
+  <link rel="icon" id="faviconLink" href="data:," />
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
@@ -44,7 +45,7 @@
     .hidden{display:none!important}
     .status{min-height:18px;font-size:14px}
     .ok{color:#0d8a56}.error{color:#bb2649}
-    .inline-note{padding:12px 14px;border-radius:16px;background:#eef8ff;border:1px solid #cfe9ff;color:#275d90;font-size:14px}
+    .inline-note{padding:12px 14px;border-radius:18px;background:linear-gradient(135deg,#eef8ff,#f7fbff);border:1px solid #cfe9ff;color:#275d90;font-size:14px}
     .profile-grid{display:grid;grid-template-columns:110px 1fr;gap:18px;align-items:start}
     .passport{width:110px;height:132px;border-radius:16px;border:1px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden}
     .passport img{width:100%;height:100%;object-fit:cover}
@@ -54,30 +55,36 @@
     .info-label{font-size:12px;text-transform:uppercase;color:#6b7e97;letter-spacing:.08em}
     .info-value{font-weight:800;margin-top:6px}
     .report-shell{display:grid;gap:18px}
+    .report-card{position:relative;isolation:isolate}
+    .report-card::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at top right, rgba(77,91,255,.16), transparent 26%),radial-gradient(circle at top left, rgba(33,184,255,.13), transparent 24%);pointer-events:none;z-index:0}
     .report-card{overflow:hidden}
-    .report-head{padding:24px;background:linear-gradient(135deg, rgba(77,91,255,.16), rgba(33,184,255,.14));border-bottom:1px solid var(--line)}
+    .report-head{padding:26px 24px 22px;background:linear-gradient(135deg, rgba(77,91,255,.18), rgba(33,184,255,.16));border-bottom:1px solid var(--line);position:relative;overflow:hidden}
+    .report-head::after{content:"";position:absolute;right:-42px;top:-42px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle, rgba(255,255,255,.34), rgba(255,255,255,0));pointer-events:none}
     .report-title{font-size:1.7rem;font-weight:900;margin:0}
     .report-sub{margin-top:6px;color:#456281}
-    .subject-table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px;background:#fff;margin-top:18px}
+    .subject-table-wrap{overflow:auto;border:1px solid rgba(203,218,240,.9);border-radius:22px;background:rgba(255,255,255,.95);margin-top:18px;box-shadow:0 16px 34px rgba(44,71,120,.08)}
     table{width:100%;border-collapse:collapse;min-width:640px}
     th,td{padding:12px;border-bottom:1px solid #edf2fa;text-align:left;font-size:14px}
-    th{background:#f7fbff}
+    th{background:linear-gradient(180deg,#f5f9ff,#edf5ff);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
     .tag{display:inline-flex;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:900}
     .tag-pass{background:#e8fff5;color:#128053}.tag-fail{background:#fff0f3;color:#b83d5c}.tag-pending{background:#fff7e8;color:#b37212}
     .actions{display:flex;gap:10px;flex-wrap:wrap}
     .summary-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:18px}
     .report-card{background:linear-gradient(180deg, rgba(255,255,255,.94), rgba(242,247,255,.98));border:1px solid rgba(255,255,255,.9);box-shadow:0 30px 70px rgba(44,71,120,.14)}
     .report-card.theme-emerald{--primary:#0f9d7a;--primary2:#27c4a1}.report-card.theme-royal{--primary:#4d5bff;--primary2:#21b8ff}.report-card.theme-sunset{--primary:#ff7a18;--primary2:#ffb347}.report-card.theme-violet{--primary:#6f4bff;--primary2:#9b7dff}.report-card.theme-carbon{--primary:#243b55;--primary2:#141e30}.report-card.theme-rose{--primary:#d9467b;--primary2:#ff8bb3}.report-card.theme-ocean{--primary:#0077b6;--primary2:#56cfe1}.report-card.theme-gold{--primary:#9a6c00;--primary2:#ffd166}.report-card.theme-forest{--primary:#2d6a4f;--primary2:#74c69d}.report-card.theme-candy{--primary:#ff4d6d;--primary2:#ff85a1}
-    .report-head{padding:24px;background:linear-gradient(135deg, color-mix(in srgb, var(--primary) 18%, white), color-mix(in srgb, var(--primary2) 14%, white));border-bottom:1px solid var(--line)}
+    .report-card.design-royal-2,.report-card.design-emerald-2,.report-card.design-sunset-2,.report-card.design-violet-2,.report-card.design-carbon-2,.report-card.design-rose-2,.report-card.design-ocean-2,.report-card.design-gold-2,.report-card.design-forest-2,.report-card.design-candy-2{background:linear-gradient(180deg, rgba(255,255,255,.98), rgba(237,244,255,.98));border:1px solid rgba(208,223,245,.98)}
+    .report-card.design-royal-2 .summary-box,.report-card.design-emerald-2 .summary-box,.report-card.design-sunset-2 .summary-box,.report-card.design-violet-2 .summary-box,.report-card.design-carbon-2 .summary-box,.report-card.design-rose-2 .summary-box,.report-card.design-ocean-2 .summary-box,.report-card.design-gold-2 .summary-box,.report-card.design-forest-2 .summary-box,.report-card.design-candy-2 .summary-box{background:linear-gradient(180deg, rgba(255,255,255,.96), rgba(245,249,255,.98));border-color:rgba(210,223,244,.96)}
+    .report-card.design-royal-2 .subject-table-wrap,.report-card.design-emerald-2 .subject-table-wrap,.report-card.design-sunset-2 .subject-table-wrap,.report-card.design-violet-2 .subject-table-wrap,.report-card.design-carbon-2 .subject-table-wrap,.report-card.design-rose-2 .subject-table-wrap,.report-card.design-ocean-2 .subject-table-wrap,.report-card.design-gold-2 .subject-table-wrap,.report-card.design-forest-2 .subject-table-wrap,.report-card.design-candy-2 .subject-table-wrap{border-color:rgba(196,214,240,.95);box-shadow:0 20px 40px rgba(44,71,120,.10)}
+    .report-head{padding:26px 24px 22px;background:linear-gradient(135deg, rgba(255,255,255,.72), rgba(255,255,255,.46)), linear-gradient(135deg, rgba(77,91,255,.18), rgba(33,184,255,.16));border-bottom:1px solid var(--line);position:relative;overflow:hidden}
     .summary-box{background:rgba(255,255,255,.88);border:1px solid rgba(255,255,255,.9);box-shadow:0 10px 24px rgba(44,71,120,.08)}
     .result-design-row{display:grid;grid-template-columns:1fr 220px;gap:14px;align-items:end}
     .a4-note{font-size:12px;color:var(--muted);margin-top:6px}
 
-    .summary-box{padding:14px;border-radius:16px;background:rgba(255,255,255,.72);border:1px solid var(--line)}
+    .summary-box{padding:14px;border-radius:18px;background:rgba(255,255,255,.88);border:1px solid rgba(255,255,255,.96);box-shadow:0 14px 28px rgba(44,71,120,.08)}
     .summary-label{font-size:12px;color:#637792;text-transform:uppercase;letter-spacing:.08em}
     .summary-value{font-size:1.2rem;font-weight:900;margin-top:6px}
     .signature-wrap{margin-top:20px;display:grid;grid-template-columns:1fr 180px;gap:18px;align-items:end}
-    .signature-box{border-top:1px solid #c5d3e6;padding-top:8px;text-align:center}
+    .signature-box{border-top:1px solid #c5d3e6;padding-top:8px;text-align:center;background:rgba(255,255,255,.76);padding:14px;border-radius:18px}
     .signature-box img{max-width:160px;max-height:60px;display:block;margin:0 auto 8px}
     .overlay{position:fixed;inset:0;background:rgba(7,16,29,.58);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(8px)}
     .overlay.show{display:flex}
@@ -223,6 +230,10 @@
 
       <div class="glass card report-card" id="reportCapture">
         <div class="report-head">
+          <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px">
+            <div class="tag" style="background:rgba(255,255,255,.78);color:#1b3b63;border-color:rgba(255,255,255,.92)">Official Result Sheet</div>
+            <div class="tag" style="background:rgba(255,255,255,.78);color:#1b3b63;border-color:rgba(255,255,255,.92)">Glassy Modern Report</div>
+          </div>
           <div style="display:grid;grid-template-columns:72px 1fr;gap:14px;align-items:center">
             <div class="passport" style="width:72px;height:72px" id="brandLogoBox">LOGO</div>
             <div>
@@ -412,7 +423,7 @@
       currentDesign = name || 'royal';
       const base = String(currentDesign).split('-')[0];
       const target = $('reportCapture');
-      target.className = `glass card report-card theme-${base}`;
+      target.className = `glass card report-card theme-${base} design-${currentDesign}`;
       const sel = $('resultDesignSelect');
       if (sel && sel.value !== currentDesign) sel.value = currentDesign;
     }
@@ -425,6 +436,13 @@
       $('resetApplyForm').classList.toggle('hidden', name !== 'reset');
     }
 
+    function applyFavicon(url){
+      const link = $('faviconLink');
+      if (!link) return;
+      const finalUrl = normalizeImageUrl(url || currentSettings.FAVICON_URL || currentSettings.BRAND_LOGO_URL || '');
+      link.href = finalUrl || 'data:,';
+    }
+
     function fillOptions(el, options, placeholder='Select'){
       el.innerHTML = `<option value="">${placeholder}</option>` + options.map(opt => `<option value="${esc(opt)}">${esc(opt)}</option>`).join('');
     }
@@ -435,6 +453,7 @@
       currentSettings = res.data.settings || {};
       $('brandHeader').textContent = currentSettings.BRAND_NAME || 'Genz Edutech Innovations';
       $('portalNote').innerHTML = currentSettings.PORTAL_NOTICE || 'Use your exam code to load results.';
+      applyFavicon(currentSettings.FAVICON_URL || currentSettings.BRAND_LOGO_URL || '');
       if ($('signupClassLevel')) $('signupClassLevel').placeholder = 'e.g. Year 5 / JSS 1 / Undergraduate';
       if ($('signupCategory') && (publicData.categoryOptions || []).length){ fillOptions($('signupCategory'), publicData.categoryOptions || [], 'Select category'); }
       const signupTab = document.querySelector('[data-auth-tab="signup"]');
@@ -488,6 +507,7 @@
       currentSettings = resultData.settings || currentSettings;
 
       applyResultDesign($('resultDesignSelect').value || currentDesign);
+      applyFavicon(currentSettings.FAVICON_URL || currentSettings.BRAND_LOGO_URL || '');
       $('brandName').textContent = currentSettings.BRAND_NAME || 'Genz Edutech Innovations';
       $('schoolName').textContent = currentSettings.SCHOOL_NAME || 'Result Portal';
       $('schoolAddress').textContent = currentSettings.HEAD_OFFICE_ADDRESS || '';

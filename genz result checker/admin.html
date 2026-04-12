@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://script.google.com https://script.googleusercontent.com https://cdnjs.cloudflare.com data: blob:; img-src * data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; connect-src https://script.google.com https://script.googleusercontent.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://script.google.com" />
   <title>Admin Portal | Genz Edutech Innovations</title>
+  <link rel="icon" id="faviconLink" href="data:," />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -73,6 +74,8 @@
     .data-table{min-width:980px}
     .compact-data-table{min-width:720px}
     .table-wrap td .actions,.table-wrap td .table-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start}
+    .result-action-group{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;min-width:250px}
+    .result-action-group .btn{width:100%;justify-content:center}
     .table-wrap td .actions .btn,.table-wrap td .table-actions .btn{padding:8px 10px;font-size:12px;line-height:1.2;white-space:nowrap;flex:0 0 auto}
     .table-wrap td p,.table-wrap td span,.table-wrap td div{max-width:100%}
     .table-stack{display:flex;flex-direction:column;gap:4px}
@@ -95,7 +98,9 @@
     .results-table th:nth-child(6),.results-table td:nth-child(6),.results-table th:nth-child(7),.results-table td:nth-child(7){min-width:110px}
     .results-table th:nth-child(8),.results-table td:nth-child(8){min-width:130px}
     .results-table th:nth-child(9),.results-table td:nth-child(9){min-width:120px}
-    .results-table th:nth-child(10),.results-table td:nth-child(10){min-width:260px}
+    .results-table th:nth-child(10),.results-table td:nth-child(10){min-width:170px}
+    .results-table th:nth-child(11),.results-table td:nth-child(11){min-width:120px}
+    .results-table th:nth-child(12),.results-table td:nth-child(12){min-width:290px}
     .admins-table th:nth-child(1),.admins-table td:nth-child(1){min-width:160px}
     .admins-table th:nth-child(2),.admins-table td:nth-child(2){min-width:160px}
     .admins-table th:nth-child(3),.admins-table td:nth-child(3){min-width:220px}
@@ -151,10 +156,13 @@
     @media (max-width:640px){.toolbar .actions{width:100%}.toolbar .actions input,.toolbar .actions select{width:100%}}
 
     .grid-5{grid-template-columns:repeat(5,minmax(0,1fr))}
-    .pdf-export-surface{background:linear-gradient(180deg,#ffffff,#f6faff);color:#16304d;border:1px solid #d9e5f7;border-radius:24px;overflow:hidden;box-shadow:0 22px 54px rgba(32,58,96,.10)}
-    .pdf-export-head{padding:24px;background:linear-gradient(135deg,rgba(111,99,255,.12),rgba(34,199,255,.12));border-bottom:1px solid #d9e5f7}
-    .pdf-export-body{padding:22px;background:linear-gradient(180deg,#ffffff,#f8fbff)}
+    .pdf-export-surface{background:linear-gradient(180deg,#ffffff 0%,#f4f8ff 52%,#eef5ff 100%);color:#16304d;border:1px solid #d9e5f7;border-radius:28px;overflow:hidden;box-shadow:0 26px 62px rgba(32,58,96,.12);position:relative}
+    .pdf-export-surface::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at top right, rgba(111,99,255,.16), transparent 28%),radial-gradient(circle at top left, rgba(34,199,255,.12), transparent 24%),linear-gradient(180deg, rgba(255,255,255,.12), transparent 46%);pointer-events:none}
+    .pdf-export-surface>*{position:relative;z-index:1}
+    .pdf-export-head{padding:28px 24px 24px;background:linear-gradient(135deg,rgba(111,99,255,.18),rgba(34,199,255,.15));border-bottom:1px solid #d9e5f7}
+    .pdf-export-body{padding:22px;background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(248,251,255,.96))}
     .pdf-brand-line{display:grid;grid-template-columns:72px 1fr;gap:14px;align-items:center}
+    .pdf-brand-badge{display:inline-flex;align-items:center;gap:8px;padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.85);border:1px solid #dce8fb;color:#284767;font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
     .pdf-brand-name{font-size:1.15rem;font-weight:900;color:#16304d}
     .pdf-school-title{font-size:1.65rem;font-weight:900;margin:2px 0 0;color:#16304d}
     .pdf-school-sub{margin-top:6px;color:#5b738f}
@@ -167,11 +175,11 @@
     .pdf-info-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#6c829e}
     .pdf-info-value{font-weight:800;margin-top:6px;color:#16304d}
     .pdf-summary-strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-top:18px}
-    .pdf-summary-box{padding:14px;border-radius:16px;background:#ffffff;border:1px solid #dfe8f7}
+    .pdf-summary-box{padding:14px;border-radius:18px;background:rgba(255,255,255,.95);border:1px solid #dfe8f7;box-shadow:0 10px 24px rgba(51,84,138,.07)}
     .pdf-summary-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#6c829e}
     .pdf-summary-value{font-size:1.15rem;font-weight:900;margin-top:6px;color:#16304d}
     .pdf-subject-table-wrap{overflow:auto;border:1px solid #dfe8f7;border-radius:18px;background:#fff;margin-top:18px}
-    .pdf-subject-table-wrap th{background:#f4f8ff;color:#16304d;position:static}
+    .pdf-subject-table-wrap th{background:linear-gradient(180deg,#eef5ff,#e7f0ff);color:#16304d;position:static;font-size:12px;text-transform:uppercase;letter-spacing:.06em}
     .pdf-subject-table-wrap td{color:#16304d;border-bottom:1px solid #edf2fa}
     .compact-table td,.compact-table th{font-size:13px}
     .table-wrap table tbody tr:hover{background:rgba(255,255,255,.04)}
@@ -194,14 +202,14 @@
     .pdf-signature-wrap{margin-top:20px;display:grid;grid-template-columns:1fr 180px;gap:18px;align-items:end}
     .pdf-signature-box{border-top:1px solid #cdd9eb;padding-top:8px;text-align:center;color:#16304d}
     .pdf-signature-box img{max-width:160px;max-height:60px;display:block;margin:0 auto 8px}
-    .pdf-inline-note{padding:12px 14px;border-radius:16px;background:#eef6ff;border:1px solid #dbe7fb;color:#2a4f77;font-size:14px}
+    .pdf-inline-note{padding:12px 14px;border-radius:16px;background:linear-gradient(135deg,#eef6ff,#f8fbff);border:1px solid #dbe7fb;color:#2a4f77;font-size:14px}
     .report-workbench{position:fixed;left:-10000px;top:0;width:920px;z-index:-1;opacity:0;pointer-events:none}
     .preview-surface{padding:14px;border-radius:18px;border:1px dashed rgba(255,255,255,.16);background:rgba(255,255,255,.04)}
     .export-mini{font-size:12px;color:#9db2cf}
     .export-manager-table td,.export-manager-table th{white-space:normal}
     .export-score-pill{display:inline-flex;padding:6px 10px;border-radius:999px;background:rgba(111,99,255,.14);border:1px solid rgba(111,99,255,.22);font-size:12px;font-weight:800;color:#eef5ff}
     @media (max-width:1150px){ .grid-5{grid-template-columns:1fr 1fr} }
-    @media (max-width:980px){ .grid-5,.pdf-summary-strip,.pdf-info-grid,.pdf-signature-wrap,.pdf-profile-grid{grid-template-columns:1fr} .report-workbench{width:760px} }
+    @media (max-width:980px){ .grid-5,.pdf-summary-strip,.pdf-info-grid,.pdf-signature-wrap,.pdf-profile-grid,.result-action-group{grid-template-columns:1fr} .report-workbench{width:760px} }
 
   </style>
 </head>
@@ -696,6 +704,18 @@
                 <div class="avatar-preview" id="brandLogoPreview">No image</div>
               </div>
             </div>
+            <div class="grid grid-3">
+              <div class="field">
+                <label>Favicon / Tab Icon URL</label>
+                <input name="FAVICON_URL" id="faviconUrlInput" placeholder="Image URL, Drive link, or file ID" />
+                <div class="actions" style="margin-top:10px">
+                  <button class="btn btn-soft" type="button" id="uploadFaviconBtn">Upload Favicon to My Drive</button>
+                  <input type="file" id="faviconUploadFile" accept="image/*" hidden />
+                </div>
+                <div class="status" id="faviconUploadStatus" style="margin-top:10px"></div>
+                <div class="avatar-preview" id="faviconPreview">No image</div>
+              </div>
+            </div>
             <div class="field"><label>Portal Notice</label><textarea name="PORTAL_NOTICE"></textarea></div>
             <div class="grid grid-3">
               <div class="field"><label>Class / Level Options (comma separated, optional)</label><textarea name="CLASS_OPTIONS"></textarea></div>
@@ -961,6 +981,8 @@
     }
     async function loadAdminPublicBootstrap(){
       const res = await apiRequest('getPublicBootstrap', {}, 'GET', 'Loading portal...');
+      bootstrapData.settings = Object.assign({}, bootstrapData.settings || {}, (res.data && res.data.settings) || {});
+      applyFavicon((res.data && res.data.settings && (res.data.settings.FAVICON_URL || res.data.settings.BRAND_LOGO_URL)) || '');
       const allow = !!(res.data && res.data.allowAdminSignup);
       const signupTab = document.querySelector('[data-auth-tab="signup"]');
       if (signupTab) signupTab.classList.toggle('hidden', !allow);
@@ -1360,6 +1382,7 @@
             <div class="pdf-brand-line">
               <div class="pdf-passport contain" style="width:72px;height:72px" data-role="brandLogo">LOGO</div>
               <div>
+                <div class="pdf-brand-badge">Official Result Sheet</div>
                 <div class="pdf-brand-name">${esc(settings.BRAND_NAME || 'Genz Edutech Innovations')}</div>
                 <div class="pdf-school-title">${esc(settings.SCHOOL_NAME || 'Result Portal')}</div>
                 <div class="pdf-school-sub">${esc(settings.HEAD_OFFICE_ADDRESS || '')}</div>
@@ -1421,7 +1444,7 @@
               </div>
             </div>
             <div class="pdf-signature-wrap">
-              <div class="pdf-inline-note">This result was exported from the admin result manager. The exam code, published date, and subject rows shown here reflect the official record currently saved in the portal.</div>
+              <div class="pdf-inline-note">This result was exported from the admin result manager. The exam code, published date, and subject rows shown here reflect the official record currently saved in the portal. Downloaded copy carries the same result profile visible in the portal preview.</div>
               <div class="pdf-signature-box" data-role="signatureBox">
                 ${signatureRaw ? `<div style="color:#5d728d;margin-bottom:8px">${esc(signatureName)}</div><div class="pdf-passport contain" style="width:160px;height:68px;margin:0 auto;background:transparent;border:none" data-role="signatureImage"></div>` : `<div style="color:#5d728d">No signature added</div><div>${esc(signatureName)}</div>`}
               </div>
@@ -1571,10 +1594,10 @@
           <td>${esc(r.publishedAt || '—')}</td>
           <td>${r.deleted ? '<span class="tag" style="color:#ffdce4">Deleted</span>' : r.archived ? '<span class="tag" style="color:#fff0d8">Archived</span>' : `<span class="tag">${esc(r.resultStatus || 'PENDING')}</span>`}</td>
           <td>
-            <div class="actions">
+            <div class="result-action-group">
               <button class="btn btn-soft" onclick="editResult('${esc(r.resultId)}')">Edit</button>
               <button class="btn btn-soft" onclick="changeResultState('${esc(r.resultId)}','${r.published ? 'unpublish':'publish'}')">${r.published ? 'Unpublish':'Publish'}</button>
-              <button class="btn btn-soft" onclick="changeResultState('${esc(r.resultId)}','${r.viewActive ? 'viewinactive':'viewactive'}')">${r.viewActive ? 'Hide':'View Active'}</button>
+              <button class="btn btn-soft" onclick="changeResultState('${esc(r.resultId)}','${r.viewActive ? 'viewinactive':'viewactive'}')">${r.viewActive ? 'Disable View':'Enable View'}</button>
               <button class="btn btn-warn" onclick="changeResultState('${esc(r.resultId)}','${r.archived ? 'restore':'archive'}')">${r.archived ? 'Restore':'Archive'}</button>
               <button class="btn btn-danger" onclick="changeResultState('${esc(r.resultId)}','${r.deleted ? 'restore':'delete'}')">${r.deleted ? 'Restore':'Delete'}</button>
               <button class="btn btn-danger" onclick="changeResultState('${esc(r.resultId)}','harddelete')">Delete Forever</button>
@@ -1652,6 +1675,7 @@
       const res = await apiRequest('getAdminBootstrap', {}, 'GET', 'Loading dashboard...');
       bootstrapData = res.data;
       $('welcomeText').textContent = `Signed in • ${res.data.settings.BRAND_NAME || 'Genz Edutech Innovations'}`;
+      applyFavicon(res.data.settings.FAVICON_URL || res.data.settings.BRAND_LOGO_URL || '');
       $('studentCategory').innerHTML = `<option value="">Select category</option>` + (res.data.categoryOptions || []).map(opt => `<option value="${esc(opt)}">${esc(opt)}</option>`).join('');
       fillOptions($('resultRegIdSelect'), res.data.students.filter(s => !s.deleted).map(s => s.regId), 'Select student');
       $('resultAcademicSession').value = res.data.settings.ACADEMIC_SESSION || '';
@@ -1674,6 +1698,8 @@
       });
       previewGenericImage(form.querySelector('[name="BRAND_LOGO_URL"]').value, 'brandLogoPreview', 'Brand Logo');
       previewGenericImage(form.querySelector('[name="SIGNATURE_URL"]').value, 'signaturePreview', 'Signature');
+      previewGenericImage(form.querySelector('[name="FAVICON_URL"]').value || form.querySelector('[name="BRAND_LOGO_URL"]').value, 'faviconPreview', 'Favicon');
+      applyFavicon(form.querySelector('[name="FAVICON_URL"]').value || form.querySelector('[name="BRAND_LOGO_URL"]').value || '');
       syncSubjectOptionsFieldFromData();
     }
 
@@ -1710,6 +1736,13 @@
       renderImageWithFallback($(previewId), url, label);
     }
 
+    function applyFavicon(url){
+      const link = $('faviconLink');
+      if (!link) return;
+      const finalUrl = normalizeImageUrl(url || bootstrapData.settings?.FAVICON_URL || bootstrapData.settings?.BRAND_LOGO_URL || '');
+      link.href = finalUrl || 'data:,';
+    }
+
     async function uploadBrandingAsset(settingKey, fileInputId, inputId, previewId, statusId, loadingText){
       const file = $(fileInputId).files[0];
       if (!file) return;
@@ -1726,7 +1759,8 @@
         }, 'POST', loadingText || 'Uploading image...');
         const finalUrl = normalizeImageUrl(res.data.savedUrl || res.data.thumbnailUrl || res.data.viewUrl || '');
         $(inputId).value = finalUrl;
-        previewGenericImage(finalUrl, previewId, settingKey === 'BRAND_LOGO_URL' ? 'Brand Logo' : 'Signature');
+        previewGenericImage(finalUrl, previewId, settingKey === 'BRAND_LOGO_URL' ? 'Brand Logo' : settingKey === 'FAVICON_URL' ? 'Favicon' : 'Signature');
+        if (settingKey === 'FAVICON_URL') applyFavicon(finalUrl);
         status.textContent = res.message;
         status.className = 'status ok';
         showToast(res.message);
@@ -1866,12 +1900,15 @@
     $('passportUrlInput').addEventListener('input', e => previewPassport(e.target.value));
     $('uploadPassportBtn').addEventListener('click', () => $('passportUploadFile').click());
     $('passportUploadFile').addEventListener('change', uploadPassportFile);
-    $('brandLogoUrlInput').addEventListener('input', e => previewGenericImage(e.target.value, 'brandLogoPreview', 'Brand Logo'));
+    $('brandLogoUrlInput').addEventListener('input', e => { previewGenericImage(e.target.value, 'brandLogoPreview', 'Brand Logo'); if (!$('faviconUrlInput').value.trim()) { previewGenericImage(e.target.value, 'faviconPreview', 'Favicon'); applyFavicon(e.target.value); } });
     $('signatureUrlInput').addEventListener('input', e => previewGenericImage(e.target.value, 'signaturePreview', 'Signature'));
+    $('faviconUrlInput').addEventListener('input', e => { previewGenericImage(e.target.value || $('brandLogoUrlInput').value, 'faviconPreview', 'Favicon'); applyFavicon(e.target.value || $('brandLogoUrlInput').value); });
     $('uploadBrandLogoBtn').addEventListener('click', () => $('brandLogoUploadFile').click());
     $('brandLogoUploadFile').addEventListener('change', () => uploadBrandingAsset('BRAND_LOGO_URL', 'brandLogoUploadFile', 'brandLogoUrlInput', 'brandLogoPreview', 'brandLogoUploadStatus', 'Uploading brand logo...'));
     $('uploadSignatureBtn').addEventListener('click', () => $('signatureUploadFile').click());
     $('signatureUploadFile').addEventListener('change', () => uploadBrandingAsset('SIGNATURE_URL', 'signatureUploadFile', 'signatureUrlInput', 'signaturePreview', 'signatureUploadStatus', 'Uploading signature...'));
+    $('uploadFaviconBtn').addEventListener('click', () => $('faviconUploadFile').click());
+    $('faviconUploadFile').addEventListener('change', () => uploadBrandingAsset('FAVICON_URL', 'faviconUploadFile', 'faviconUrlInput', 'faviconPreview', 'faviconUploadStatus', 'Uploading favicon...'));
     $('selectVisibleStudentsBtn').addEventListener('click', selectVisibleStudents);
     $('clearStudentSelectionToolbarBtn').addEventListener('click', clearStudentSelection);
     $('clearStudentSelectionBtn').addEventListener('click', clearStudentSelection);
