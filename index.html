@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://script.google.com https://script.googleusercontent.com https://cdnjs.cloudflare.com data: blob:; img-src * data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; connect-src https://script.google.com https://script.googleusercontent.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self' https://script.google.com" />
+  <title>Genz Edutech Innovations | Result Portal</title>
+  <link rel="icon" id="faviconLink" href="data:," />
+  <style>
+    :root{--bg:#0b1220;--bg2:#13203c;--text:#f7fbff;--muted:#b8c7de;--card:rgba(255,255,255,.09);--line:rgba(255,255,255,.12);--primary:#6f63ff;--primary2:#21c7ff;--shadow:0 26px 60px rgba(0,0,0,.28)}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;color:var(--text);background:
+      radial-gradient(circle at top left, rgba(111,99,255,.22), transparent 28%),
+      radial-gradient(circle at top right, rgba(33,199,255,.14), transparent 24%),
+      linear-gradient(150deg,var(--bg),var(--bg2));min-height:100vh}
+    .wrap{max-width:1180px;margin:0 auto;padding:24px}
+    .glass{background:var(--card);border:1px solid var(--line);border-radius:26px;backdrop-filter:blur(18px);box-shadow:var(--shadow)}
+    .topbar{padding:16px 18px;display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap}
+    .brand{font-weight:900;font-size:1.15rem}
+    .hero{display:grid;grid-template-columns:1.1fr .9fr;gap:20px;align-items:stretch;margin-top:18px}
+    .hero-card{padding:30px}
+    .eyebrow{display:inline-flex;padding:8px 12px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid var(--line);font-size:12px;font-weight:800}
+    h1{font-size:clamp(2rem,4vw,3.3rem);line-height:1.08;margin:18px 0 14px}
+    p{line-height:1.7}
+    .muted{color:var(--muted)}
+    .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+    .btn{border:none;border-radius:16px;padding:14px 18px;font-weight:900;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+    .btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary2));color:#fff}
+    .btn-soft{background:rgba(255,255,255,.08);color:#fff;border:1px solid var(--line)}
+    .feature-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:18px}
+    .feature{padding:18px}
+    .feature strong{display:block;margin-bottom:8px}
+    .mock{padding:22px;display:grid;gap:14px}
+    .panel{padding:18px;border-radius:20px;background:rgba(255,255,255,.07);border:1px solid var(--line)}
+    .pill{display:inline-flex;padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.09);border:1px solid var(--line);font-size:12px;font-weight:800}
+    @media (max-width:980px){.hero,.feature-grid{grid-template-columns:1fr}.wrap{padding:16px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="glass topbar">
+      <div class="brand">Genz Edutech Innovations</div>
+      <div class="muted">Modern result checker portal</div>
+    </div>
+
+    <section class="hero">
+      <div class="glass hero-card">
+        <span class="eyebrow">Production-ready static frontend + Apps Script backend</span>
+        <h1>Beautiful school result management with exam-code controlled student access</h1>
+        <p class="muted">
+          This portal gives admins clean student and result management, soft-delete and restore flows, CSV imports, ranking recalculation, bulk email, and a report card view students can download as a real PDF.
+        </p>
+        <div class="actions">
+          <a class="btn btn-primary" href="student.html">Open Student Portal</a>
+          <a class="btn btn-soft" href="admin.html">Open Admin Portal</a>
+        </div>
+      </div>
+
+      <div class="glass mock">
+        <div class="panel">
+          <div class="pill">Admin controls</div>
+          <p class="muted">Create or update students, import CSV, publish by exam code, archive or delete records, and export lists.</p>
+        </div>
+        <div class="panel">
+          <div class="pill">Student access</div>
+          <p class="muted">Students log in, enter the exam code given by the admin, filter by term or session, and download a high-quality PDF report.</p>
+        </div>
+        <div class="panel">
+          <div class="pill">Safe workflow</div>
+          <p class="muted">Passwords are salt-hashed with upgrade support, sessions are browser-bound, requests use freshness nonces, and reset codes can be sent by email for both admin and student accounts.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="feature-grid">
+      <div class="glass feature"><strong>Dashboard summaries</strong><span class="muted">Clean stats for students, published results, active view records, and exam codes.</span></div>
+      <div class="glass feature"><strong>Archive / restore</strong><span class="muted">Soft-delete, restore, archive, activate, deactivate, and delete forever from the admin portal.</span></div>
+      <div class="glass feature"><strong>CSV-friendly</strong><span class="muted">Import student data and result entries in batches, then export the updated records any time.</span></div>
+      <div class="glass feature"><strong>Report card style</strong><span class="muted">Published date, exam code, rank, remarks, comments, and signature support are all reflected in the result view.</span></div>
+    </section>
+  </div>
+  <script>
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxkqab1CGlVVZ1No0Q5XF3vg6QMgDF7avYLAvaV5DhW_fR8AASqhn_O8lx3nAgXDG_NtQ/exec';
+    (async function(){
+      try{
+        const res = await fetch(`${WEB_APP_URL}?action=getPublicBootstrap`, { method:'GET' });
+        const data = await res.json();
+        const settings = (data && data.data && data.data.settings) || {};
+        const favicon = settings.FAVICON_URL || settings.BRAND_LOGO_URL || '';
+        const link = document.getElementById('faviconLink');
+        if (link) link.href = favicon || 'data:,';
+        const brand = settings.BRAND_NAME || 'Genz Edutech Innovations';
+        document.title = `${brand} | Result Portal`;
+        const brandNode = document.querySelector('.brand');
+        if (brandNode) brandNode.textContent = brand;
+      }catch(_err){}
+    })();
+  </script>
+</body>
+</html>
