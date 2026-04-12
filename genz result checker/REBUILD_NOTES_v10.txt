@@ -1,0 +1,44 @@
+RESULT CHECKER REBUILD NOTES V10
+
+FILES UPDATED
+- Code.gs
+- admin.html
+- appsscript.json (included for completeness)
+
+MAIN CHANGES
+1. Fresh onboarding model
+   - No default seeded admin is created automatically anymore.
+   - If there is no admin record, the first admin signup becomes the principal admin.
+   - Added editor helper: factoryResetFreshOnboarding()
+
+2. Principal admin self-heal
+   - If admin records lose the principal flag, the system automatically restores one principal admin.
+
+3. Drive storage readiness
+   - Added editor helper: authorizeDriveNow()
+   - Added dashboard button: Create / Open Drive Storage Folder
+   - Root folder name: Genz Result Checker Storage
+
+4. Bulk email upgrade
+   - Manual email list input
+   - CSV email template download
+   - CSV email import
+   - HTML message body support
+   - Batch size / recipients-per-send control
+
+5. Auto generated admin comment
+   - TeacherComment now auto-fills from score percentage when no manual comment is supplied.
+
+6. Result import / dashboard text wrapping
+   - Improved overflow handling in admin UI.
+
+IMPORTANT STEPS AFTER REPLACING FILES
+1. Save the Apps Script project.
+2. If Drive upload is needed, run authorizeDriveNow() once in the Apps Script editor and approve Drive access.
+3. Redeploy the web app.
+4. Hard refresh the browser.
+
+IF YOU WANT TO START COMPLETELY FRESH
+- Run: factoryResetFreshOnboarding()
+- Then sign up again from the public admin signup form.
+- That first signup becomes the principal admin.

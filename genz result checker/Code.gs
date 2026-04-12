@@ -1,5 +1,7 @@
 const GOOGLE_SHEET_ID = '1eOq3_XOmL8NqMbXIC3ysa0d3K8B9jQdmT9z6y-iBiOw';
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 3;
+const PRINCIPAL_REMEMBER_TTL_SECONDS = 60 * 60 * 24 * 30;
+const CACHE_SESSION_TTL_SECONDS = 60 * 60 * 6;
 const REQUEST_TTL_SECONDS = 60 * 5;
 const RESET_CODE_TTL_MINUTES = 15;
 const PASSWORD_HASH_VERSION = 'v2';
@@ -421,15 +423,22 @@ function adminLogin_(payload) {
     throw new Error('Invalid admin login details.');
   }
   updateObjectRow_(sh, row.rowIndex, { LastLoginAt: isoNow_(), UpdatedAt: isoNow_() });
+  var isPrincipal = normalizeBoolean_(row.obj.IsPrincipal, false);
+  var wantsRemember = normalizeBoolean_(payload.rememberMe, false);
+  var rememberApplied = isPrincipal && wantsRemember;
+  var sessionTtl = rememberApplied ? PRINCIPAL_REMEMBER_TTL_SECONDS : SESSION_TTL_SECONDS;
   var session = createSession_('admin', row.obj.Username, clientId, {
     displayName: row.obj.DisplayName || row.obj.Username,
-    isPrincipal: normalizeBoolean_(row.obj.IsPrincipal, false)
-  });
-  logAudit_('admin', row.obj.Username, 'adminLogin', 'OK', 'Admin logged in.');
+    isPrincipal: isPrincipal,
+    rememberMe: rememberApplied
+  }, sessionTtl);
+  logAudit_('admin', row.obj.Username, 'adminLogin', 'OK', rememberApplied ? 'Principal admin logged in with remember-me.' : 'Admin logged in.');
   return ok_('Login successful.', {
     token: session.token,
     displayName: row.obj.DisplayName || row.obj.Username,
-    isPrincipal: normalizeBoolean_(row.obj.IsPrincipal, false)
+    isPrincipal: isPrincipal,
+    rememberApplied: rememberApplied,
+    sessionDays: Math.round((sessionTtl / 86400) * 10) / 10
   });
 }
 
@@ -1063,19 +1072,26 @@ function getSessionKey_(token) {
   return 'SESSION_' + sanitizeValue_(token);
 }
 
+function getCacheSessionTtl_(ttlSeconds) {
+  ttlSeconds = Number(ttlSeconds) || SESSION_TTL_SECONDS;
+  return Math.max(60, Math.min(ttlSeconds, CACHE_SESSION_TTL_SECONDS));
+}
+
 function deleteSession_(token) {
   token = sanitizeValue_(token);
   if (!token) return;
-  CacheService.getScriptCache().remove(getSessionKey_(token));
-  getSessionStore_().deleteProperty(getSessionKey_(token));
+  var key = getSessionKey_(token);
+  CacheService.getScriptCache().remove(key);
+  getSessionStore_().deleteProperty(key);
 }
 
 function saveSession_(session) {
   if (!session || !session.token) throw new Error('Invalid session payload.');
-  session.expiresAt = new Date(Date.now() + SESSION_TTL_SECONDS * 1000).toISOString();
+  session.ttlSeconds = Number(session.ttlSeconds) || SESSION_TTL_SECONDS;
+  session.expiresAt = new Date(Date.now() + session.ttlSeconds * 1000).toISOString();
   var raw = JSON.stringify(session);
   var key = getSessionKey_(session.token);
-  CacheService.getScriptCache().put(key, raw, SESSION_TTL_SECONDS);
+  CacheService.getScriptCache().put(key, raw, getCacheSessionTtl_(session.ttlSeconds));
   getSessionStore_().setProperty(key, raw);
   return session;
 }
@@ -1095,7 +1111,7 @@ function loadSession_(token) {
     deleteSession_(token);
     return null;
   }
-  CacheService.getScriptCache().put(key, JSON.stringify(session), SESSION_TTL_SECONDS);
+  CacheService.getScriptCache().put(key, JSON.stringify(session), getCacheSessionTtl_(session.ttlSeconds));
   return session;
 }
 
@@ -1115,9 +1131,9 @@ function requireSession_(token, expectedRole, clientId) {
   return touchSession_(session);
 }
 
-function createSession_(role, id, clientId, extra) {
+function createSession_(role, id, clientId, extra, ttlSeconds) {
   var token = Utilities.getUuid();
-  var session = Object.assign({ role: role, id: id, clientId: clientId, createdAt: isoNow_(), token: token }, extra || {});
+  var session = Object.assign({ role: role, id: id, clientId: clientId, createdAt: isoNow_(), token: token, ttlSeconds: Number(ttlSeconds) || SESSION_TTL_SECONDS }, extra || {});
   return saveSession_(session);
 }
 

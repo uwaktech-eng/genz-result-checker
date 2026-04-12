@@ -171,6 +171,7 @@
         <p class="muted">Use your admin credentials to manage students, results, and publishing controls.</p>
         <div class="field"><label>Username</label><input name="username" required /></div>
         <div class="field"><label>Password</label><input type="password" name="password" required /></div>
+        <label class="inline-check" style="margin:8px 0 14px"><input type="checkbox" name="rememberMe" value="true" /> <span>Remember me <span class="muted">(principal admin only, extends session on this browser)</span></span></label>
         <button class="btn btn-primary" style="width:100%" type="submit">Login</button>
       </form>
 
@@ -709,9 +710,14 @@
     function esc(v){
       return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
     }
-    function token(){ return localStorage.getItem(ADMIN_TOKEN_KEY) || ''; }
-    function setToken(v){ localStorage.setItem(ADMIN_TOKEN_KEY, v); }
-    function clearToken(){ localStorage.removeItem(ADMIN_TOKEN_KEY); }
+    function token(){ return localStorage.getItem(ADMIN_TOKEN_KEY) || sessionStorage.getItem(ADMIN_TOKEN_KEY) || ''; }
+    function setToken(v, remember=false){
+      clearToken();
+      if (!v) return;
+      if (remember) localStorage.setItem(ADMIN_TOKEN_KEY, v);
+      else sessionStorage.setItem(ADMIN_TOKEN_KEY, v);
+    }
+    function clearToken(){ localStorage.removeItem(ADMIN_TOKEN_KEY); sessionStorage.removeItem(ADMIN_TOKEN_KEY); }
     function clientId(){
       let v = localStorage.getItem(ADMIN_CLIENT_KEY) || '';
       if (!v){
@@ -1766,12 +1772,14 @@
       e.preventDefault();
       try{
         const data = serializeForm(e.target);
+        const wantsRemember = ['true','on','1','yes'].includes(String(data.rememberMe || '').toLowerCase());
         const res = await apiRequest('adminLogin', data, 'POST', 'Signing in...');
-        setToken(res.data.token);
+        const rememberApplied = !!(res.data && res.data.rememberApplied);
+        setToken(res.data.token, rememberApplied);
         $('authView').classList.add('hidden');
         $('appView').classList.remove('hidden');
         await loadBootstrap();
-        showToast(res.message);
+        showToast(rememberApplied ? `Login successful. Principal admin remember me is active for about ${res.data.sessionDays || 30} days on this browser.` : (wantsRemember ? 'Login successful. Standard session used because remember me is only for the principal admin.' : res.message));
       }catch(err){ showToast(err.message, 'error'); }
     });
 
