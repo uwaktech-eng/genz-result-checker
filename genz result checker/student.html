@@ -289,16 +289,15 @@
         <div class="subject-pick-shell">
           <div class="subject-pick-toolbar">
             <div>
-              <h2 style="margin:0 0 8px">Bulk report card subject selection</h2>
-              <div class="muted">Select one or more subjects. Your on-screen generated result and downloaded PDF will follow the subjects you choose here.</div>
+              <h2 style="margin:0 0 8px">Bulk report card row selection</h2>
+              <div class="muted">Tick one or more published result rows. Your on-screen generated result and downloaded PDF will follow the checked rows you choose below.</div>
             </div>
             <div class="subject-pick-actions">
-              <button class="btn btn-soft" id="selectAllSubjectsBtn" type="button">Select All</button>
-              <button class="btn btn-soft" id="clearSelectedSubjectsBtn" type="button">Clear</button>
+              <button class="btn btn-soft" id="clearSelectedSubjectsBtn" type="button">Clear Checked Rows</button>
               <div class="subject-pill-count" id="selectedSubjectCount">No result loaded yet</div>
             </div>
           </div>
-          <div class="subject-pill-grid" id="subjectSelectionList"><div class="muted">Load a result first to choose subjects for the bulk report card.</div></div>
+          <div class="selection-helper" id="subjectSelectionList"><strong>Tick the checkbox beside each published result below.</strong>The generated result and downloaded PDF will include only the checked result rows together with the brand logo, student passport, and admin signature.</div>
         </div>
       </div>
 
@@ -369,6 +368,7 @@
             <table>
               <thead>
                 <tr>
+                  <th>Include</th>
                   <th>Exam Code</th>
                   <th>Class</th>
                   <th>Subject</th>
@@ -600,8 +600,10 @@
 
     function renderStudentProfile(student){
       const passportBox = $('passportBox');
-      if (student.passportUrl) passportBox.innerHTML = `<img src="${esc(normalizeImageUrl(student.passportUrl))}" alt="Passport" crossorigin="anonymous" referrerpolicy="no-referrer" />`;
-      else passportBox.textContent = 'No passport';
+      const passportUrl = normalizeImageUrl(student.passportUrl || '');
+      passportBox.innerHTML = passportUrl
+        ? `<div data-role="passport-shell" style="width:100%;height:100%"><img data-role="student-passport" data-image-source="${esc(passportUrl)}" alt="Passport" crossorigin="anonymous" referrerpolicy="no-referrer" style="display:none;width:100%;height:100%;object-fit:cover" /><div class="muted" data-role="passport-fallback" style="display:grid;place-items:center;width:100%;height:100%;padding:10px;text-align:center">Student passport is loading…</div></div>`
+        : `<div class="muted" data-role="passport-fallback" style="display:grid;place-items:center;width:100%;height:100%;padding:10px;text-align:center">No passport</div>`;
 
       const fieldValues = {
         fullName: student.fullName, regId: student.regId, classLevel: student.classLevel, category: student.category, schoolName: student.schoolName,
@@ -631,17 +633,13 @@
       return String(value || '').trim().toLowerCase();
     }
 
-    function getSubjectOptions(rows){
-      const list = [];
-      const counts = new Map();
-      (rows || []).forEach(row => {
-        const label = String(row && row.subject || '').trim();
-        if (!label) return;
-        const key = normalizeSubjectKey(label);
-        counts.set(key, (counts.get(key) || 0) + 1);
-        if (!list.find(item => item.key === key)) list.push({ key, label });
-      });
-      return list.map(item => ({ ...item, count: counts.get(item.key) || 0 }));
+    function getSelectableOptions(rows){
+      return (rows || []).map(row => ({
+        key: rowSelectionKey(row),
+        label: String(row && row.subject || 'Untitled Subject').trim() || 'Untitled Subject',
+        meta: [row && row.term, row && row.academicSession].filter(Boolean).join(' • '),
+        row: row
+      }));
     }
 
     function syncSelectedSubjects(options, forceAll=false){
@@ -666,31 +664,26 @@
 
     function getSelectedRows(baseRows){
       const rows = Array.isArray(baseRows) ? baseRows : getBaseFilteredResults();
-      const options = getSubjectOptions(rows);
+      const options = getSelectableOptions(rows);
       if (!options.length) return [];
       syncSelectedSubjects(options, false);
       const allow = new Set(selectedSubjects || []);
       if (!allow.size) return [];
-      return rows.filter(r => allow.has(normalizeSubjectKey(r.subject)));
+      return rows.filter(r => allow.has(rowSelectionKey(r)));
     }
 
     function renderSubjectSelection(rows){
       const list = $('subjectSelectionList');
       const countBox = $('selectedSubjectCount');
-      const options = getSubjectOptions(rows);
+      const options = getSelectableOptions(rows);
       if (!options.length){
-        list.innerHTML = `<div class="subject-empty">Load a result first to choose one or more subjects for your bulk report card.</div>`;
-        countBox.textContent = 'No subject loaded yet';
+        list.innerHTML = `<strong>Tick the checkbox beside each published result below.</strong>No result is loaded yet, so there is nothing to add to the report card.`;
+        countBox.textContent = 'No result loaded yet';
         return;
       }
       syncSelectedSubjects(options, false);
-      countBox.textContent = `${selectedSubjects.length} of ${options.length} subject(s) selected`;
-      list.innerHTML = options.map(item => `
-        <label class="subject-pill">
-          <input type="checkbox" data-subject-key="${esc(item.key)}" ${selectedSubjects.includes(item.key) ? 'checked' : ''} />
-          <span>${esc(item.label)} <small>${esc(item.count)}</small></span>
-        </label>
-      `).join('');
+      countBox.textContent = `${selectedSubjects.length} of ${options.length} published result row(s) checked`;
+      list.innerHTML = `<strong>Tick the checkbox beside each published result below.</strong>Only the ${selectedSubjects.length} checked row(s) will appear in the generated result and downloaded report card PDF.`;
     }
 
     function getFilteredResults(){
@@ -699,6 +692,68 @@
 
     function initialsFromText(text){
       return String(text || '').trim().split(/\s+/).slice(0,2).map(v => v.charAt(0).toUpperCase()).join('') || 'LG';
+    }
+
+    function rowSelectionKey(row){
+      return String((row && (row.resultId || row.ResultID)) || [row && row.examCode, row && row.academicSession, row && row.term, row && row.subject].map(v => String(v || '').trim()).join('||'));
+    }
+
+    async function bindResultImage(img, url, options={}){
+      if (!img) return;
+      const candidates = publicImageCandidates(url);
+      const fallback = options.fallback || null;
+      const wrapper = options.wrapper || null;
+      const hideWrapperOnFail = !!options.hideWrapperOnFail;
+      const showFallback = () => {
+        try { img.style.display = 'none'; img.removeAttribute('src'); } catch(err){}
+        if (fallback) fallback.style.display = 'grid';
+        if (wrapper && hideWrapperOnFail) wrapper.style.display = 'none';
+      };
+      if (!candidates.length){ showFallback(); return; }
+      let index = 0;
+      const tryNext = async () => {
+        if (index >= candidates.length){
+          const backendData = await fetchImageDataUrlFromBackend(url || '');
+          if (backendData){
+            img.onload = function(){
+              this.style.display = 'block';
+              if (fallback) fallback.style.display = 'none';
+              if (wrapper) wrapper.style.display = '';
+            };
+            img.onerror = showFallback;
+            img.src = backendData;
+            img.style.display = 'block';
+            return;
+          }
+          showFallback();
+          return;
+        }
+        const nextSrc = candidates[index++];
+        if (wrapper) wrapper.style.display = '';
+        img.onerror = () => { tryNext(); };
+        img.onload = function(){
+          this.style.display = 'block';
+          if (fallback) fallback.style.display = 'none';
+          if (wrapper) wrapper.style.display = '';
+        };
+        img.src = nextSrc;
+        img.style.display = 'block';
+      };
+      await tryNext();
+    }
+
+    function bindResultMedia(root){
+      if (!root) return;
+      root.querySelectorAll('[data-image-source]').forEach(node => {
+        const src = node.getAttribute('data-image-source') || '';
+        if (node.matches('[data-role="result-brand-logo"]')){
+          bindResultImage(node, src, { fallback: root.querySelector('[data-role="brand-logo-fallback"]'), wrapper: root.querySelector('[data-role="brand-logo-shell"]') });
+        } else if (node.matches('[data-role="student-passport"]')){
+          bindResultImage(node, src, { fallback: root.querySelector('[data-role="passport-fallback"]'), wrapper: root.querySelector('#passportBox') });
+        } else if (node.matches('[data-role="result-signature"]')){
+          bindResultImage(node, src, { fallback: root.querySelector('[data-role="signature-fallback"]'), wrapper: root.querySelector('[data-role="signature-shell"]') });
+        }
+      });
     }
 
     function getPdfPalette(name){
@@ -730,6 +785,8 @@
       if (match && match[1]) {
         push(`https://drive.google.com/thumbnail?id=${match[1]}&sz=w2000`);
         push(`https://drive.google.com/uc?export=view&id=${match[1]}`);
+        push(`https://drive.google.com/uc?id=${match[1]}`);
+        push(`https://drive.usercontent.google.com/download?id=${match[1]}&export=view&authuser=0`);
       }
       return out;
     }
@@ -891,7 +948,9 @@
       $('schoolPhone').textContent = currentSettings.SCHOOL_PHONE || '';
       $('schoolEmail').textContent = currentSettings.SCHOOL_EMAIL || '';
       const logoUrl = normalizeImageUrl(currentSettings.BRAND_LOGO_URL || '');
-      $('brandLogoBox').innerHTML = logoUrl ? `<img src="${esc(logoUrl)}" alt="Logo" crossorigin="anonymous" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:contain" />` : initialsFromText(currentSettings.BRAND_NAME || 'Logo');
+      $('brandLogoBox').innerHTML = logoUrl
+        ? `<div data-role="brand-logo-shell" style="width:100%;height:100%"><img data-role="result-brand-logo" data-image-source="${esc(logoUrl)}" alt="Logo" crossorigin="anonymous" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:contain;display:none" /><div data-role="brand-logo-fallback" style="display:grid;place-items:center;width:100%;height:100%;font-weight:900;letter-spacing:.08em">${esc(initialsFromText(currentSettings.BRAND_NAME || 'Logo'))}</div></div>`
+        : initialsFromText(currentSettings.BRAND_NAME || 'Logo');
 
       renderStudentProfile(resultData.student);
 
@@ -917,19 +976,19 @@
       const publishedDate = first?.publishedAt || '—';
       const statusText = resultData.student.deleted ? 'Deleted Record' : resultData.student.archived ? 'Archived Record' : (resultData.student.active ? 'Active Record' : 'Inactive Record');
       const badgeTerm = (first?.term || currentResults[0]?.term || 'Result');
-      const selectionSummary = totalAvailable ? `${totalSubjects} of ${totalAvailable} subject(s) selected` : 'No subject loaded yet';
+      const selectionSummary = totalAvailable ? `${totalSubjects} of ${totalAvailable} published row(s) checked` : 'No result row loaded yet';
 
       $('summaryStrip').innerHTML = [
         ['Exam Code', resultData.examCode || '—'],
         ['Class', resultData.student.classLevel || '—'],
-        ['Selected Subjects', totalSubjects],
-        ['Loaded Subjects', totalAvailable],
+        ['Checked Rows', totalSubjects],
+        ['Loaded Rows', totalAvailable],
         ['Average %', avg]
       ].map(item => `<div class="summary-box"><div class="summary-label">${esc(item[0])}</div><div class="summary-value">${esc(item[1])}</div></div>`).join('');
 
       $('performanceBanner').innerHTML = [
-        ['Pass Performance', `${passed}/${totalSubjects || 0}`, `${failed} selected subject(s) below pass mark`],
-        ['Best Subject', best ? `${best.subject || '—'} • ${best.percentage || '0'}%` : '—', best ? `${best.grade || 'No grade'} grade obtained` : 'Select subject(s) to preview best result'],
+        ['Pass Performance', `${passed}/${totalSubjects || 0}`, `${failed} checked row(s) below pass mark`],
+        ['Best Subject', best ? `${best.subject || '—'} • ${best.percentage || '0'}%` : '—', best ? `${best.grade || 'No grade'} grade obtained` : 'Check row(s) to preview best result'],
         ['Verification', first?.academicSession || 'Official Record', `${badgeTerm} • ${formatDisplayDate(publishedDate)}`]
       ].map(item => `<div class="performance-card"><div class="k">${esc(item[0])}</div><div class="v">${esc(item[1])}</div><div class="s">${esc(item[2])}</div></div>`).join('');
 
@@ -937,7 +996,7 @@
         <div>
           <strong>Bulk Report Card Preview</strong>
           <div class="big">${esc(selectionSummary)}</div>
-          <div class="sub">Your generated result and downloaded PDF will carry the selected subjects together with the brand logo, student passport, and admin signature.</div>
+          <div class="sub">Your generated result and downloaded PDF will carry the checked result rows together with the brand logo, student passport, and admin signature.</div>
         </div>
         <div class="selection-pill">${esc(first.examCode || resultData.examCode || 'Result')} • ${esc(first.term || 'All Terms')}</div>
       `;
@@ -950,10 +1009,14 @@
       $('metaSessionTerm').textContent = `Session • ${first?.academicSession || '—'}${first?.term ? ' / ' + first.term : ''}`;
       $('metaGeneratedOn').textContent = `Generated • ${formatDisplayDate(new Date())}`;
       $('heroVerificationText').textContent = `${statusText}. ${selectionSummary} prepared for bulk report card download.`;
-      $('heroGeneratedText').textContent = `The on-screen result mirrors the PDF design and includes the brand logo, student passport, and admin signature.`;
+      $('heroGeneratedText').textContent = `The on-screen result mirrors the PDF design. Tick the checkboxes in the table below to choose the exact published result rows to include.`;
 
-      $('resultTableBody').innerHTML = filtered.length ? filtered.map(r => `
+      const selectedKeySet = new Set(selectedSubjects || []);
+      $('resultTableBody').innerHTML = baseRows.length ? baseRows.map(r => {
+        const rowKey = rowSelectionKey(r);
+        return `
         <tr>
+          <td><div class="result-check-wrap"><input class="result-check" type="checkbox" data-result-key="${esc(rowKey)}" ${selectedKeySet.has(rowKey) ? 'checked' : ''} /></div></td>
           <td>${esc(r.examCode)}</td>
           <td>${esc(r.classLevel || resultData.student.classLevel || '—')}</td>
           <td>${esc(r.subject)}</td>
@@ -963,8 +1026,8 @@
           <td>${esc(r.positionText || '—')}</td>
           <td><span class="tag ${String(r.resultStatus).toUpperCase()==='PASS'?'tag-pass':String(r.resultStatus).toUpperCase()==='FAIL'?'tag-fail':'tag-pending'}">${esc(r.resultStatus || 'PENDING')}</span></td>
           <td>${esc(formatDisplayDate(r.publishedAt || '—'))}</td>
-        </tr>
-      `).join('') : `<tr><td colspan="9" class="muted">No selected subject is available under the current filters. Tick one or more subjects above to build the bulk report card.</td></tr>`;
+        </tr>`;
+      }).join('') : `<tr><td colspan="10" class="muted">No published result row is available under the current filters.</td></tr>`;
 
       $('examMetaGrid').innerHTML = [
         ['Exam Code', first.examCode], ['Exam Title', first.examTitle], ['Academic Session', first.academicSession],
@@ -975,7 +1038,7 @@
       $('resultFooterMeta').innerHTML = [
         ['Exam Title', first.examTitle || '—'],
         ['Session / Term', `${first.academicSession || '—'}${first.term ? ' • ' + first.term : ''}`],
-        ['Result Status', totalSubjects ? `${passed}/${totalSubjects} passed • ${avg}% average` : 'Select subject(s) to build the report'],
+        ['Result Status', totalSubjects ? `${passed}/${totalSubjects} passed • ${avg}% average` : 'Check row(s) to build the report'],
         ['Bulk Selection', selectionSummary]
       ].map(([label,value]) => `<div class="result-footer-item"><strong>${esc(label)}</strong><span>${esc(value || '—')}</span></div>`).join('');
 
@@ -985,13 +1048,15 @@
           <div class="info-value">${esc(r.remark || '—')}</div>
           <div class="muted" style="margin-top:6px">${esc(r.teacherComment || 'No teacher comment')}</div>
         </div>
-      `).join('') : `<div class="muted">No remarks available for the current subject selection.</div>`;
+      `).join('') : `<div class="muted">No remarks available for the current checked result rows.</div>`;
 
       const signatureUrl = normalizeImageUrl(first.signatureUrl || currentSettings.SIGNATURE_URL || '');
       const signatureName = currentSettings.SIGNATURE_NAME || currentSettings.PRINCIPAL_NAME || 'Authorized Signatory';
       $('signatureBox').innerHTML = signatureUrl
-        ? `<img src="${esc(signatureUrl)}" alt="Signature" crossorigin="anonymous" referrerpolicy="no-referrer" /><div class="signature-role">Signed by Admin</div><div class="signature-name">${esc(signatureName)}</div><div class="signature-caption">Official approval signature appears on both this generated result and the downloaded PDF.</div>`
+        ? `<div data-role="signature-shell"><img data-role="result-signature" data-image-source="${esc(signatureUrl)}" alt="Signature" crossorigin="anonymous" referrerpolicy="no-referrer" style="display:none" /><div class="muted" data-role="signature-fallback" style="display:grid;place-items:center;padding:12px 0">Signature is loading…</div></div><div class="signature-role">Signed by Admin</div><div class="signature-name">${esc(signatureName)}</div><div class="signature-caption">Official approval signature appears on both this generated result and the downloaded PDF.</div>`
         : `<div class="muted">No signature added</div><div class="signature-role">Signatory</div><div class="signature-name">${esc(signatureName)}</div><div class="signature-caption">Add admin signature in settings so it shows on both generated and downloaded result.</div>`;
+
+      bindResultMedia($('resultCard'));
     }
 
     async function ensureImagesReady(root){
@@ -1043,7 +1108,7 @@
       try{
         const baseRows = getBaseFilteredResults();
         const rows = getSelectedRows(baseRows);
-        if (!rows.length) throw new Error('Select one or more subjects before downloading the bulk report card PDF.');
+        if (!rows.length) throw new Error('Check one or more result rows before downloading the bulk report card PDF.');
         const first = rows[0] || {};
         const palette = getPdfPalette(currentDesign);
         const { jsPDF } = window.jspdf;
@@ -1197,7 +1262,7 @@
         doc.setTextColor(83,102,129);
         doc.setFont('helvetica','normal');
         doc.setFontSize(9.8);
-        const noteLines = doc.splitTextToSize(`This result was generated from the official student result portal on ${formatDisplayDate(new Date())}. ${totalSubjects} selected subject(s) were included in this bulk report card. The brand logo, student passport, published result rows, and admin signature form part of this verified academic record.`, 286);
+        const noteLines = doc.splitTextToSize(`This result was generated from the official student result portal on ${formatDisplayDate(new Date())}. ${totalSubjects} checked result row(s) were included in this bulk report card. The brand logo, student passport, published result rows, and admin signature form part of this verified academic record.`, 286);
         doc.text(noteLines, 42, y + 40);
 
         doc.setDrawColor(...palette.line);
@@ -1238,21 +1303,16 @@
 
     $('loadResultBtn').addEventListener('click', loadResult);
     $('downloadPdfBtn').addEventListener('click', downloadPdf);
-    $('selectAllSubjectsBtn').addEventListener('click', () => {
-      const options = getSubjectOptions(getBaseFilteredResults());
-      subjectSelectionTouched = true;
-      selectedSubjects = options.map(item => item.key);
-      if (currentResults.length) renderReport({student:currentStudent,results:currentResults,settings:currentSettings,examCode: currentResults[0]?.examCode, sessions:[...new Set(currentResults.map(r=>r.academicSession))], terms:[...new Set(currentResults.map(r=>r.term))]});
-    });
     $('clearSelectedSubjectsBtn').addEventListener('click', () => {
       subjectSelectionTouched = true;
       selectedSubjects = [];
       if (currentResults.length) renderReport({student:currentStudent,results:currentResults,settings:currentSettings,examCode: currentResults[0]?.examCode, sessions:[...new Set(currentResults.map(r=>r.academicSession))], terms:[...new Set(currentResults.map(r=>r.term))]});
     });
-    $('subjectSelectionList').addEventListener('change', e => {
+    $('resultTableBody').addEventListener('change', e => {
       const target = e.target;
       if (!target || target.type !== 'checkbox') return;
-      const key = String(target.dataset.subjectKey || '');
+      const key = String(target.dataset.resultKey || '');
+      if (!key) return;
       subjectSelectionTouched = true;
       if (target.checked) {
         if (!selectedSubjects.includes(key)) selectedSubjects.push(key);
