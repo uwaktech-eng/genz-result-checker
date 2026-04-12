@@ -754,7 +754,7 @@
       showLoading(loadingText);
       try{
         payload = payload || {};
-        const noTokenActions = ['adminLogin', 'adminSignup', 'requestPasswordReset', 'resetPassword', 'getPublicBootstrap'];
+        const noTokenActions = ['adminLogin', 'requestPasswordReset', 'resetPassword', 'getPublicBootstrap'];
         if (!payload.token && !noTokenActions.includes(action)) payload.token = token();
         if (!payload.clientId) payload.clientId = clientId();
         payload.requestTs = Date.now();
@@ -1990,7 +1990,10 @@
     $('subadminForm').addEventListener('submit', async e => {
       e.preventDefault();
       try{
-        const res = await apiRequest('adminSignup', serializeForm(e.target), 'POST', 'Creating sub-admin...');
+        const subadminPayload = serializeForm(e.target);
+        subadminPayload.token = token();
+        subadminPayload.clientId = clientId();
+        const res = await apiRequest('adminSignup', subadminPayload, 'POST', 'Creating sub-admin...');
         $('subadminStatus').textContent = res.message;
         $('subadminStatus').className = 'status ok';
         showToast(res.message);
