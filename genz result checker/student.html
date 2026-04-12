@@ -393,6 +393,9 @@
     let currentResults = [];
     let currentSettings = {};
     let currentDesign = 'royal';
+    let currentRenderNonce = 0;
+    let currentSelectionKeys = new Set();
+    let currentSelectionSource = '';
     const RESULT_DESIGNS = ['royal','emerald','sunset','violet','carbon','rose','ocean','gold','forest','candy','royal-2','emerald-2','sunset-2','violet-2','carbon-2','rose-2','ocean-2','gold-2','forest-2','candy-2'];
 
     const $ = id => document.getElementById(id);
