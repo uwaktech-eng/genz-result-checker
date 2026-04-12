@@ -210,7 +210,7 @@ function validateAction_(action) {
     ping: true, getPublicBootstrap: true, adminLogin: true, adminSignup: true, studentSignup: true, studentLogin: true,
     validateSession: true, getAdminBootstrap: true, saveSettings: true, saveStudent: true, uploadStudentPassport: true, uploadBrandingAsset: true, setStudentState: true,
     importStudentsCsv: true, exportStudentsCsv: true, bulkUpdatePassports: true, importPassportsCsv: true,
-    saveResult: true, saveResultEntries: true, importResultsCsv: true, recalculateResults: true, setResultState: true,
+    saveResult: true, saveResultEntries: true, importResultsCsv: true, recalculateResults: true, setResultState: true, bulkSetResultState: true,
     exportResultsCsv: true, loadStudentExamCodes: true, loadStudentResults: true, sendBulkEmail: true,
     authorizeMailStatus: true, exportSmsContacts: true, requestPasswordReset: true, resetPassword: true,
     setAdminState: true
