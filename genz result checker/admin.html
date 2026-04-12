@@ -66,10 +66,41 @@
     .summary-value{font-size:1.75rem;font-weight:900;margin-top:8px}
     .section{display:none}
     .section.active{display:block}
-    .table-wrap{overflow:auto;max-width:100%;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.05)}
-    table{width:100%;border-collapse:separate;border-spacing:0;min-width:760px;table-layout:fixed}
-    th,td{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;vertical-align:top;font-size:14px;word-break:break-word;overflow-wrap:anywhere;white-space:normal;line-height:1.45}
+     .table-wrap{overflow:auto;max-width:100%;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.05)}
+    table{width:100%;border-collapse:separate;border-spacing:0;min-width:760px;table-layout:auto}
+    th,td{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;vertical-align:top;font-size:14px;word-break:normal;overflow-wrap:break-word;white-space:normal;line-height:1.5;hyphens:auto}
     th{position:sticky;top:0;background:rgba(14,22,39,.98);z-index:1}
+    .data-table{min-width:980px}
+    .compact-data-table{min-width:720px}
+    .table-wrap td .actions,.table-wrap td .table-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start}
+    .table-wrap td .actions .btn,.table-wrap td .table-actions .btn{padding:8px 10px;font-size:12px;line-height:1.2;white-space:nowrap;flex:0 0 auto}
+    .table-wrap td p,.table-wrap td span,.table-wrap td div{max-width:100%}
+    .table-stack{display:flex;flex-direction:column;gap:4px}
+    .cell-main{font-weight:700;color:#f4f8ff}
+    .cell-sub{font-size:12px;color:#9db2cf}
+    .student-list-table th:nth-child(1),.student-list-table td:nth-child(1){min-width:70px}
+    .student-list-table th:nth-child(2),.student-list-table td:nth-child(2){min-width:120px}
+    .student-list-table th:nth-child(3),.student-list-table td:nth-child(3){min-width:200px}
+    .student-list-table th:nth-child(4),.student-list-table td:nth-child(4){min-width:120px}
+    .student-list-table th:nth-child(5),.student-list-table td:nth-child(5){min-width:120px}
+    .student-list-table th:nth-child(6),.student-list-table td:nth-child(6){min-width:100px}
+    .student-list-table th:nth-child(7),.student-list-table td:nth-child(7){min-width:220px}
+    .student-list-table th:nth-child(8),.student-list-table td:nth-child(8){min-width:120px}
+    .student-list-table th:nth-child(9),.student-list-table td:nth-child(9){min-width:320px}
+    .results-table th:nth-child(1),.results-table td:nth-child(1){min-width:150px}
+    .results-table th:nth-child(2),.results-table td:nth-child(2){min-width:130px}
+    .results-table th:nth-child(3),.results-table td:nth-child(3){min-width:120px}
+    .results-table th:nth-child(4),.results-table td:nth-child(4){min-width:110px}
+    .results-table th:nth-child(5),.results-table td:nth-child(5){min-width:90px}
+    .results-table th:nth-child(6),.results-table td:nth-child(6),.results-table th:nth-child(7),.results-table td:nth-child(7){min-width:110px}
+    .results-table th:nth-child(8),.results-table td:nth-child(8){min-width:130px}
+    .results-table th:nth-child(9),.results-table td:nth-child(9){min-width:120px}
+    .results-table th:nth-child(10),.results-table td:nth-child(10){min-width:260px}
+    .admins-table th:nth-child(1),.admins-table td:nth-child(1){min-width:160px}
+    .admins-table th:nth-child(2),.admins-table td:nth-child(2){min-width:160px}
+    .admins-table th:nth-child(3),.admins-table td:nth-child(3){min-width:220px}
+    .admins-table th:nth-child(4),.admins-table td:nth-child(4){min-width:120px}
+    .admins-table th:nth-child(5),.admins-table td:nth-child(5){min-width:260px}
     .toolbar{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
     .toolbar .actions{display:flex;gap:10px;flex-wrap:wrap}
     .actions{display:flex;gap:10px;flex-wrap:wrap}
@@ -290,7 +321,7 @@
               </div>
               <button class="btn btn-soft" id="exportStudentsBtn">Export Students CSV</button>
             </div>
-            <div class="table-wrap"><table><thead><tr><th>Reg ID</th><th>Name</th><th>Class</th><th>Status</th></tr></thead><tbody id="recentStudentsBody"></tbody></table></div>
+            <div class="table-wrap"><table class="compact-data-table"><thead><tr><th>Reg ID</th><th>Name</th><th>Class</th><th>Status</th></tr></thead><tbody id="recentStudentsBody"></tbody></table></div>
           </div>
 
           <div class="glass card">
@@ -304,7 +335,7 @@
                 <button class="btn btn-primary" id="openResultExportManagerBtn" type="button">Open PDF Export Manager</button>
               </div>
             </div>
-            <div class="table-wrap"><table><thead><tr><th>Exam Code</th><th>Subject</th><th>Reg ID</th><th>Score</th><th>Published</th></tr></thead><tbody id="recentResultsBody"></tbody></table></div>
+            <div class="table-wrap"><table class="compact-data-table"><thead><tr><th>Exam Code</th><th>Subject</th><th>Reg ID</th><th>Score</th><th>Published</th></tr></thead><tbody id="recentResultsBody"></tbody></table></div>
           </div>
         </div>
 
@@ -337,7 +368,7 @@
               <button class="btn btn-soft" type="button" id="exportAllZipBtn">Export All PDFs (ZIP)</button>
             </div>
           </div>
-          <div class="table-wrap export-manager-table"><table><thead><tr><th>Select</th><th>Reg ID</th><th>Student</th><th>Class</th><th>Exam Code</th><th>Subjects</th><th>Total Score</th><th>Average %</th><th>Published</th><th>Actions</th></tr></thead><tbody id="reportExportBody"></tbody></table></div>
+          <div class="table-wrap export-manager-table"><table class="data-table"><thead><tr><th>Select</th><th>Reg ID</th><th>Student</th><th>Class</th><th>Exam Code</th><th>Subjects</th><th>Total Score</th><th>Average %</th><th>Published</th><th>Actions</th></tr></thead><tbody id="reportExportBody"></tbody></table></div>
           <div class="glass card" style="padding:16px;margin-top:18px">
             <div class="toolbar">
               <div>
@@ -462,7 +493,7 @@
             </div></div>
           </div>
           <div class="selection-info" id="studentSelectionInfo">No student selected.</div>
-          <div class="table-wrap"><table><thead><tr><th>Select</th><th>Reg ID</th><th>Full Name</th><th>Class</th><th>Category</th><th>Passport</th><th>Email / Phone</th><th>Status</th><th>Actions</th></tr></thead><tbody id="studentsBody"></tbody></table></div>
+          <div class="table-wrap"><table class="data-table student-list-table"><thead><tr><th>Select</th><th>Reg ID</th><th>Full Name</th><th>Class</th><th>Category</th><th>Passport</th><th>Email / Phone</th><th>Status</th><th>Actions</th></tr></thead><tbody id="studentsBody"></tbody></table></div>
         </div>
       </section>
 
@@ -544,7 +575,7 @@
                 <div class="muted">Edit from the row, then publish or activate view for student access by exam code.</div>
               </div>
             </div>
-            <div class="table-wrap"><table><thead><tr><th>Exam Code</th><th>Subject</th><th>Reg ID</th><th>Score / %</th><th>Rank</th><th>Published</th><th>View Access</th><th>Published Date</th><th>Status</th><th>Actions</th></tr></thead><tbody id="resultsBody"></tbody></table></div>
+            <div class="table-wrap"><table class="data-table results-table"><thead><tr><th>Exam Code</th><th>Subject</th><th>Reg ID</th><th>Score / %</th><th>Rank</th><th>Published</th><th>View Access</th><th>Published Date</th><th>Status</th><th>Actions</th></tr></thead><tbody id="resultsBody"></tbody></table></div>
           </div>
         </div>
       </section>
@@ -575,7 +606,7 @@
                 <div class="muted">The principal admin badge identifies the main controller for all sub-admin access.</div>
               </div>
             </div>
-            <div class="table-wrap"><table><thead><tr><th>Username</th><th>Name</th><th>Email / Phone</th><th>Status</th><th>Actions</th></tr></thead><tbody id="adminsBody"></tbody></table></div>
+            <div class="table-wrap"><table class="data-table admins-table"><thead><tr><th>Username</th><th>Name</th><th>Email / Phone</th><th>Status</th><th>Actions</th></tr></thead><tbody id="adminsBody"></tbody></table></div>
           </div>
         </div>
       </section>
@@ -899,16 +930,7 @@
     window.toggleStudentSelection = toggleStudentSelection;
 
     function selectVisibleStudents(){
-      const q = $('studentSearch').value.trim().toLowerCase();
-      const filter = $('studentFilterState').value;
-      bootstrapData.students.filter(s => {
-        const hay = `${s.regId} ${s.fullName} ${s.classLevel} ${s.category}`.toLowerCase();
-        if (q && !hay.includes(q)) return false;
-        if (filter === 'active' && (!s.active || s.archived || s.deleted)) return false;
-        if (filter === 'archived' && !s.archived) return false;
-        if (filter === 'deleted' && !s.deleted) return false;
-        return true;
-      }).forEach(s => selectedStudentIds.add(String(s.regId).toUpperCase()));
+      getFilteredStudentRows().forEach(s => selectedStudentIds.add(String(s.regId).toUpperCase()));
       renderStudents();
     }
 
@@ -939,6 +961,20 @@
       if (!selectEl) return;
       if (String(selectEl.tagName || '').toLowerCase() !== 'select') return;
       selectEl.innerHTML = `<option value="">${placeholder}</option>` + options.map(opt => `<option value="${esc(opt)}">${esc(opt)}</option>`).join('');
+    }
+
+    function syncStudentClassFilterOptions(){
+      const select = $('studentFilterClass');
+      if (!select) return;
+      const previousValue = String(select.value || select.dataset.currentValue || '');
+      const classOptions = [...new Set((bootstrapData.students || []).map(s => String(s.classLevel || '').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+      fillOptions(select, classOptions, 'All classes');
+      if (previousValue && classOptions.includes(previousValue)) {
+        select.value = previousValue;
+      } else {
+        select.value = '';
+      }
+      select.dataset.currentValue = select.value || '';
     }
 
     function renderSubjectPicker(){
@@ -1071,30 +1107,27 @@
 
     function renderStudents(){
       fillOptions($('resultRegIdSelect'), bootstrapData.students.filter(s => !s.deleted).map(s => s.regId), 'Select student');
-      const classOptions = [...new Set(bootstrapData.students.map(s => String(s.classLevel || '').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
-      fillOptions($('studentFilterClass'), classOptions, 'All classes');
-      const previousClass = $('studentFilterClass').dataset.currentValue || $('studentFilterClass').value || '';
-      if (previousClass && classOptions.includes(previousClass)) $('studentFilterClass').value = previousClass;
+      syncStudentClassFilterOptions();
       const rows = getFilteredStudentRows();
       $('studentFilterClass').dataset.currentValue = $('studentFilterClass').value || '';
 
       $('studentsBody').innerHTML = rows.map(s => `
         <tr>
           <td><input type="checkbox" ${selectedStudentIds.has(String(s.regId).toUpperCase()) ? 'checked' : ''} onchange="toggleStudentSelection('${esc(s.regId)}', this.checked)" /></td>
-          <td>${esc(s.regId)}</td>
-          <td>${esc(s.fullName)}</td>
-          <td>${esc(s.classLevel || '—')}</td>
+          <td><div class="table-stack"><span class="cell-main">${esc(s.regId)}</span><span class="cell-sub">${esc(s.schoolName || 'Student ID')}</span></div></td>
+          <td><div class="table-stack"><span class="cell-main">${esc(s.fullName)}</span><span class="cell-sub">${esc(s.gender || '—')} • ${esc(s.age || '—')}</span></div></td>
+          <td><div class="table-stack"><span class="cell-main">${esc(s.classLevel || '—')}</span><span class="cell-sub">${esc(s.category || '—')}</span></div></td>
           <td>${esc(s.category || '—')}</td>
           <td>${s.passportUrl ? `<img src="${esc(normalizeImageUrl(s.passportUrl))}" alt="Passport" class="logo-thumb" />` : '<span class="muted">No image</span>'}</td>
-          <td>${esc(s.parentEmail || '—')}<br><span class="muted small">${esc(s.parentPhone || '—')}</span></td>
+          <td><div class="table-stack"><span class="cell-main">${esc(s.parentEmail || '—')}</span><span class="cell-sub">${esc(s.parentPhone || '—')}</span></div></td>
           <td>${statusBadge(s)}</td>
           <td>
-            <div class="actions">
-              <button class="btn btn-soft" onclick="editStudent('${esc(s.regId)}')">Edit</button>
-              <button class="btn btn-soft" onclick="changeStudentState('${esc(s.regId)}','${s.active ? 'deactivate':'activate'}')">${s.active ? 'Deactivate':'Activate'}</button>
-              <button class="btn btn-warn" onclick="changeStudentState('${esc(s.regId)}','${s.archived ? 'restore':'archive'}')">${s.archived ? 'Restore':'Archive'}</button>
-              <button class="btn btn-danger" onclick="changeStudentState('${esc(s.regId)}','${s.deleted ? 'restore':'delete'}')">${s.deleted ? 'Restore':'Delete'}</button>
-              <button class="btn btn-danger" onclick="changeStudentState('${esc(s.regId)}','harddelete')">Delete Forever</button>
+            <div class="table-actions">
+              <button class="btn btn-soft" type="button" onclick="editStudent('${esc(s.regId)}')">Edit</button>
+              <button class="btn btn-soft" type="button" onclick="changeStudentState('${esc(s.regId)}','${s.active ? 'deactivate':'activate'}')">${s.active ? 'Deactivate':'Activate'}</button>
+              <button class="btn btn-warn" type="button" onclick="changeStudentState('${esc(s.regId)}','${s.archived ? 'restore':'archive'}')">${s.archived ? 'Restore':'Archive'}</button>
+              <button class="btn btn-danger" type="button" onclick="changeStudentState('${esc(s.regId)}','${s.deleted ? 'restore':'delete'}')">${s.deleted ? 'Restore':'Delete'}</button>
+              <button class="btn btn-danger" type="button" onclick="changeStudentState('${esc(s.regId)}','harddelete')">Delete Forever</button>
             </div>
           </td>
         </tr>
@@ -1946,7 +1979,7 @@
 
     $('refreshResultsBtn').addEventListener('click', loadBootstrap);
     $('studentSearch').addEventListener('input', renderStudents);
-    $('studentFilterClass').addEventListener('change', renderStudents);
+    $('studentFilterClass').addEventListener('change', () => { $('studentFilterClass').dataset.currentValue = $('studentFilterClass').value || ''; renderStudents(); });
     $('studentFilterState').addEventListener('change', renderStudents);
     $('resultSearchText').addEventListener('input', renderResults);
     $('resultSearchExamCode').addEventListener('input', renderResults);
