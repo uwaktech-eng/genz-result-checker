@@ -1,5 +1,5 @@
-const GOOGLE_SHEET_ID = '1zyjmnpFIgtpIhrYhJvqo668yqjIQbGCbaxJhvK1LWzQ';
-const SESSION_TTL_SECONDS = 60 * 60 * 6;
+const GOOGLE_SHEET_ID = '1eOq3_XOmL8NqMbXIC3ysa0d3K8B9jQdmT9z6y-iBiOw';
+const SESSION_TTL_SECONDS = 60 * 60 * 24 * 3;
 const REQUEST_TTL_SECONDS = 60 * 5;
 const RESET_CODE_TTL_MINUTES = 15;
 const PASSWORD_HASH_VERSION = 'v2';
@@ -1055,23 +1055,70 @@ function requirePrincipalAdmin_(token, clientId) {
   return session;
 }
 
+function getSessionStore_() {
+  return PropertiesService.getScriptProperties();
+}
+
+function getSessionKey_(token) {
+  return 'SESSION_' + sanitizeValue_(token);
+}
+
+function deleteSession_(token) {
+  token = sanitizeValue_(token);
+  if (!token) return;
+  CacheService.getScriptCache().remove(getSessionKey_(token));
+  getSessionStore_().deleteProperty(getSessionKey_(token));
+}
+
+function saveSession_(session) {
+  if (!session || !session.token) throw new Error('Invalid session payload.');
+  session.expiresAt = new Date(Date.now() + SESSION_TTL_SECONDS * 1000).toISOString();
+  var raw = JSON.stringify(session);
+  var key = getSessionKey_(session.token);
+  CacheService.getScriptCache().put(key, raw, SESSION_TTL_SECONDS);
+  getSessionStore_().setProperty(key, raw);
+  return session;
+}
+
+function loadSession_(token) {
+  token = sanitizeValue_(token);
+  if (!token) return null;
+  var key = getSessionKey_(token);
+  var raw = CacheService.getScriptCache().get(key) || getSessionStore_().getProperty(key);
+  if (!raw) return null;
+  var session = parseJson_(raw);
+  if (!session || !session.role) {
+    deleteSession_(token);
+    return null;
+  }
+  if (session.expiresAt && new Date(session.expiresAt).getTime() < Date.now()) {
+    deleteSession_(token);
+    return null;
+  }
+  CacheService.getScriptCache().put(key, JSON.stringify(session), SESSION_TTL_SECONDS);
+  return session;
+}
+
+function touchSession_(session) {
+  if (!session || !session.token) return session;
+  session.lastSeenAt = isoNow_();
+  return saveSession_(session);
+}
+
 function requireSession_(token, expectedRole, clientId) {
   token = sanitizeValue_(token);
   if (!token) throw new Error('Session expired. Please log in again.');
-  var raw = CacheService.getScriptCache().get('SESSION_' + token);
-  if (!raw) throw new Error('Session expired. Please log in again.');
-  var session = parseJson_(raw);
-  if (!session || !session.role) throw new Error('Session expired. Please log in again.');
+  var session = loadSession_(token);
+  if (!session) throw new Error('Session expired. Please log in again.');
   if (expectedRole && session.role !== expectedRole) throw new Error('You are not authorized for this action.');
   if (clientId && session.clientId && session.clientId !== clientId) throw new Error('This session belongs to another browser. Please log in again.');
-  return session;
+  return touchSession_(session);
 }
 
 function createSession_(role, id, clientId, extra) {
   var token = Utilities.getUuid();
   var session = Object.assign({ role: role, id: id, clientId: clientId, createdAt: isoNow_(), token: token }, extra || {});
-  CacheService.getScriptCache().put('SESSION_' + token, JSON.stringify(session), SESSION_TTL_SECONDS);
-  return session;
+  return saveSession_(session);
 }
 
 function requireClientId_(clientId) {
