@@ -1,0 +1,10 @@
+Upload ONLY these frontend files to Vercel:
+- index.html
+- admin.html
+- student.html
+- vercel.json
+
+Do NOT upload Code.gs, appsscript.json, or the whole Apps Script project to Vercel.
+Those stay in Google Apps Script.
+
+If you are deploying from GitHub, place these four files at the repository root.
