@@ -280,7 +280,13 @@
               <div class="grid grid-2">
                 <div class="field">
                   <label>Passport URL</label>
-                  <input name="passportUrl" id="passportUrlInput" placeholder="Paste image URL" />
+                  <input name="passportUrl" id="passportUrlInput" placeholder="Paste image URL or Google Drive file ID" />
+                  <div class="actions" style="margin-top:10px">
+                    <button class="btn btn-soft" type="button" id="uploadPassportBtn">Upload Passport to My Drive</button>
+                    <input type="file" id="passportUploadFile" accept="image/*" hidden />
+                  </div>
+                  <div class="inline-note">You can paste a normal image URL, a Google Drive share link, a raw Drive file ID, or upload directly here for a clean output.</div>
+                  <div class="status" id="passportUploadStatus" style="margin-top:10px"></div>
                 </div>
                 <div class="field">
                   <label>Preview</label>
@@ -508,8 +514,26 @@
               <div class="field"><label>Pass Mark Number</label><input name="PASS_MARK_NUMBER" type="number" /></div>
               <div class="field"><label>Pass Mark Percentage</label><input name="PASS_MARK_PERCENTAGE" type="number" /></div>
               <div class="field"><label>Signature Name</label><input name="SIGNATURE_NAME" /></div>
-              <div class="field"><label>Signature URL</label><input name="SIGNATURE_URL" /></div>
-              <div class="field"><label>Brand Logo URL</label><input name="BRAND_LOGO_URL" placeholder="Image URL or Google Drive share link" /></div>
+              <div class="field">
+                <label>Signature URL</label>
+                <input name="SIGNATURE_URL" id="signatureUrlInput" placeholder="Image URL, Drive link, or file ID" />
+                <div class="actions" style="margin-top:10px">
+                  <button class="btn btn-soft" type="button" id="uploadSignatureBtn">Upload Signature to My Drive</button>
+                  <input type="file" id="signatureUploadFile" accept="image/*" hidden />
+                </div>
+                <div class="status" id="signatureUploadStatus" style="margin-top:10px"></div>
+                <div class="avatar-preview" id="signaturePreview">No image</div>
+              </div>
+              <div class="field">
+                <label>Brand Logo URL</label>
+                <input name="BRAND_LOGO_URL" id="brandLogoUrlInput" placeholder="Image URL, Drive link, or file ID" />
+                <div class="actions" style="margin-top:10px">
+                  <button class="btn btn-soft" type="button" id="uploadBrandLogoBtn">Upload Brand Logo to My Drive</button>
+                  <input type="file" id="brandLogoUploadFile" accept="image/*" hidden />
+                </div>
+                <div class="status" id="brandLogoUploadStatus" style="margin-top:10px"></div>
+                <div class="avatar-preview" id="brandLogoPreview">No image</div>
+              </div>
             </div>
             <div class="field"><label>Portal Notice</label><textarea name="PORTAL_NOTICE"></textarea></div>
             <div class="grid grid-3">
@@ -646,14 +670,27 @@
       setTimeout(()=> URL.revokeObjectURL(a.href), 500);
     }
 
+    function extractImageSource(raw){
+      raw = String(raw || '').trim();
+      if (!raw) return '';
+      const img = raw.match(/<img[^>]+src=["']?([^"' >]+)["']?/i);
+      if (img && img[1]) raw = img[1];
+      const css = raw.match(/url\((['"]?)(.*?)\1\)/i);
+      if (css && css[2]) raw = css[2];
+      return String(raw || '').trim();
+    }
+
     function normalizeImageUrl(url){
-      url = String(url || '').trim();
-      if (!url) return '';
-      let match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/i);
-      if (!match) match = url.match(/[?&]id=([a-zA-Z0-9_-]+)/i);
-      if (!match) match = url.match(/\/uc\?export=view&id=([a-zA-Z0-9_-]+)/i);
-      if (match) return `https://drive.google.com/uc?export=view&id=${match[1]}`;
-      return url;
+      const raw = extractImageSource(url);
+      if (!raw) return '';
+      let match = raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/i);
+      if (!match) match = raw.match(/drive\.google\.com\/open\?id=([^&]+)/i);
+      if (!match) match = raw.match(/[?&]id=([a-zA-Z0-9_-]+)/i);
+      if (!match) match = raw.match(/thumbnail\?[^#]*id=([a-zA-Z0-9_-]+)/i);
+      if (!match) match = raw.match(/\/uc\?export=(?:view|download)&id=([a-zA-Z0-9_-]+)/i);
+      if (!match && /^[A-Za-z0-9_-]{20,}$/.test(raw)) match = [raw, raw];
+      if (match && match[1]) return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1600`;
+      return raw;
     }
 
     function updateStudentSelectionInfo(){
@@ -1046,6 +1083,8 @@
         const field = form.querySelector(`[name="${key}"]`);
         if (field) field.value = bootstrapData.settings[key] ?? '';
       });
+      previewGenericImage(form.querySelector('[name="BRAND_LOGO_URL"]').value, 'brandLogoPreview', 'Brand Logo');
+      previewGenericImage(form.querySelector('[name="SIGNATURE_URL"]').value, 'signaturePreview', 'Signature');
       syncSubjectOptionsFieldFromData();
     }
 
@@ -1060,6 +1099,88 @@
       const finalUrl = normalizeImageUrl(url);
       if (finalUrl && /^https?:\/\//i.test(finalUrl.trim())) box.innerHTML = `<img src="${esc(finalUrl)}" alt="Passport" />`;
       else box.textContent = 'No image';
+    }
+
+    function previewGenericImage(url, previewId, label){
+      const box = $(previewId);
+      const finalUrl = normalizeImageUrl(url);
+      if (finalUrl && /^https?:\/\//i.test(finalUrl.trim())) box.innerHTML = `<img src="${esc(finalUrl)}" alt="${esc(label || 'Image')}" />`;
+      else box.textContent = 'No image';
+    }
+
+    async function uploadBrandingAsset(settingKey, fileInputId, inputId, previewId, statusId, loadingText){
+      const file = $(fileInputId).files[0];
+      if (!file) return;
+      const status = $(statusId);
+      try{
+        status.textContent = loadingText || 'Uploading image...';
+        status.className = 'status';
+        const fileData = await fileToBase64(file);
+        const res = await apiRequest('uploadBrandingAsset', {
+          settingKey,
+          fileName: file.name,
+          mimeType: file.type || 'application/octet-stream',
+          fileData
+        }, 'POST', loadingText || 'Uploading image...');
+        const finalUrl = normalizeImageUrl(res.data.savedUrl || res.data.thumbnailUrl || res.data.viewUrl || '');
+        $(inputId).value = finalUrl;
+        previewGenericImage(finalUrl, previewId, settingKey === 'BRAND_LOGO_URL' ? 'Brand Logo' : 'Signature');
+        status.textContent = res.message;
+        status.className = 'status ok';
+        showToast(res.message);
+      }catch(err){
+        status.textContent = err.message;
+        status.className = 'status error';
+        showToast(err.message, 'error');
+      }finally{
+        $(fileInputId).value = '';
+      }
+    }
+
+    function fileToBase64(file){
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = String(reader.result || '');
+          const comma = result.indexOf(',');
+          resolve(comma >= 0 ? result.slice(comma + 1) : result);
+        };
+        reader.onerror = () => reject(new Error('Unable to read the selected file.'));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function uploadPassportFile(){
+      const file = $('passportUploadFile').files[0];
+      if (!file) return;
+      const status = $('passportUploadStatus');
+      try{
+        status.textContent = 'Uploading passport image...';
+        status.className = 'status';
+        const form = $('studentForm');
+        const regId = form.querySelector('[name="regId"]').value.trim();
+        const fullName = form.querySelector('[name="fullName"]').value.trim();
+        const fileData = await fileToBase64(file);
+        const res = await apiRequest('uploadStudentPassport', {
+          regId,
+          fullName,
+          fileName: file.name,
+          mimeType: file.type || 'application/octet-stream',
+          fileData
+        }, 'POST', 'Uploading passport...');
+        const finalUrl = normalizeImageUrl(res.data.savedUrl || res.data.thumbnailUrl || res.data.viewUrl || '');
+        $('passportUrlInput').value = finalUrl;
+        previewPassport(finalUrl);
+        status.textContent = res.message + (res.data && res.data.updatedStudent ? ' Existing student record updated too.' : '');
+        status.className = 'status ok';
+        showToast(res.message);
+      }catch(err){
+        status.textContent = err.message;
+        status.className = 'status error';
+        showToast(err.message, 'error');
+      }finally{
+        $('passportUploadFile').value = '';
+      }
     }
 
     async function validateSavedSession(){
@@ -1136,9 +1257,19 @@
 
     $('clearStudentFormBtn').addEventListener('click', () => {
       $('studentForm').reset();
+      $('passportUploadStatus').textContent = '';
+      $('passportUploadStatus').className = 'status';
       previewPassport('');
     });
     $('passportUrlInput').addEventListener('input', e => previewPassport(e.target.value));
+    $('uploadPassportBtn').addEventListener('click', () => $('passportUploadFile').click());
+    $('passportUploadFile').addEventListener('change', uploadPassportFile);
+    $('brandLogoUrlInput').addEventListener('input', e => previewGenericImage(e.target.value, 'brandLogoPreview', 'Brand Logo'));
+    $('signatureUrlInput').addEventListener('input', e => previewGenericImage(e.target.value, 'signaturePreview', 'Signature'));
+    $('uploadBrandLogoBtn').addEventListener('click', () => $('brandLogoUploadFile').click());
+    $('brandLogoUploadFile').addEventListener('change', () => uploadBrandingAsset('BRAND_LOGO_URL', 'brandLogoUploadFile', 'brandLogoUrlInput', 'brandLogoPreview', 'brandLogoUploadStatus', 'Uploading brand logo...'));
+    $('uploadSignatureBtn').addEventListener('click', () => $('signatureUploadFile').click());
+    $('signatureUploadFile').addEventListener('change', () => uploadBrandingAsset('SIGNATURE_URL', 'signatureUploadFile', 'signatureUrlInput', 'signaturePreview', 'signatureUploadStatus', 'Uploading signature...'));
     $('selectVisibleStudentsBtn').addEventListener('click', selectVisibleStudents);
     $('clearStudentSelectionToolbarBtn').addEventListener('click', clearStudentSelection);
     $('clearStudentSelectionBtn').addEventListener('click', clearStudentSelection);
