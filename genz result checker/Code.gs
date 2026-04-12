@@ -1,4 +1,4 @@
-const GOOGLE_SHEET_ID = '1zyjmnpFIgtpIhrYhJvqo668yqjIQbGCbaxJhvK1LWzQ';
+const GOOGLE_SHEET_ID = '1eOq3_XOmL8NqMbXIC3ysa0d3K8B9jQdmT9z6y-iBiOw';
 const SESSION_TTL_SECONDS = 60 * 60 * 6;
 const REQUEST_TTL_SECONDS = 60 * 5;
 const RESET_CODE_TTL_MINUTES = 15;
@@ -450,7 +450,8 @@ function adminSignup_(payload) {
     caller = requireSession_(payload.token, 'admin', sanitizeValue_(payload.clientId));
   }
   if (admins.length > 0) {
-    if (!caller || !caller.isPrincipal) throw new Error('Only the principal admin can create sub-admin accounts.');
+    if (!caller) throw new Error('Only the principal admin can create sub-admin accounts.');
+    caller = requirePrincipalAdmin_(payload.token, sanitizeValue_(payload.clientId));
   } else if (!normalizeBoolean_(settings.PUBLIC_ADMIN_SIGNUP_ENABLED, false) && !caller) {
     throw new Error('Public admin signup is disabled.');
   }
@@ -1073,13 +1074,42 @@ function requireAdmin_(token, clientId) {
 function requirePrincipalAdmin_(token, clientId) {
   ensurePrincipalAdminConsistency_();
   var session = requireSession_(token, 'admin', clientId);
-  if (!session.isPrincipal) {
-    var row = getAdminRowByUsername_(session.id);
-    if (row && normalizeBoolean_(row.obj.IsPrincipal, false)) {
-      session.isPrincipal = true;
-      touchSession_(session.token, session);
-    }
+  var row = getAdminRowByUsername_(session.id);
+  if (row && normalizeBoolean_(row.obj.IsPrincipal, false)) {
+    session.isPrincipal = true;
+    touchSession_(session.token, session);
+    return session;
   }
+
+  var sh = getSpreadsheet_().getSheetByName(SHEET_NAMES.ADMINS);
+  var activeAdmins = getSheetObjectsWithIndex_(sh).filter(function(item) {
+    return !normalizeBoolean_(item.obj.Deleted, false) && !normalizeBoolean_(item.obj.Archived, false) && normalizeBoolean_(item.obj.Active, true);
+  });
+  var principalRow = activeAdmins.find(function(item) { return normalizeBoolean_(item.obj.IsPrincipal, false); }) || null;
+
+  var canPromoteCaller = !!row && normalizeBoolean_(row.obj.Active, true) && !normalizeBoolean_(row.obj.Archived, false) && !normalizeBoolean_(row.obj.Deleted, false) && (
+    !principalRow ||
+    principalRow.rowIndex === row.rowIndex ||
+    (
+      String(principalRow.obj.Username || '').toLowerCase() === 'admin' &&
+      !sanitizeEmail_(principalRow.obj.Email) &&
+      !sanitizeValue_(principalRow.obj.Phone) &&
+      !sanitizeValue_(principalRow.obj.LastLoginAt)
+    )
+  );
+
+  if (canPromoteCaller) {
+    activeAdmins.forEach(function(item) {
+      var shouldPrincipal = item.rowIndex === row.rowIndex;
+      if (normalizeBoolean_(item.obj.IsPrincipal, false) !== shouldPrincipal) {
+        updateObjectRow_(sh, item.rowIndex, { IsPrincipal: shouldPrincipal, UpdatedAt: isoNow_() });
+      }
+    });
+    session.isPrincipal = true;
+    touchSession_(session.token, session);
+    return session;
+  }
+
   if (!session.isPrincipal) throw new Error('Only the principal admin can perform this action.');
   return session;
 }
@@ -1101,6 +1131,15 @@ function createSession_(role, id, clientId, extra) {
   var session = Object.assign({ role: role, id: id, clientId: clientId, createdAt: isoNow_(), token: token }, extra || {});
   CacheService.getScriptCache().put('SESSION_' + token, JSON.stringify(session), SESSION_TTL_SECONDS);
   return session;
+}
+
+
+function touchSession_(token, session) {
+  token = sanitizeValue_(token);
+  if (!token || !session) return;
+  session.token = token;
+  session.touchedAt = isoNow_();
+  CacheService.getScriptCache().put('SESSION_' + token, JSON.stringify(session), SESSION_TTL_SECONDS);
 }
 
 function requireClientId_(clientId) {
