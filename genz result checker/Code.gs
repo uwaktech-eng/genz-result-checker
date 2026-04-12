@@ -661,11 +661,24 @@ function setStudentState_(payload) {
   var sh = getSpreadsheet_().getSheetByName(SHEET_NAMES.STUDENTS);
   var row = findObjectRow_(sh, function(obj) { return sanitizeRegId_(obj.RegID) === regId; });
   if (!row) throw new Error('Student not found.');
-  var patch = studentStatePatch_(state);
+
   if (state === 'harddelete') {
+    var resultsSh = getSpreadsheet_().getSheetByName(SHEET_NAMES.RESULTS);
+    if (resultsSh) {
+      var resultRows = getSheetObjectsWithIndex_(resultsSh)
+        .filter(function(item) { return sanitizeRegId_(item.obj.RegID) === regId; })
+        .map(function(item) { return item.rowIndex; })
+        .sort(function(a, b) { return b - a; });
+      resultRows.forEach(function(rowIndex) {
+        resultsSh.deleteRow(rowIndex);
+      });
+    }
+
     sh.deleteRow(row.rowIndex);
     return ok_('Student deleted forever.');
   }
+
+  var patch = studentStatePatch_(state);
   patch.UpdatedAt = isoNow_();
   updateObjectRow_(sh, row.rowIndex, patch);
   return ok_('Student state updated.');
