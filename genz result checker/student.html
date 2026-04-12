@@ -10,8 +10,41 @@
   <style>
     :root{
       --bg:#f4f7ff;--bg2:#edf3ff;--panel:rgba(255,255,255,.82);--line:#dfe8f7;--text:#13223c;--muted:#5f738f;
-      --primary:#4d5bff;--primary2:#21b8ff;--success:#1ba972;--danger:#dd5f76;--shadow:0 22px 54px rgba(43,68,118,.12);--radius:24px
+      --primary:#4d5bff;--primary2:#21b8ff;--success:#1ba972;--danger:#dd5f76;--shadow:0 22px 54px rgba(43,68,118,.12);--radius:24px;
+      --card-bg:rgba(255,255,255,.96);--head-grad:linear-gradient(135deg, rgba(77,91,255,.16), rgba(33,184,255,.14));--result-bg:linear-gradient(180deg,#ffffff,#f8fbff);
+      --accent-soft:rgba(77,91,255,.08);--table-head:#f7fbff;--table-row:#ffffff
     }
+    .theme-sunset{--bg:#fff7f1;--bg2:#ffe5d5;--panel:rgba(255,252,248,.9);--line:#ffd3bf;--text:#4a2418;--muted:#8b5f4a;--primary:#ff7b54;--primary2:#ffb26b;--card-bg:#fffaf6;--head-grad:linear-gradient(135deg,rgba(255,123,84,.24),rgba(255,178,107,.24));--result-bg:linear-gradient(180deg,#fffaf6,#fff2ea);--accent-soft:rgba(255,123,84,.1);--table-head:#fff0e6;--table-row:#fffdfb}
+    .theme-forest{--bg:#effaf3;--bg2:#dff5e9;--panel:rgba(251,255,252,.9);--line:#c6e8d1;--text:#163126;--muted:#557965;--primary:#1b9c68;--primary2:#7ed6a7;--card-bg:#fcfffd;--head-grad:linear-gradient(135deg,rgba(27,156,104,.22),rgba(126,214,167,.24));--result-bg:linear-gradient(180deg,#ffffff,#f3fbf6);--accent-soft:rgba(27,156,104,.08);--table-head:#edf8f1;--table-row:#fbfffc}
+    .theme-royal{--bg:#f4f1ff;--bg2:#e7e0ff;--panel:rgba(251,249,255,.9);--line:#d8d0ff;--text:#241c4c;--muted:#645a97;--primary:#6c4cff;--primary2:#a27dff;--card-bg:#fcfbff;--head-grad:linear-gradient(135deg,rgba(108,76,255,.22),rgba(162,125,255,.24));--result-bg:linear-gradient(180deg,#ffffff,#f7f4ff);--accent-soft:rgba(108,76,255,.08);--table-head:#f1edff;--table-row:#ffffff}
+    .theme-ocean{--bg:#eef8ff;--bg2:#dff0ff;--panel:rgba(250,254,255,.9);--line:#cfe5f5;--text:#10314d;--muted:#55748f;--primary:#0086d1;--primary2:#6cd4ff;--card-bg:#fbfeff;--head-grad:linear-gradient(135deg,rgba(0,134,209,.2),rgba(108,212,255,.22));--result-bg:linear-gradient(180deg,#ffffff,#f4fbff);--accent-soft:rgba(0,134,209,.08);--table-head:#edf8ff;--table-row:#fbfeff}
+    .theme-gold{--bg:#fffaf0;--bg2:#fff1cc;--panel:rgba(255,254,249,.92);--line:#f0dfb0;--text:#4b3812;--muted:#8a6d2a;--primary:#c99400;--primary2:#ffd85e;--card-bg:#fffef9;--head-grad:linear-gradient(135deg,rgba(201,148,0,.22),rgba(255,216,94,.22));--result-bg:linear-gradient(180deg,#fffefb,#fff8e8);--accent-soft:rgba(201,148,0,.08);--table-head:#fff7df;--table-row:#fffefb}
+    .theme-rose{--bg:#fff2f7;--bg2:#ffe1ee;--panel:rgba(255,249,252,.92);--line:#f3cfe0;--text:#4b1d31;--muted:#8c5a70;--primary:#d94b87;--primary2:#ff93b7;--card-bg:#fffafd;--head-grad:linear-gradient(135deg,rgba(217,75,135,.22),rgba(255,147,183,.22));--result-bg:linear-gradient(180deg,#fffdfd,#fff2f7);--accent-soft:rgba(217,75,135,.08);--table-head:#fff0f6;--table-row:#fffdfd}
+    .theme-graphite{--bg:#eef1f5;--bg2:#dce4ec;--panel:rgba(255,255,255,.85);--line:#c5d0db;--text:#1f2937;--muted:#5f6b7a;--primary:#3b4b5f;--primary2:#7f93a8;--card-bg:#fbfcfd;--head-grad:linear-gradient(135deg,rgba(59,75,95,.18),rgba(127,147,168,.22));--result-bg:linear-gradient(180deg,#ffffff,#f4f7fa);--accent-soft:rgba(59,75,95,.07);--table-head:#edf2f7;--table-row:#ffffff}
+    .theme-lavender{--bg:#fbf6ff;--bg2:#efe4ff;--panel:rgba(255,252,255,.9);--line:#e0cff8;--text:#35214d;--muted:#775d99;--primary:#9966ff;--primary2:#d7a8ff;--card-bg:#fffcff;--head-grad:linear-gradient(135deg,rgba(153,102,255,.22),rgba(215,168,255,.22));--result-bg:linear-gradient(180deg,#fffefe,#f8f2ff);--accent-soft:rgba(153,102,255,.08);--table-head:#f5efff;--table-row:#fffefe}
+    .theme-mint{--bg:#f2fff9;--bg2:#ddfff0;--panel:rgba(252,255,254,.92);--line:#c6f0dc;--text:#15372a;--muted:#58856e;--primary:#16b978;--primary2:#87f0bb;--card-bg:#fdfffe;--head-grad:linear-gradient(135deg,rgba(22,185,120,.22),rgba(135,240,187,.22));--result-bg:linear-gradient(180deg,#ffffff,#f1fff7);--accent-soft:rgba(22,185,120,.08);--table-head:#eafff2;--table-row:#fdfffe}
+    .theme-night{--bg:#101826;--bg2:#151f31;--panel:rgba(19,29,43,.88);--line:#2a3b56;--text:#ecf4ff;--muted:#9bb2ce;--primary:#4d8dff;--primary2:#61e0ff;--card-bg:#142135;--head-grad:linear-gradient(135deg,rgba(77,141,255,.28),rgba(97,224,255,.22));--result-bg:linear-gradient(180deg,#17253a,#132033);--accent-soft:rgba(77,141,255,.12);--table-head:#1a2a41;--table-row:#142135}
+    .theme-night .glass,.theme-night .subject-table-wrap,.theme-night .passport,.theme-night .info-item,.theme-night .summary-box{border-color:#2a3b56}
+    .theme-night th{color:#ecf4ff}
+    .theme-night td{color:#eaf2ff}
+    .theme-night .tag-pass{background:#143a2b;color:#9df0c4}.theme-night .tag-fail{background:#41202a;color:#ffb4c2}.theme-night .tag-pending{background:#4b3714;color:#ffd57b}
+    .theme-coral{--bg:#fff6f5;--bg2:#ffd9d1;--panel:rgba(255,251,250,.92);--line:#f1cdc4;--text:#51251d;--muted:#8a5b51;--primary:#e25c4a;--primary2:#ff9f8f;--card-bg:#fffdfc;--head-grad:linear-gradient(135deg,rgba(226,92,74,.22),rgba(255,159,143,.22));--result-bg:linear-gradient(180deg,#fffefe,#fff2ef);--accent-soft:rgba(226,92,74,.08);--table-head:#fff0ed;--table-row:#fffefd}
+    .theme-teal{--bg:#f1fffe;--bg2:#d8fbf8;--panel:rgba(252,255,255,.92);--line:#c6efec;--text:#133533;--muted:#587b79;--primary:#0aa6a6;--primary2:#79ece4;--card-bg:#fdffff;--head-grad:linear-gradient(135deg,rgba(10,166,166,.22),rgba(121,236,228,.22));--result-bg:linear-gradient(180deg,#ffffff,#f2fffe);--accent-soft:rgba(10,166,166,.08);--table-head:#eaffff;--table-row:#fdffff}
+    .theme-plum{--bg:#fff5ff;--bg2:#efd8f6;--panel:rgba(255,251,255,.92);--line:#e2c7ec;--text:#431f48;--muted:#7f5e85;--primary:#9b3db1;--primary2:#dd93ea;--card-bg:#fffdff;--head-grad:linear-gradient(135deg,rgba(155,61,177,.22),rgba(221,147,234,.22));--result-bg:linear-gradient(180deg,#fffefe,#fdf2ff);--accent-soft:rgba(155,61,177,.08);--table-head:#faecff;--table-row:#fffefe}
+    .theme-skyline{--bg:#eef6ff;--bg2:#d6e6ff;--panel:rgba(251,253,255,.92);--line:#c6d7f5;--text:#183153;--muted:#5f789d;--primary:#2b6de0;--primary2:#8fb2ff;--card-bg:#fcfdff;--head-grad:linear-gradient(135deg,rgba(43,109,224,.22),rgba(143,178,255,.22));--result-bg:linear-gradient(180deg,#ffffff,#f2f7ff);--accent-soft:rgba(43,109,224,.08);--table-head:#edf4ff;--table-row:#fcfdff}
+    .theme-amber{--bg:#fff9ef;--bg2:#ffe7ba;--panel:rgba(255,253,248,.92);--line:#f0d7a3;--text:#4d3411;--muted:#8f6d32;--primary:#d08900;--primary2:#ffc857;--card-bg:#fffefb;--head-grad:linear-gradient(135deg,rgba(208,137,0,.22),rgba(255,200,87,.22));--result-bg:linear-gradient(180deg,#ffffff,#fff7e8);--accent-soft:rgba(208,137,0,.08);--table-head:#fff4da;--table-row:#fffefb}
+    .theme-crimson{--bg:#fff3f5;--bg2:#ffd9df;--panel:rgba(255,250,251,.92);--line:#f3c8d1;--text:#4c1826;--muted:#8b5768;--primary:#c5395d;--primary2:#ff92ab;--card-bg:#fffdfd;--head-grad:linear-gradient(135deg,rgba(197,57,93,.22),rgba(255,146,171,.22));--result-bg:linear-gradient(180deg,#ffffff,#fff1f4);--accent-soft:rgba(197,57,93,.08);--table-head:#ffeef2;--table-row:#fffdfd}
+    .theme-cyan{--bg:#efffff;--bg2:#d6fbff;--panel:rgba(251,255,255,.92);--line:#c4eef5;--text:#143842;--muted:#5e8089;--primary:#00a5c8;--primary2:#7de8ff;--card-bg:#fdffff;--head-grad:linear-gradient(135deg,rgba(0,165,200,.22),rgba(125,232,255,.22));--result-bg:linear-gradient(180deg,#ffffff,#f1feff);--accent-soft:rgba(0,165,200,.08);--table-head:#e9fbff;--table-row:#fdffff}
+    .theme-earth{--bg:#faf7f1;--bg2:#efe6d9;--panel:rgba(255,252,248,.92);--line:#dfd2c0;--text:#453426;--muted:#7b6c5d;--primary:#8c6a47;--primary2:#c4a37f;--card-bg:#fffdf9;--head-grad:linear-gradient(135deg,rgba(140,106,71,.22),rgba(196,163,127,.22));--result-bg:linear-gradient(180deg,#ffffff,#f9f5ef);--accent-soft:rgba(140,106,71,.08);--table-head:#f5efe7;--table-row:#fffdf9}
+    .theme-neon{--bg:#f5f7ff;--bg2:#e3e6ff;--panel:rgba(255,255,255,.9);--line:#cfd6ff;--text:#1a1d42;--muted:#62679a;--primary:#5b4bff;--primary2:#00d8ff;--card-bg:#ffffff;--head-grad:linear-gradient(135deg,rgba(91,75,255,.26),rgba(0,216,255,.2));--result-bg:linear-gradient(180deg,#ffffff,#f4f8ff);--accent-soft:rgba(91,75,255,.08);--table-head:#eef2ff;--table-row:#ffffff}
+    .theme-classic{--bg:#f8f9fb;--bg2:#edf0f5;--panel:rgba(255,255,255,.94);--line:#d6dde8;--text:#182433;--muted:#647182;--primary:#284b7f;--primary2:#7ba6e8;--card-bg:#ffffff;--head-grad:linear-gradient(135deg,rgba(40,75,127,.2),rgba(123,166,232,.18));--result-bg:linear-gradient(180deg,#ffffff,#f7f9fc);--accent-soft:rgba(40,75,127,.07);--table-head:#f0f4f9;--table-row:#ffffff}
+    .theme-paper{--bg:#fcfbf7;--bg2:#f3efe3;--panel:rgba(255,255,251,.96);--line:#e3dcc8;--text:#30281f;--muted:#756b5f;--primary:#7e6b4d;--primary2:#c1aa7a;--card-bg:#fffef9;--head-grad:linear-gradient(135deg,rgba(126,107,77,.18),rgba(193,170,122,.18));--result-bg:linear-gradient(180deg,#fffefb,#faf7ef);--accent-soft:rgba(126,107,77,.06);--table-head:#f7f3e7;--table-row:#fffef9}
+    .theme-emerald{--bg:#f2fff7;--bg2:#dff8ea;--panel:rgba(252,255,253,.92);--line:#cbead7;--text:#163125;--muted:#5d816a;--primary:#149954;--primary2:#76e6ad;--card-bg:#fdfffe;--head-grad:linear-gradient(135deg,rgba(20,153,84,.22),rgba(118,230,173,.22));--result-bg:linear-gradient(180deg,#ffffff,#f1fff6);--accent-soft:rgba(20,153,84,.08);--table-head:#eafaf0;--table-row:#fdfffe}
+    .theme-noir{--bg:#111111;--bg2:#1d1d1d;--panel:rgba(24,24,24,.9);--line:#333333;--text:#f5f5f5;--muted:#b0b0b0;--primary:#d4af37;--primary2:#8a6b1f;--card-bg:#1a1a1a;--head-grad:linear-gradient(135deg,rgba(212,175,55,.18),rgba(138,107,31,.28));--result-bg:linear-gradient(180deg,#1d1d1d,#141414);--accent-soft:rgba(212,175,55,.08);--table-head:#232323;--table-row:#1a1a1a}
+    .theme-noir .glass,.theme-noir .subject-table-wrap,.theme-noir .passport,.theme-noir .info-item,.theme-noir .summary-box{border-color:#333333}
+    .theme-noir th{color:#f5f5f5}
+    .theme-noir td{color:#f0f0f0}
+    .theme-noir .tag-pass{background:#143a2b;color:#96e6b6}.theme-noir .tag-fail{background:#3b1f28;color:#ffb7c7}.theme-noir .tag-pending{background:#48360f;color:#ffd981}
     *{box-sizing:border-box;min-width:0}
     html,body{max-width:100%;overflow-x:hidden}
     body{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:
@@ -50,23 +83,26 @@
     .passport img{width:100%;height:100%;object-fit:cover}
     .pdf-export-mode [data-pdf-hide="true"]{display:none !important}
     .info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-    .info-item{padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.7);border:1px solid var(--line)}
+    .info-item{padding:12px 14px;border-radius:16px;background:color-mix(in srgb, var(--card-bg) 90%, transparent);border:1px solid var(--line)}
     .info-label{font-size:12px;text-transform:uppercase;color:#6b7e97;letter-spacing:.08em}
     .info-value{font-weight:800;margin-top:6px}
     .report-shell{display:grid;gap:18px}
-    .report-card{overflow:hidden}
-    .report-head{padding:24px;background:linear-gradient(135deg, rgba(77,91,255,.16), rgba(33,184,255,.14));border-bottom:1px solid var(--line)}
+    .report-card{overflow:hidden;background:var(--result-bg)}
+    .report-head{padding:24px;background:var(--head-grad);border-bottom:1px solid var(--line)}
     .report-title{font-size:1.7rem;font-weight:900;margin:0}
     .report-sub{margin-top:6px;color:#456281}
-    .subject-table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px;background:#fff;margin-top:18px}
+    .subject-table-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px;background:var(--card-bg);margin-top:18px}
     table{width:100%;border-collapse:collapse;min-width:640px}
     th,td{padding:12px;border-bottom:1px solid #edf2fa;text-align:left;font-size:14px}
-    th{background:#f7fbff}
+    th{background:var(--table-head)}
     .tag{display:inline-flex;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:900}
     .tag-pass{background:#e8fff5;color:#128053}.tag-fail{background:#fff0f3;color:#b83d5c}.tag-pending{background:#fff7e8;color:#b37212}
     .actions{display:flex;gap:10px;flex-wrap:wrap}
+    .design-toolbar{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;align-items:end}
+    .design-toolbar .field{margin:0}
+    .design-hint{font-size:13px;color:var(--muted)}
     .summary-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:18px}
-    .summary-box{padding:14px;border-radius:16px;background:rgba(255,255,255,.72);border:1px solid var(--line)}
+    .summary-box{padding:14px;border-radius:16px;background:color-mix(in srgb, var(--card-bg) 92%, transparent);border:1px solid var(--line)}
     .summary-label{font-size:12px;color:#637792;text-transform:uppercase;letter-spacing:.08em}
     .summary-value{font-size:1.2rem;font-weight:900;margin-top:6px}
     .signature-wrap{margin-top:20px;display:grid;grid-template-columns:1fr 180px;gap:18px;align-items:end}
@@ -196,6 +232,13 @@
           <div class="field"><label>Academic Session Filter</label><select id="sessionFilter"><option value="">All sessions</option></select></div>
           <div class="field"><label>Term Filter</label><select id="termFilter"><option value="">All terms</option></select></div>
         </div>
+        <div class="design-toolbar" style="margin-bottom:14px">
+          <div class="field">
+            <label>Result Design</label>
+            <select id="designPresetSelect"></select>
+          </div>
+          <div class="design-hint">Students can switch between 20 visual result designs. The selected design applies to the generated result and the downloaded PDF.</div>
+        </div>
         <div class="actions">
           <button class="btn btn-primary" id="loadResultBtn" type="button">Load Result</button>
           <button class="btn btn-soft" id="downloadPdfBtn" type="button">Download PDF</button>
@@ -317,6 +360,30 @@
     }
     function esc(v){ return String(v ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
 
+    const RESULT_DESIGNS = [
+      ['theme-default','Design 1 · Crystal Blue'],
+      ['theme-sunset','Design 2 · Sunset Glow'],
+      ['theme-forest','Design 3 · Forest Green'],
+      ['theme-royal','Design 4 · Royal Purple'],
+      ['theme-ocean','Design 5 · Ocean Wave'],
+      ['theme-gold','Design 6 · Golden Merit'],
+      ['theme-rose','Design 7 · Rose Bloom'],
+      ['theme-graphite','Design 8 · Graphite'],
+      ['theme-lavender','Design 9 · Lavender Light'],
+      ['theme-mint','Design 10 · Mint Fresh'],
+      ['theme-night','Design 11 · Night Glass'],
+      ['theme-coral','Design 12 · Coral Rise'],
+      ['theme-teal','Design 13 · Teal Calm'],
+      ['theme-plum','Design 14 · Plum Rich'],
+      ['theme-skyline','Design 15 · Skyline'],
+      ['theme-amber','Design 16 · Amber Shine'],
+      ['theme-crimson','Design 17 · Crimson Ink'],
+      ['theme-cyan','Design 18 · Cyan Mist'],
+      ['theme-earth','Design 19 · Earth Tone'],
+      ['theme-noir','Design 20 · Noir Gold']
+    ];
+    const RESULT_DESIGN_KEY = 'genz_result_design';
+
     function extractImageSource(raw){
       raw = String(raw || '').trim();
       if (!raw) return '';
@@ -324,20 +391,85 @@
       if (img && img[1]) raw = img[1];
       const css = raw.match(/url\((['"]?)(.*?)\1\)/i);
       if (css && css[2]) raw = css[2];
-      return String(raw || '').trim();
+      return String(raw || '').trim().replace(/^['"]|['"]$/g,'');
     }
 
-    function normalizeImageUrl(url){
-      const raw = extractImageSource(url);
+    function extractDriveFileId(raw){
+      raw = extractImageSource(raw);
       if (!raw) return '';
       let match = raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/i);
       if (!match) match = raw.match(/drive\.google\.com\/open\?id=([^&]+)/i);
+      if (!match) match = raw.match(/drive\.google\.com\/thumbnail\?[^#]*id=([a-zA-Z0-9_-]+)/i);
+      if (!match) match = raw.match(/drive\.google\.com\/uc\?(?:[^#]*&)?id=([a-zA-Z0-9_-]+)/i);
+      if (!match) match = raw.match(/drive\.usercontent\.google\.com\/download\?[^#]*id=([a-zA-Z0-9_-]+)/i);
       if (!match) match = raw.match(/[?&]id=([a-zA-Z0-9_-]+)/i);
-      if (!match) match = raw.match(/thumbnail\?[^#]*id=([a-zA-Z0-9_-]+)/i);
-      if (!match) match = raw.match(/\/uc\?export=(?:view|download)&id=([a-zA-Z0-9_-]+)/i);
       if (!match && /^[A-Za-z0-9_-]{20,}$/.test(raw)) match = [raw, raw];
-      if (match && match[1]) return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1600`;
-      return raw;
+      return match && match[1] ? match[1] : '';
+    }
+
+    function buildImageCandidates(raw){
+      const src = extractImageSource(raw);
+      if (!src) return [];
+      const fileId = extractDriveFileId(src);
+      const list = [];
+      if (fileId){
+        list.push(
+          `https://drive.google.com/thumbnail?id=${fileId}&sz=w1600`,
+          `https://drive.google.com/uc?export=view&id=${fileId}`,
+          `https://drive.google.com/uc?id=${fileId}`,
+          `https://drive.usercontent.google.com/download?id=${fileId}&export=view&authuser=0`
+        );
+      }
+      if (/dropbox\.com\//i.test(src)) list.push(src.replace(/\?dl=0/i,'?raw=1').replace(/\?dl=1/i,'?raw=1'));
+      if (/github\.com\//i.test(src) && /\/blob\//i.test(src)) list.push(src.replace('github.com/','raw.githubusercontent.com/').replace('/blob/','/'));
+      list.push(src);
+      return [...new Set(list.filter(Boolean))];
+    }
+
+    function normalizeImageUrl(url){
+      const candidates = buildImageCandidates(url);
+      return candidates[0] || '';
+    }
+
+    function setImageWithFallback(box, raw, alt='Image', contain=false, emptyText='No image'){
+      if (!box) return;
+      const candidates = buildImageCandidates(raw);
+      if (!candidates.length){
+        box.textContent = emptyText;
+        return;
+      }
+      let index = 0;
+      const img = new Image();
+      img.alt = alt;
+      img.style.width = '100%';
+      img.style.height = '100%';
+      img.style.objectFit = contain ? 'contain' : 'cover';
+      img.onload = () => { box.innerHTML = ''; box.appendChild(img); };
+      img.onerror = () => {
+        index += 1;
+        if (index < candidates.length) img.src = candidates[index];
+        else box.textContent = emptyText;
+      };
+      img.src = candidates[index];
+    }
+
+    function buildDesignOptions(){
+      const select = $('designPresetSelect');
+      if (!select) return;
+      select.innerHTML = RESULT_DESIGNS.map(([value,label]) => `<option value="${esc(value)}">${esc(label)}</option>`).join('');
+      const saved = localStorage.getItem(RESULT_DESIGN_KEY) || RESULT_DESIGNS[0][0];
+      select.value = RESULT_DESIGNS.some(([v]) => v === saved) ? saved : RESULT_DESIGNS[0][0];
+      applyResultDesign(select.value, false);
+    }
+
+    function applyResultDesign(themeName, remember=true){
+      const report = $('reportCapture');
+      if (!report) return;
+      RESULT_DESIGNS.forEach(([value]) => report.classList.remove(value));
+      const chosen = RESULT_DESIGNS.some(([value]) => value === themeName) ? themeName : RESULT_DESIGNS[0][0];
+      if (chosen !== 'theme-default') report.classList.add(chosen);
+      if ($('designPresetSelect') && $('designPresetSelect').value !== chosen) $('designPresetSelect').value = chosen;
+      if (remember) localStorage.setItem(RESULT_DESIGN_KEY, chosen);
     }
 
     async function apiRequest(action, payload={}, method='POST', loadingText='Loading...'){
@@ -434,7 +566,7 @@
 
     function renderStudentProfile(student){
       const passportBox = $('passportBox');
-      if (student.passportUrl) passportBox.innerHTML = `<img src="${esc(normalizeImageUrl(student.passportUrl))}" alt="Passport" />`;
+      if (student.passportUrl) setImageWithFallback(passportBox, student.passportUrl, 'Passport', false, 'No passport');
       else passportBox.textContent = 'No passport';
 
       const info = [
@@ -459,8 +591,8 @@
       $('schoolAddress').textContent = currentSettings.HEAD_OFFICE_ADDRESS || '';
       $('schoolPhone').textContent = currentSettings.SCHOOL_PHONE || '';
       $('schoolEmail').textContent = currentSettings.SCHOOL_EMAIL || '';
-      const logoUrl = normalizeImageUrl(currentSettings.BRAND_LOGO_URL || '');
-      $('brandLogoBox').innerHTML = logoUrl ? `<img src="${esc(logoUrl)}" alt="Logo" style="width:100%;height:100%;object-fit:contain" />` : 'LOGO';
+      if (currentSettings.BRAND_LOGO_URL) setImageWithFallback($('brandLogoBox'), currentSettings.BRAND_LOGO_URL, 'Logo', true, 'LOGO');
+      else $('brandLogoBox').textContent = 'LOGO';
 
       renderStudentProfile(resultData.student);
 
@@ -518,11 +650,15 @@
         </div>
       `).join('') : `<div class="muted">No remarks available.</div>`;
 
-      const signatureUrl = normalizeImageUrl(first.signatureUrl || currentSettings.SIGNATURE_URL || '');
+      const signatureRaw = first.signatureUrl || currentSettings.SIGNATURE_URL || '';
       const signatureName = currentSettings.SIGNATURE_NAME || 'Authorized Signatory';
-      $('signatureBox').innerHTML = signatureUrl
-        ? `<img src="${esc(signatureUrl)}" alt="Signature" /><div>${esc(signatureName)}</div>`
-        : `<div class="muted">No signature added</div><div>${esc(signatureName)}</div>`;
+      if (signatureRaw){
+        $('signatureBox').innerHTML = `<div class="muted" style="margin-bottom:8px">${esc(signatureName)}</div><div class="passport" style="width:160px;height:68px;margin:0 auto;background:transparent;border:none" id="signatureImageBox"></div>`;
+        setImageWithFallback($('signatureImageBox'), signatureRaw, 'Signature', true, 'No signature');
+      } else {
+        $('signatureBox').innerHTML = `<div class="muted">No signature added</div><div>${esc(signatureName)}</div>`;
+      }
+      applyResultDesign(localStorage.getItem(RESULT_DESIGN_KEY) || RESULT_DESIGNS[0][0], false);
     }
 
     async function loadResult(){
@@ -587,6 +723,7 @@
 
     $('loadResultBtn').addEventListener('click', loadResult);
     $('downloadPdfBtn').addEventListener('click', downloadPdf);
+    $('designPresetSelect').addEventListener('change', e => applyResultDesign(e.target.value));
     $('sessionFilter').addEventListener('change', () => { if (currentResults.length) renderReport({student:currentStudent,results:currentResults,settings:currentSettings,examCode: currentResults[0]?.examCode, sessions:[...new Set(currentResults.map(r=>r.academicSession))], terms:[...new Set(currentResults.map(r=>r.term))]}); });
     $('termFilter').addEventListener('change', () => { if (currentResults.length) renderReport({student:currentStudent,results:currentResults,settings:currentSettings,examCode: currentResults[0]?.examCode, sessions:[...new Set(currentResults.map(r=>r.academicSession))], terms:[...new Set(currentResults.map(r=>r.term))]}); });
 
@@ -638,6 +775,7 @@
 
     (async function init(){
       setAuthTab('login');
+      buildDesignOptions();
       await loadPublicBootstrap();
       const ok = await validateSavedSession();
       if (ok){

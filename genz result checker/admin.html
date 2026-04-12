@@ -681,20 +681,42 @@
       if (img && img[1]) raw = img[1];
       const css = raw.match(/url\((['"]?)(.*?)\1\)/i);
       if (css && css[2]) raw = css[2];
-      return String(raw || '').trim();
+      return String(raw || '').trim().replace(/^['"]|['"]$/g,'');
     }
 
-    function normalizeImageUrl(url){
-      const raw = extractImageSource(url);
+    function extractDriveFileId(raw){
+      raw = extractImageSource(raw);
       if (!raw) return '';
       let match = raw.match(/\/file\/d\/([a-zA-Z0-9_-]+)/i);
       if (!match) match = raw.match(/drive\.google\.com\/open\?id=([^&]+)/i);
+      if (!match) match = raw.match(/drive\.google\.com\/thumbnail\?[^#]*id=([a-zA-Z0-9_-]+)/i);
+      if (!match) match = raw.match(/drive\.google\.com\/uc\?(?:[^#]*&)?id=([a-zA-Z0-9_-]+)/i);
+      if (!match) match = raw.match(/drive\.usercontent\.google\.com\/download\?[^#]*id=([a-zA-Z0-9_-]+)/i);
       if (!match) match = raw.match(/[?&]id=([a-zA-Z0-9_-]+)/i);
-      if (!match) match = raw.match(/thumbnail\?[^#]*id=([a-zA-Z0-9_-]+)/i);
-      if (!match) match = raw.match(/\/uc\?export=(?:view|download)&id=([a-zA-Z0-9_-]+)/i);
       if (!match && /^[A-Za-z0-9_-]{20,}$/.test(raw)) match = [raw, raw];
-      if (match && match[1]) return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1600`;
-      return raw;
+      return match && match[1] ? match[1] : '';
+    }
+
+    function buildImageCandidates(raw){
+      const src = extractImageSource(raw);
+      if (!src) return [];
+      const fileId = extractDriveFileId(src);
+      const list = [];
+      if (fileId){
+        list.push(
+          `https://drive.google.com/thumbnail?id=${fileId}&sz=w1600`,
+          `https://drive.google.com/uc?export=view&id=${fileId}`,
+          `https://drive.google.com/uc?id=${fileId}`,
+          `https://drive.usercontent.google.com/download?id=${fileId}&export=view&authuser=0`
+        );
+      }
+      list.push(src);
+      return [...new Set(list.filter(Boolean))];
+    }
+
+    function normalizeImageUrl(url){
+      const candidates = buildImageCandidates(url);
+      return candidates[0] || '';
     }
 
     function updateStudentSelectionInfo(){
@@ -1098,18 +1120,31 @@
       if (window.innerWidth <= 980) $('sidebar').classList.remove('open');
     }
 
+    function renderImageWithFallback(box, url, label){
+      if (!box) return;
+      const candidates = buildImageCandidates(url);
+      if (!candidates.length){
+        box.textContent = 'No image';
+        return;
+      }
+      let idx = 0;
+      const img = new Image();
+      img.alt = label || 'Image';
+      img.onload = () => { box.innerHTML = ''; box.appendChild(img); };
+      img.onerror = () => {
+        idx += 1;
+        if (idx < candidates.length) img.src = candidates[idx];
+        else box.textContent = 'No image';
+      };
+      img.src = candidates[idx];
+    }
+
     function previewPassport(url){
-      const box = $('passportPreview');
-      const finalUrl = normalizeImageUrl(url);
-      if (finalUrl && /^https?:\/\//i.test(finalUrl.trim())) box.innerHTML = `<img src="${esc(finalUrl)}" alt="Passport" />`;
-      else box.textContent = 'No image';
+      renderImageWithFallback($('passportPreview'), url, 'Passport');
     }
 
     function previewGenericImage(url, previewId, label){
-      const box = $(previewId);
-      const finalUrl = normalizeImageUrl(url);
-      if (finalUrl && /^https?:\/\//i.test(finalUrl.trim())) box.innerHTML = `<img src="${esc(finalUrl)}" alt="${esc(label || 'Image')}" />`;
-      else box.textContent = 'No image';
+      renderImageWithFallback($(previewId), url, label);
     }
 
     async function uploadBrandingAsset(settingKey, fileInputId, inputId, previewId, statusId, loadingText){

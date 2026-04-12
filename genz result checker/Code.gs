@@ -1407,8 +1407,15 @@ function normalizeImageUrl_(url) {
   if (imgMatch && imgMatch[1]) url = sanitizeValue_(imgMatch[1]);
   var cssMatch = url.match(/url\((['"]?)(.*?)\1\)/i);
   if (cssMatch && cssMatch[2]) url = sanitizeValue_(cssMatch[2]);
+  url = url.replace(/^['"]|['"]$/g, '');
   var match = extractDriveFileId_(url);
   if (match) return 'https://drive.google.com/thumbnail?id=' + match + '&sz=w1600';
+  if (/dropbox\.com\//i.test(url)) {
+    return url.replace(/\?dl=0/i, '?raw=1').replace(/\?dl=1/i, '?raw=1');
+  }
+  if (/github\.com\//i.test(url) && /\/blob\//i.test(url)) {
+    return url.replace('github.com/', 'raw.githubusercontent.com/').replace('/blob/', '/');
+  }
   return url;
 }
 
@@ -1440,9 +1447,13 @@ function safeName_(value) {
 }
 
 function getRootStorageFolder_() {
-  var folderName = 'Genz Result Checker Storage';
-  var iter = DriveApp.getFoldersByName(folderName);
-  return iter.hasNext() ? iter.next() : DriveApp.createFolder(folderName);
+  try {
+    var folderName = 'Genz Result Checker Storage';
+    var iter = DriveApp.getFoldersByName(folderName);
+    return iter.hasNext() ? iter.next() : DriveApp.createFolder(folderName);
+  } catch (err) {
+    throw new Error('Drive permission is not active yet. Replace appsscript.json, save the project, authorize Drive access when prompted, then redeploy the web app.');
+  }
 }
 
 function getNestedFolder_(parts) {

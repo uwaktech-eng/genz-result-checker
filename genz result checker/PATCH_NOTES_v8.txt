@@ -1,0 +1,18 @@
+Replace:
+- Code.gs
+- admin.html
+- student.html
+- appsscript.json
+
+What changed:
+- clearer Drive authorization error for passport upload
+- stronger image URL normalization and preview for passport/brand/signature
+- dropdown visibility fix kept
+- 20 selectable result designs for generated result and PDF
+- student result now uses image fallback chains for Drive and common image hosts
+
+After replacing:
+1. Save the Apps Script project
+2. Accept/reauthorize Drive permission if prompted
+3. Redeploy the web app
+4. Hard refresh the browser
