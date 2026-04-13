@@ -914,21 +914,22 @@ function loadStudentExamCodes_(payload) {
 function loadStudentResults_(payload) {
   var session = requireSession_(payload.token, 'student', sanitizeValue_(payload.clientId));
   var examCode = sanitizeValue_(payload.examCode);
-  if (!examCode) throw new Error('Exam code is required.');
   var academicSession = sanitizeValue_(payload.academicSession);
   var term = sanitizeValue_(payload.term);
   var student = cleanStudent_(getStudentByRegId_(session.id));
   if (!student) throw new Error('Student account not found.');
   var results = getSheetObjects_(getSpreadsheet_().getSheetByName(SHEET_NAMES.RESULTS)).map(cleanResult_).map(function(r){ r.classLevel = student.classLevel || ''; return r; }).filter(function(r) {
     return r.regId === session.id &&
-      r.examCode.toLowerCase() === examCode.toLowerCase() &&
+      (!examCode || r.examCode.toLowerCase() === examCode.toLowerCase()) &&
       r.published && r.viewActive && !r.archived && !r.deleted &&
       (!academicSession || r.academicSession === academicSession) &&
       (!term || r.term === term);
   });
-  if (!results.length) throw new Error('No published result was found for that exam code.');
-  return ok_('Result loaded successfully.', {
-    examCode: examCode,
+  if (!results.length) {
+    throw new Error(examCode ? 'No published result was found for that exam code.' : 'No published result is currently available for your account.');
+  }
+  return ok_(examCode ? 'Result loaded successfully.' : 'All published results loaded successfully.', {
+    examCode: examCode || '',
     student: student,
     settings: getSettings_(),
     results: results,

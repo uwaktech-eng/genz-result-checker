@@ -110,11 +110,6 @@
     .report-title{font-size:1.7rem;font-weight:900;margin:0}
     .report-sub{margin-top:6px;color:#456281}
     .subject-table-wrap{overflow:auto;border:1px solid rgba(203,218,240,.9);border-radius:22px;background:rgba(255,255,255,.95);margin-top:18px;box-shadow:0 16px 34px rgba(44,71,120,.08)}
-
-    .row-check{width:18px;height:18px;accent-color:#2563eb;cursor:pointer}
-    .selection-note{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px 0;color:#5d728f;font-size:13px}
-    .selection-note strong{color:#1b3152}
-    .selection-empty{padding:14px 16px 0;color:#b45309;font-size:13px;font-weight:700}
     table{width:100%;border-collapse:collapse;min-width:640px}
     th,td{padding:12px;border-bottom:1px solid #edf2fa;text-align:left;font-size:14px}
     th{background:linear-gradient(180deg,#f5f9ff,#edf5ff);font-size:12px;text-transform:uppercase;letter-spacing:.06em}
@@ -138,6 +133,23 @@
     .signature-wrap{margin-top:20px;display:grid;grid-template-columns:1fr 180px;gap:18px;align-items:end}
     .signature-box{border-top:1px solid #c5d3e6;padding-top:8px;text-align:center;background:rgba(255,255,255,.76);padding:14px;border-radius:18px}
     .signature-box img{max-width:160px;max-height:60px;display:block;margin:0 auto 8px}
+    .subject-pick-shell{padding:4px 0 2px}
+    .subject-pick-toolbar{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}
+    .subject-pick-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .subject-pill-count{padding:10px 14px;border-radius:999px;background:linear-gradient(135deg,rgba(77,91,255,.10),rgba(33,184,255,.12));border:1px solid rgba(77,91,255,.16);color:#1b3b63;font-size:12px;font-weight:900;letter-spacing:.04em;text-transform:uppercase}
+    .subject-pill-grid{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+    .subject-pill{position:relative;display:inline-flex;cursor:pointer}
+    .subject-pill input{position:absolute;opacity:0;pointer-events:none}
+    .subject-pill span{display:inline-flex;align-items:center;gap:10px;padding:12px 15px;border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.86),rgba(245,249,255,.96));border:1px solid rgba(214,226,244,.96);box-shadow:0 12px 24px rgba(44,71,120,.06);color:#173459;font-weight:800;transition:.18s ease}
+    .subject-pill small{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;padding:0 8px;border-radius:999px;background:rgba(23,52,89,.07);color:#506784;font-size:11px;font-weight:900}
+    .subject-pill input:checked + span{background:linear-gradient(135deg,rgba(77,91,255,.95),rgba(33,184,255,.92));border-color:transparent;color:#fff;box-shadow:0 16px 30px rgba(55,81,159,.20)}
+    .subject-pill input:checked + span small{background:rgba(255,255,255,.18);color:#fff}
+    .selection-spotlight{margin-top:18px;padding:16px 18px;border-radius:22px;background:linear-gradient(135deg,rgba(77,91,255,.12),rgba(33,184,255,.10));border:1px solid rgba(160,190,245,.35);display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap;box-shadow:0 16px 30px rgba(44,71,120,.06)}
+    .selection-spotlight strong{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#5f7493;margin-bottom:7px}
+    .selection-spotlight .big{font-size:1.12rem;font-weight:900;color:#142646}
+    .selection-spotlight .sub{margin-top:6px;color:#5b718f;font-size:13px}
+    .selection-pill{display:inline-flex;align-items:center;gap:8px;padding:11px 15px;border-radius:999px;background:rgba(255,255,255,.88);border:1px solid rgba(255,255,255,.98);color:#173459;font-weight:900;box-shadow:0 10px 22px rgba(44,71,120,.08)}
+    .subject-empty{padding:18px;border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.88),rgba(246,249,255,.96));border:1px dashed rgba(170,188,218,.9);color:#58708f;text-align:center}
     .overlay{position:fixed;inset:0;background:rgba(7,16,29,.58);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(8px)}
     .overlay.show{display:flex}
     .loader-box{padding:24px;width:min(90vw,360px);text-align:center}
@@ -147,6 +159,7 @@
     @keyframes spin{to{transform:rotate(360deg)}}
     @media (max-width:980px){
       .auth-grid,.grid-2,.grid-3,.summary-strip,.info-grid,.signature-wrap,.profile-grid,.result-design-row,.result-footer,.performance-banner,.report-head-grid{grid-template-columns:1fr}
+      .subject-pick-toolbar,.selection-spotlight{flex-direction:column;align-items:stretch}
       .wrap{padding:16px}
       table{min-width:560px}
     }
@@ -183,7 +196,7 @@
 
         <form id="loginForm">
           <h2 style="margin:0 0 10px">Sign in</h2>
-          <p class="muted">Log in first, then enter the <strong>exam code</strong> given by the admin to view and download your published result.</p>
+          <p class="muted">Log in first, then optionally enter a specific <strong>exam code</strong>. Leave it blank to view and download <strong>all published results</strong> available to your account.</p>
           <div class="grid grid-2">
             <div class="field"><label>Registration ID</label><input name="regId" required /></div>
             <div class="field"><label>Password</label><input type="password" name="password" required /></div>
@@ -241,7 +254,7 @@
 
       <div class="glass card">
         <h2 style="margin:0 0 10px">How result access works</h2>
-        <div class="inline-note" id="portalNote">After login, enter the exam code given by the admin. You will only see results that are both <strong>published</strong> and <strong>activated for view</strong>.</div>
+        <div class="inline-note" id="portalNote">After login, you may enter a specific exam code to load only that result. Leave the exam code blank to load every result that is both <strong>published</strong> and <strong>activated for view</strong> for your account.</div>
         <div class="grid" style="margin-top:16px">
           <div class="glass card" style="padding:16px">
             <strong>Download as PDF</strong>
@@ -249,7 +262,7 @@
           </div>
           <div class="glass card" style="padding:16px">
             <strong>History filters</strong>
-            <p class="muted">If multiple terms or sessions exist under the same exam code, you can filter the loaded report.</p>
+            <p class="muted">Use the filters to narrow the loaded results by academic session or term after the records appear.</p>
           </div>
         </div>
       </div>
@@ -259,7 +272,7 @@
       <div class="glass card print-hide">
         <div class="result-design-row">
           <div class="grid grid-3">
-            <div class="field"><label>Exam Code</label><input id="examCodeInput" placeholder="Enter the exam code given by the admin" /></div>
+            <div class="field"><label>Exam Code <span class="muted">(optional)</span></label><input id="examCodeInput" placeholder="Leave blank to load all published results, or enter one exam code" /></div>
             <div class="field"><label>Academic Session Filter</label><select id="sessionFilter"><option value="">All sessions</option></select></div>
             <div class="field"><label>Term Filter</label><select id="termFilter"><option value="">All terms</option></select></div>
           </div>
@@ -272,13 +285,23 @@
         <div class="status" id="resultLoadStatus"></div>
       </div>
 
-      <div class="glass card print-hide">
-        <div class="toolbar">
-          <h2 style="margin:0 0 10px">Available exam codes</h2>
-          <div class="muted">Only exam codes activated by the admin will appear here after login.</div>
+      <div class="glass card print-hide" id="subjectSelectionCard">
+        <div class="subject-pick-shell">
+          <div class="subject-pick-toolbar">
+            <div>
+              <h2 style="margin:0 0 8px">Bulk report card subject selection</h2>
+              <div class="muted">Select one or more subjects. Your on-screen generated result and downloaded PDF will follow the subjects you choose here.</div>
+            </div>
+            <div class="subject-pick-actions">
+              <button class="btn btn-soft" id="selectAllSubjectsBtn" type="button">Select All</button>
+              <button class="btn btn-soft" id="clearSelectedSubjectsBtn" type="button">Clear</button>
+              <div class="subject-pill-count" id="selectedSubjectCount">No result loaded yet</div>
+            </div>
+          </div>
+          <div class="subject-pill-grid" id="subjectSelectionList"><div class="muted">Load a result first to choose subjects for the bulk report card.</div></div>
         </div>
-        <div class="actions" id="examCodeChips"></div>
       </div>
+
 
       <div class="glass card report-card" id="reportCapture">
         <div class="report-head">
@@ -327,19 +350,18 @@
 
           <div class="summary-strip" id="summaryStrip"></div>
           <div class="performance-banner" id="performanceBanner"></div>
+          <div class="selection-spotlight" id="selectionSpotlight"></div>
 
           <div class="subject-table-wrap">
             <div class="table-card-title" style="padding:16px 16px 0">
               <div>
                 <div class="table-title">Detailed Subject Breakdown</div>
-                <div class="table-subtitle">Tick the published result rows you want to include in the onscreen report card and downloaded PDF.</div>
+                <div class="table-subtitle">Scores, grades, ranking, and publication status for each subject entry.</div>
               </div>
             </div>
-            <div class="selection-note" id="selectionNote"><span><strong>Selected report rows:</strong> waiting for result load</span><span>Only checked rows go into the report card PDF.</span></div>
             <table>
               <thead>
                 <tr>
-                  <th>Include</th>
                   <th>Exam Code</th>
                   <th>Class</th>
                   <th>Subject</th>
@@ -353,7 +375,6 @@
               </thead>
               <tbody id="resultTableBody"></tbody>
             </table>
-            <div class="selection-empty hidden" id="selectionEmpty">No subject row is currently checked for the report card.</div>
           </div>
 
           <div class="grid grid-2" style="margin-top:18px">
@@ -393,9 +414,8 @@
     let currentResults = [];
     let currentSettings = {};
     let currentDesign = 'royal';
-    let currentRenderNonce = 0;
-    let currentSelectionKeys = new Set();
-    let currentSelectionSource = '';
+    let selectedSubjects = [];
+    let subjectSelectionTouched = false;
     const RESULT_DESIGNS = ['royal','emerald','sunset','violet','carbon','rose','ocean','gold','forest','candy','royal-2','emerald-2','sunset-2','violet-2','carbon-2','rose-2','ocean-2','gold-2','forest-2','candy-2'];
 
     const $ = id => document.getElementById(id);
@@ -539,7 +559,7 @@
       publicData = res.data;
       currentSettings = res.data.settings || {};
       $('brandHeader').textContent = currentSettings.BRAND_NAME || 'Genz Edutech Innovations';
-      $('portalNote').innerHTML = currentSettings.PORTAL_NOTICE || 'Use your exam code to load results.';
+      $('portalNote').innerHTML = currentSettings.PORTAL_NOTICE || 'Enter a specific exam code to load just that result, or leave the exam code blank to load all published results for your account.';
       applyFavicon(currentSettings.FAVICON_URL || currentSettings.BRAND_LOGO_URL || '');
       if ($('signupClassLevel')) $('signupClassLevel').placeholder = 'e.g. Year 5 / JSS 1 / Undergraduate';
       if ($('signupCategory') && (publicData.categoryOptions || []).length){ fillOptions($('signupCategory'), publicData.categoryOptions || [], 'Select category'); }
@@ -560,19 +580,10 @@
       }
     }
 
-    async function loadAvailableExamCodes(){
-      const res = await apiRequest('loadStudentExamCodes', {}, 'GET', 'Loading available exam codes...');
-      $('examCodeChips').innerHTML = res.data.length
-        ? res.data.map(item => `<button class="btn btn-soft" type="button" onclick="pickExamCode('${esc(item.examCode)}')">${esc(item.examCode)} • ${esc(item.term || '')}</button>`).join('')
-        : `<div class="muted">No active exam code has been assigned to your account yet.</div>`;
-    }
-
-    window.pickExamCode = function(code){
-      $('examCodeInput').value = code;
-    }
-
-    function renderStudentProfile(student, options={}){
-      forceImageIntoBox('passportBox', student.passportUrl || '', 'Passport', 'No passport', { fit:'cover', renderNonce: options.renderNonce || currentRenderNonce });
+    function renderStudentProfile(student){
+      const passportBox = $('passportBox');
+      if (student.passportUrl) passportBox.innerHTML = `<img src="${esc(normalizeImageUrl(student.passportUrl))}" alt="Passport" crossorigin="anonymous" referrerpolicy="no-referrer" />`;
+      else passportBox.textContent = 'No passport';
 
       const fieldValues = {
         fullName: student.fullName, regId: student.regId, classLevel: student.classLevel, category: student.category, schoolName: student.schoolName,
@@ -598,91 +609,74 @@
       return Number.isFinite(num) ? num : 0;
     }
 
-    function resultRowKey(row){
-      return [row.examCode, row.academicSession, row.term, row.subject, row.publishedAt, row.studentScore, row.maxScore, row.grade].map(v => String(v || '').trim().toLowerCase()).join('||');
+    function normalizeSubjectKey(value){
+      return String(value || '').trim().toLowerCase();
     }
 
-    function getSelectedReportRows(filtered){
-      const rows = Array.isArray(filtered) ? filtered : getFilteredResults();
-      return rows.filter(r => currentSelectionKeys.has(resultRowKey(r)));
-    }
-
-    function syncSelectionForResults(results, resetSelection){
-      const rows = Array.isArray(results) ? results : [];
-      const sourceKey = rows.map(resultRowKey).join('@@');
-      if (resetSelection || sourceKey !== currentSelectionSource) {
-        currentSelectionSource = sourceKey;
-        currentSelectionKeys = new Set(rows.map(resultRowKey));
-      }
-    }
-
-    function updateSelectionUi(filtered){
-      const selectedRows = getSelectedReportRows(filtered);
-      const total = Array.isArray(filtered) ? filtered.length : 0;
-      const note = $('selectionNote');
-      if (note) note.innerHTML = `<span><strong>Selected report rows:</strong> ${selectedRows.length} of ${total}</span><span>Only checked rows go into the report card PDF.</span>`;
-      $('selectionEmpty').classList.toggle('hidden', selectedRows.length > 0 || total === 0);
-    }
-
-    async function canDisplayImage(url){
-      const src = String(url || '').trim();
-      if (!src) return false;
-      if (/^data:image\//i.test(src)) return true;
-      return await new Promise(resolve => {
-        try {
-          const img = new Image();
-          let done = false;
-          const finish = ok => { if (done) return; done = true; resolve(!!ok); };
-          img.crossOrigin = 'anonymous';
-          img.referrerPolicy = 'no-referrer';
-          img.onload = () => finish((img.naturalWidth || img.width || 0) > 0);
-          img.onerror = () => finish(false);
-          img.src = src + (src.includes('?') ? '&' : '?') + '_viewimg=' + Date.now();
-          setTimeout(() => finish(false), 2500);
-        } catch (err) { resolve(false); }
+    function getSubjectOptions(rows){
+      const list = [];
+      const counts = new Map();
+      (rows || []).forEach(row => {
+        const label = String(row && row.subject || '').trim();
+        if (!label) return;
+        const key = normalizeSubjectKey(label);
+        counts.set(key, (counts.get(key) || 0) + 1);
+        if (!list.find(item => item.key === key)) list.push({ key, label });
       });
+      return list.map(item => ({ ...item, count: counts.get(item.key) || 0 }));
     }
 
-    async function resolveDisplayImageUrl(url){
-      const raw = normalizeImageUrl(url || '');
-      if (!raw) return '';
-      if (displayImageCache[raw]) return displayImageCache[raw];
-      for (const candidate of publicImageCandidates(raw)) {
-        if (await canDisplayImage(candidate)) {
-          displayImageCache[raw] = candidate;
-          return candidate;
-        }
+    function syncSelectedSubjects(options, forceAll=false){
+      const keys = (options || []).map(item => item.key);
+      if (forceAll){
+        subjectSelectionTouched = true;
+        selectedSubjects = [...keys];
+        return;
       }
-      const fallbackData = await fetchImageDataUrlFromBackend(raw);
-      if (fallbackData) {
-        displayImageCache[raw] = fallbackData;
-        return fallbackData;
+      if (!subjectSelectionTouched){
+        selectedSubjects = [...keys];
+        return;
       }
-      return '';
+      selectedSubjects = (selectedSubjects || []).filter(key => keys.includes(key));
     }
 
-    async function forceImageIntoBox(boxId, url, alt, fallbackText, options={}){
-      const el = typeof boxId === 'string' ? $(boxId) : boxId;
-      if (!el) return '';
-      const renderNonce = options.renderNonce || currentRenderNonce;
-      if (options.initials && !url) { el.textContent = options.initials; return ''; }
-      if (fallbackText) el.textContent = fallbackText;
-      const src = await resolveDisplayImageUrl(url || '');
-      if (renderNonce !== currentRenderNonce) return '';
-      if (src) {
-        const fit = options.fit || 'cover';
-        el.innerHTML = `<img src="${esc(src)}" alt="${esc(alt || '')}" crossorigin="anonymous" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:${fit}" />`;
-        return src;
-      }
-      if (options.initials) el.textContent = options.initials;
-      else if (fallbackText) el.textContent = fallbackText;
-      return '';
-    }
-
-    function getFilteredResults(){
+    function getBaseFilteredResults(){
       const loadedSession = $('sessionFilter').value;
       const loadedTerm = $('termFilter').value;
       return currentResults.filter(r => (!loadedSession || r.academicSession === loadedSession) && (!loadedTerm || r.term === loadedTerm));
+    }
+
+    function getSelectedRows(baseRows){
+      const rows = Array.isArray(baseRows) ? baseRows : getBaseFilteredResults();
+      const options = getSubjectOptions(rows);
+      if (!options.length) return [];
+      syncSelectedSubjects(options, false);
+      const allow = new Set(selectedSubjects || []);
+      if (!allow.size) return [];
+      return rows.filter(r => allow.has(normalizeSubjectKey(r.subject)));
+    }
+
+    function renderSubjectSelection(rows){
+      const list = $('subjectSelectionList');
+      const countBox = $('selectedSubjectCount');
+      const options = getSubjectOptions(rows);
+      if (!options.length){
+        list.innerHTML = `<div class="subject-empty">Load a result first to choose one or more subjects for your bulk report card.</div>`;
+        countBox.textContent = 'No subject loaded yet';
+        return;
+      }
+      syncSelectedSubjects(options, false);
+      countBox.textContent = `${selectedSubjects.length} of ${options.length} subject(s) selected`;
+      list.innerHTML = options.map(item => `
+        <label class="subject-pill">
+          <input type="checkbox" data-subject-key="${esc(item.key)}" ${selectedSubjects.includes(item.key) ? 'checked' : ''} />
+          <span>${esc(item.label)} <small>${esc(item.count)}</small></span>
+        </label>
+      `).join('');
+    }
+
+    function getFilteredResults(){
+      return getSelectedRows(getBaseFilteredResults());
     }
 
     function initialsFromText(text){
@@ -813,10 +807,27 @@
     }
 
     async function preparePdfImage(url){
-      const raw = String(url || '').trim();
-      if (/^data:image\//i.test(raw)) return raw;
-      const dataUrl = await fetchImageDataUrl(raw);
+      const dataUrl = await fetchImageDataUrl(url || '');
       return String(dataUrl || '').trim();
+    }
+
+    async function getRenderedImageDataUrl(boxId){
+      const box = $(boxId);
+      const img = box ? box.querySelector('img') : null;
+      if (!img) return '';
+      await ensureImagesReady(box);
+      try{
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth || img.width || 1;
+        canvas.height = img.naturalHeight || img.height || 1;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+        const dataUrl = canvas.toDataURL('image/png');
+        if (String(dataUrl || '').startsWith('data:image/')) return dataUrl;
+      }catch(err){}
+      const src = img.currentSrc || img.src || '';
+      if (!src) return '';
+      return await fetchCandidateAsDataUrl(src) || await fetchImageDataUrlFromBackend(src);
     }
 
     function detectImageFormatFromDataUrl(dataUrl){
@@ -849,12 +860,10 @@
       return { x: dx, y: dy, w: drawW, h: drawH };
     }
 
-    function renderReport(resultData, options={}){
-      currentRenderNonce += 1;
+    function renderReport(resultData){
       currentStudent = resultData.student;
       currentResults = resultData.results || [];
       currentSettings = resultData.settings || currentSettings;
-      syncSelectionForResults(currentResults, !!options.resetSelection);
 
       applyResultDesign($('resultDesignSelect').value || currentDesign);
       applyFavicon(currentSettings.FAVICON_URL || currentSettings.BRAND_LOGO_URL || '');
@@ -863,9 +872,10 @@
       $('schoolAddress').textContent = currentSettings.HEAD_OFFICE_ADDRESS || '';
       $('schoolPhone').textContent = currentSettings.SCHOOL_PHONE || '';
       $('schoolEmail').textContent = currentSettings.SCHOOL_EMAIL || '';
-      forceImageIntoBox('brandLogoBox', currentSettings.BRAND_LOGO_URL || '', 'Logo', '', { fit:'contain', initials: initialsFromText(currentSettings.BRAND_NAME || 'Logo'), renderNonce: currentRenderNonce });
+      const logoUrl = normalizeImageUrl(currentSettings.BRAND_LOGO_URL || '');
+      $('brandLogoBox').innerHTML = logoUrl ? `<img src="${esc(logoUrl)}" alt="Logo" crossorigin="anonymous" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:contain" />` : initialsFromText(currentSettings.BRAND_NAME || 'Logo');
 
-      renderStudentProfile(resultData.student, { renderNonce: currentRenderNonce });
+      renderStudentProfile(resultData.student);
 
       const prevSession = $('sessionFilter').value;
       const prevTerm = $('termFilter').value;
@@ -876,49 +886,56 @@
       if (prevSession && sessions.includes(prevSession)) $('sessionFilter').value = prevSession;
       if (prevTerm && terms.includes(prevTerm)) $('termFilter').value = prevTerm;
 
-      const filtered = getFilteredResults();
-      updateSelectionUi(filtered);
-      const selectedRows = getSelectedReportRows(filtered);
-      const rowsForReport = selectedRows.length ? selectedRows : [];
-      const first = rowsForReport[0] || filtered[0] || currentResults[0] || {};
-      const totalSubjects = rowsForReport.length;
-      const passed = rowsForReport.filter(r => String(r.resultStatus).toUpperCase() === 'PASS').length;
-      const failed = rowsForReport.filter(r => String(r.resultStatus).toUpperCase() === 'FAIL').length;
-      const avg = totalSubjects ? (rowsForReport.reduce((sum,r)=> sum + safeNumber(r.percentage), 0) / totalSubjects).toFixed(2) : '0.00';
-      const best = rowsForReport.slice().sort((a,b)=> safeNumber(b.percentage) - safeNumber(a.percentage))[0];
+      const baseRows = getBaseFilteredResults();
+      renderSubjectSelection(baseRows);
+      const filtered = getSelectedRows(baseRows);
+      const first = filtered[0] || baseRows[0] || currentResults[0] || {};
+      const totalSubjects = filtered.length;
+      const totalAvailable = baseRows.length;
+      const passed = filtered.filter(r => String(r.resultStatus).toUpperCase() === 'PASS').length;
+      const failed = filtered.filter(r => String(r.resultStatus).toUpperCase() === 'FAIL').length;
+      const avg = totalSubjects ? (filtered.reduce((sum,r)=> sum + safeNumber(r.percentage), 0) / totalSubjects).toFixed(2) : '0.00';
+      const best = filtered.slice().sort((a,b)=> safeNumber(b.percentage) - safeNumber(a.percentage))[0];
       const publishedDate = first?.publishedAt || '—';
       const statusText = resultData.student.deleted ? 'Deleted Record' : resultData.student.archived ? 'Archived Record' : (resultData.student.active ? 'Active Record' : 'Inactive Record');
-      const badgeTerm = (first?.term || filtered[0]?.term || currentResults[0]?.term || 'Result');
+      const badgeTerm = (first?.term || currentResults[0]?.term || 'Result');
+      const selectionSummary = totalAvailable ? `${totalSubjects} of ${totalAvailable} subject(s) selected` : 'No subject loaded yet';
 
       $('summaryStrip').innerHTML = [
-        ['Exam Code', resultData.examCode || '—'],
+        ['Exam Code', resultData.examCode || 'All Published Results'],
         ['Class', resultData.student.classLevel || '—'],
-        ['Subjects', totalSubjects],
-        ['Average %', avg],
-        ['Published', formatDisplayDate(publishedDate)]
+        ['Selected Subjects', totalSubjects],
+        ['Loaded Subjects', totalAvailable],
+        ['Average %', avg]
       ].map(item => `<div class="summary-box"><div class="summary-label">${esc(item[0])}</div><div class="summary-value">${esc(item[1])}</div></div>`).join('');
 
       $('performanceBanner').innerHTML = [
-        ['Pass Performance', `${passed}/${totalSubjects || 0}`, `${failed} subject(s) below pass mark`],
-        ['Best Subject', best ? `${best.subject || '—'} • ${best.percentage || '0'}%` : '—', best ? `${best.grade || 'No grade'} grade obtained` : 'No record yet'],
+        ['Pass Performance', `${passed}/${totalSubjects || 0}`, `${failed} selected subject(s) below pass mark`],
+        ['Best Subject', best ? `${best.subject || '—'} • ${best.percentage || '0'}%` : '—', best ? `${best.grade || 'No grade'} grade obtained` : 'Select subject(s) to preview best result'],
         ['Verification', first?.academicSession || 'Official Record', `${badgeTerm} • ${formatDisplayDate(publishedDate)}`]
       ].map(item => `<div class="performance-card"><div class="k">${esc(item[0])}</div><div class="v">${esc(item[1])}</div><div class="s">${esc(item[2])}</div></div>`).join('');
+
+      $('selectionSpotlight').innerHTML = `
+        <div>
+          <strong>Bulk Report Card Preview</strong>
+          <div class="big">${esc(selectionSummary)}</div>
+          <div class="sub">Your generated result and downloaded PDF will carry the selected subjects together with the brand logo, student passport, and admin signature.</div>
+        </div>
+        <div class="selection-pill">${esc(first.examCode || resultData.examCode || 'All Published Results')} • ${esc(first.term || 'All Terms')}</div>
+      `;
 
       $('studentStatusBadge').textContent = statusText;
       $('studentHeadlineSub').textContent = `${resultData.student.fullName || 'Student'} • ${resultData.student.regId || 'No Registration ID'} • ${resultData.student.classLevel || 'Class not set'}`;
       $('resultBadgeLeft').textContent = `${String(badgeTerm).toUpperCase()} RESULT SHEET`;
       $('resultBadgeRight').textContent = `${(first?.academicSession || currentResults[0]?.academicSession || 'Verified Record')}`;
-      $('metaExamCode').textContent = `Exam Code • ${resultData.examCode || '—'}`;
+      $('metaExamCode').textContent = `Exam Code • ${resultData.examCode || 'All Published Results'}`;
       $('metaSessionTerm').textContent = `Session • ${first?.academicSession || '—'}${first?.term ? ' / ' + first.term : ''}`;
       $('metaGeneratedOn').textContent = `Generated • ${formatDisplayDate(new Date())}`;
-      $('heroVerificationText').textContent = `${statusText}. Published academic result with active view permission.`;
-      $('heroGeneratedText').textContent = totalSubjects ? `This generated result includes ${totalSubjects} checked subject row(s), the admin signature, and is ready for PDF download.` : 'Tick at least one subject row to build the report card and PDF.';
+      $('heroVerificationText').textContent = `${statusText}. ${selectionSummary} prepared for bulk report card download.`;
+      $('heroGeneratedText').textContent = `The on-screen result mirrors the PDF design and includes the brand logo, student passport, and admin signature.`;
 
-      $('resultTableBody').innerHTML = filtered.length ? filtered.map(r => {
-        const rowKey = resultRowKey(r);
-        return `
+      $('resultTableBody').innerHTML = filtered.length ? filtered.map(r => `
         <tr>
-          <td><input class="row-check" type="checkbox" data-row-key="${esc(rowKey)}" ${currentSelectionKeys.has(rowKey) ? 'checked' : ''}></td>
           <td>${esc(r.examCode)}</td>
           <td>${esc(r.classLevel || resultData.student.classLevel || '—')}</td>
           <td>${esc(r.subject)}</td>
@@ -928,37 +945,35 @@
           <td>${esc(r.positionText || '—')}</td>
           <td><span class="tag ${String(r.resultStatus).toUpperCase()==='PASS'?'tag-pass':String(r.resultStatus).toUpperCase()==='FAIL'?'tag-fail':'tag-pending'}">${esc(r.resultStatus || 'PENDING')}</span></td>
           <td>${esc(formatDisplayDate(r.publishedAt || '—'))}</td>
-        </tr>`;
-      }).join('') : `<tr><td colspan="10" class="muted">No result rows were found for the selected filters.</td></tr>`;
+        </tr>
+      `).join('') : `<tr><td colspan="9" class="muted">No selected subject is available under the current filters. Tick one or more subjects above to build the bulk report card.</td></tr>`;
 
       $('examMetaGrid').innerHTML = [
         ['Exam Code', first.examCode], ['Exam Title', first.examTitle], ['Academic Session', first.academicSession],
         ['Term', first.term], ['Exam Date', first.examDate], ['Account Status', statusText], ['Pass Mark Number', first.passMarkNumber],
-        ['Pass Mark Percentage', first.passMarkPercentage ? first.passMarkPercentage + '%' : '—'], ['Published Date', formatDisplayDate(first.publishedAt)]
+        ['Pass Mark Percentage', first.passMarkPercentage ? first.passMarkPercentage + '%' : '—'], ['Published Date', formatDisplayDate(first.publishedAt)], ['Selection', selectionSummary]
       ].map(([label,value]) => `<div class="info-item"><div class="info-label">${esc(label)}</div><div class="info-value">${esc(value || '—')}</div></div>`).join('');
 
       $('resultFooterMeta').innerHTML = [
         ['Exam Title', first.examTitle || '—'],
         ['Session / Term', `${first.academicSession || '—'}${first.term ? ' • ' + first.term : ''}`],
-        ['Result Status', totalSubjects ? `${passed}/${totalSubjects} passed • ${avg}% average` : 'No checked row selected yet']
+        ['Result Status', totalSubjects ? `${passed}/${totalSubjects} passed • ${avg}% average` : 'Select subject(s) to build the report'],
+        ['Bulk Selection', selectionSummary]
       ].map(([label,value]) => `<div class="result-footer-item"><strong>${esc(label)}</strong><span>${esc(value || '—')}</span></div>`).join('');
 
-      $('remarksList').innerHTML = rowsForReport.length ? rowsForReport.map(r => `
+      $('remarksList').innerHTML = filtered.length ? filtered.map(r => `
         <div class="info-item" style="margin-bottom:10px">
           <div class="info-label">${esc(r.subject)}</div>
           <div class="info-value">${esc(r.remark || '—')}</div>
           <div class="muted" style="margin-top:6px">${esc(r.teacherComment || 'No teacher comment')}</div>
         </div>
-      `).join('') : `<div class="muted">Tick one or more subject rows to show remarks and generate the report card.</div>`;
+      `).join('') : `<div class="muted">No remarks available for the current subject selection.</div>`;
 
+      const signatureUrl = normalizeImageUrl(first.signatureUrl || currentSettings.SIGNATURE_URL || '');
       const signatureName = currentSettings.SIGNATURE_NAME || currentSettings.PRINCIPAL_NAME || 'Authorized Signatory';
-      forceImageIntoBox('signatureBox', first.signatureUrl || currentSettings.SIGNATURE_URL || '', 'Signature', '', { fit:'contain', renderNonce: currentRenderNonce }).then(src => {
-        if (src) {
-          $('signatureBox').innerHTML += `<div class="signature-role">Signed by Admin</div><div class="signature-name">${esc(signatureName)}</div><div class="signature-caption">Official approval signature appears on both this generated result and the downloaded PDF.</div>`;
-        } else {
-          $('signatureBox').innerHTML = `<div class="muted">No signature added</div><div class="signature-role">Signatory</div><div class="signature-name">${esc(signatureName)}</div><div class="signature-caption">Add admin signature in settings so it shows on both generated and downloaded result.</div>`;
-        }
-      });
+      $('signatureBox').innerHTML = signatureUrl
+        ? `<img src="${esc(signatureUrl)}" alt="Signature" crossorigin="anonymous" referrerpolicy="no-referrer" /><div class="signature-role">Signed by Admin</div><div class="signature-name">${esc(signatureName)}</div><div class="signature-caption">Official approval signature appears on both this generated result and the downloaded PDF.</div>`
+        : `<div class="muted">No signature added</div><div class="signature-role">Signatory</div><div class="signature-name">${esc(signatureName)}</div><div class="signature-caption">Add admin signature in settings so it shows on both generated and downloaded result.</div>`;
     }
 
     async function ensureImagesReady(root){
@@ -978,13 +993,14 @@
     async function loadResult(){
       try{
         const examCode = $('examCodeInput').value.trim();
-        if (!examCode) throw new Error('Enter the exam code given by the admin.');
         const res = await apiRequest('loadStudentResults', {
           examCode: examCode,
           academicSession: $('sessionFilter').value,
           term: $('termFilter').value
-        }, 'POST', 'Loading result...');
-        renderReport(res.data, { resetSelection:true });
+        }, 'POST', examCode ? 'Loading selected result...' : 'Loading all published results...');
+        selectedSubjects = [];
+        subjectSelectionTouched = false;
+        renderReport(res.data);
         $('resultLoadStatus').textContent = res.message;
         $('resultLoadStatus').className = 'status ok';
         showToast(res.message);
@@ -1006,9 +1022,9 @@
       }
       showLoading('Preparing designed PDF result...');
       try{
-        const filtered = getFilteredResults();
-        const rows = getSelectedReportRows(filtered);
-        if (!rows.length) throw new Error('Tick one or more subject rows before downloading the PDF report card.');
+        const baseRows = getBaseFilteredResults();
+        const rows = getSelectedRows(baseRows);
+        if (!rows.length) throw new Error('Select one or more subjects before downloading the bulk report card PDF.');
         const first = rows[0] || {};
         const palette = getPdfPalette(currentDesign);
         const { jsPDF } = window.jspdf;
@@ -1020,15 +1036,19 @@
         const signatureName = currentSettings.SIGNATURE_NAME || currentSettings.PRINCIPAL_NAME || 'Authorized Signatory';
         const publishedDate = formatDisplayDate(first.publishedAt || '—');
         const totalSubjects = rows.length;
+        const totalAvailable = baseRows.length;
         const passed = rows.filter(r => String(r.resultStatus).toUpperCase() === 'PASS').length;
         const avg = totalSubjects ? (rows.reduce((sum,r)=> sum + safeNumber(r.percentage), 0) / totalSubjects).toFixed(2) : '0.00';
-        const liveLogoSrc = $('brandLogoBox').querySelector('img') ? $('brandLogoBox').querySelector('img').src : '';
-        const livePassportSrc = $('passportBox').querySelector('img') ? $('passportBox').querySelector('img').src : '';
-        const liveSignatureSrc = $('signatureBox').querySelector('img') ? $('signatureBox').querySelector('img').src : '';
+        await ensureImagesReady($('reportCapture'));
+        const [logoRendered, passportRendered, signatureRendered] = await Promise.all([
+          getRenderedImageDataUrl('brandLogoBox'),
+          getRenderedImageDataUrl('passportBox'),
+          getRenderedImageDataUrl('signatureBox')
+        ]);
         const [logoData, passportData, signatureData] = await Promise.all([
-          preparePdfImage(liveLogoSrc || currentSettings.BRAND_LOGO_URL || ''),
-          preparePdfImage(livePassportSrc || currentStudent.passportUrl || ''),
-          preparePdfImage(liveSignatureSrc || first.signatureUrl || currentSettings.SIGNATURE_URL || '')
+          Promise.resolve(logoRendered || '').then(v => v || preparePdfImage(currentSettings.BRAND_LOGO_URL || '')),
+          Promise.resolve(passportRendered || '').then(v => v || preparePdfImage(currentStudent.passportUrl || '')),
+          Promise.resolve(signatureRendered || '').then(v => v || preparePdfImage(first.signatureUrl || currentSettings.SIGNATURE_URL || ''))
         ]);
 
         doc.setFillColor(...palette.header);
@@ -1071,12 +1091,13 @@
         doc.text(`${currentStudent.fullName || 'Student'} • ${currentStudent.regId || '—'} • ${currentStudent.classLevel || 'Class not set'}`, 42, 190);
         doc.text(`Exam: ${first.examTitle || first.examCode || '—'} • Session: ${first.academicSession || '—'}${first.term ? ' / ' + first.term : ''}`, 42, 206);
         doc.text(`Published: ${publishedDate} • Average: ${avg}% • Passed: ${passed}/${totalSubjects || 0}`, 42, 222);
+        doc.text(`Selection: ${totalSubjects}/${totalAvailable || totalSubjects} subject(s) included in this bulk report card`, 42, 238);
         doc.setFillColor(...palette.light);
-        doc.roundedRect(42, 228, 250, 24, 10, 10, 'F');
+        doc.roundedRect(42, 246, 288, 24, 10, 10, 'F');
         doc.setTextColor(...palette.header);
         doc.setFont('helvetica','bold');
         doc.setFontSize(10);
-        doc.text('This PDF includes the official brand logo, student passport, and admin signature.', 52, 244);
+        doc.text('This PDF includes the official brand logo, student passport, and admin signature.', 52, 262);
 
         doc.setDrawColor(...palette.line);
         doc.roundedRect(446, 166, 94, 82, 14, 14, 'S');
@@ -1089,7 +1110,7 @@
           doc.text('No Passport', 493, 208, { align:'center' });
         }
 
-        const cardY = 284;
+        const cardY = 294;
         const cardW = 122;
         const cardGap = 11;
         const cards = [
@@ -1114,7 +1135,7 @@
         });
 
         doc.autoTable({
-          startY: 366,
+          startY: 378,
           margin: { left: 26, right: 26 },
           head: [['Subject', 'Score', 'Percent', 'Grade', 'Rank', 'Status']],
           body: rows.map(r => [
@@ -1157,7 +1178,7 @@
         doc.setTextColor(83,102,129);
         doc.setFont('helvetica','normal');
         doc.setFontSize(9.8);
-        const noteLines = doc.splitTextToSize(`This result was generated from the official student result portal on ${formatDisplayDate(new Date())}. The brand logo, student passport, published result rows, and admin signature form part of this verified academic record.`, 286);
+        const noteLines = doc.splitTextToSize(`This result was generated from the official student result portal on ${formatDisplayDate(new Date())}. ${totalSubjects} selected subject(s) were included in this bulk report card. The brand logo, student passport, published result rows, and admin signature form part of this verified academic record.`, 286);
         doc.text(noteLines, 42, y + 40);
 
         doc.setDrawColor(...palette.line);
@@ -1185,7 +1206,7 @@
         }
 
         const code = first?.examCode || currentResults[0]?.examCode || 'result';
-        const safeName = `${currentStudent.fullName || 'student'}_${code}_result_designed.pdf`.replace(/[^a-z0-9_\-.]+/gi,'_');
+        const safeName = `${currentStudent.fullName || 'student'}_${code}_${totalSubjects}_subjects_bulk_result.pdf`.replace(/[^a-z0-9_\-.]+/gi,'_');
         doc.save(safeName);
         showToast('Designed PDF downloaded successfully.');
       }catch(err){
@@ -1198,20 +1219,34 @@
 
     $('loadResultBtn').addEventListener('click', loadResult);
     $('downloadPdfBtn').addEventListener('click', downloadPdf);
+    $('selectAllSubjectsBtn').addEventListener('click', () => {
+      const options = getSubjectOptions(getBaseFilteredResults());
+      subjectSelectionTouched = true;
+      selectedSubjects = options.map(item => item.key);
+      if (currentResults.length) renderReport({student:currentStudent,results:currentResults,settings:currentSettings,examCode: currentResults[0]?.examCode, sessions:[...new Set(currentResults.map(r=>r.academicSession))], terms:[...new Set(currentResults.map(r=>r.term))]});
+    });
+    $('clearSelectedSubjectsBtn').addEventListener('click', () => {
+      subjectSelectionTouched = true;
+      selectedSubjects = [];
+      if (currentResults.length) renderReport({student:currentStudent,results:currentResults,settings:currentSettings,examCode: currentResults[0]?.examCode, sessions:[...new Set(currentResults.map(r=>r.academicSession))], terms:[...new Set(currentResults.map(r=>r.term))]});
+    });
+    $('subjectSelectionList').addEventListener('change', e => {
+      const target = e.target;
+      if (!target || target.type !== 'checkbox') return;
+      const key = String(target.dataset.subjectKey || '');
+      subjectSelectionTouched = true;
+      if (target.checked) {
+        if (!selectedSubjects.includes(key)) selectedSubjects.push(key);
+      } else {
+        selectedSubjects = selectedSubjects.filter(item => item !== key);
+      }
+      if (currentResults.length) renderReport({student:currentStudent,results:currentResults,settings:currentSettings,examCode: currentResults[0]?.examCode, sessions:[...new Set(currentResults.map(r=>r.academicSession))], terms:[...new Set(currentResults.map(r=>r.term))]});
+    });
     $('resultDesignSelect').innerHTML = RESULT_DESIGNS.map(v => `<option value="${esc(v)}">${esc(v.replace(/-/g,' ').replace(/\b\w/g, m => m.toUpperCase()))}</option>`).join('');
     $('resultDesignSelect').value = currentDesign;
     $('resultDesignSelect').addEventListener('change', e => applyResultDesign(e.target.value));
     $('sessionFilter').addEventListener('change', () => { if (currentResults.length) renderReport({student:currentStudent,results:currentResults,settings:currentSettings,examCode: currentResults[0]?.examCode, sessions:[...new Set(currentResults.map(r=>r.academicSession))], terms:[...new Set(currentResults.map(r=>r.term))]}); });
     $('termFilter').addEventListener('change', () => { if (currentResults.length) renderReport({student:currentStudent,results:currentResults,settings:currentSettings,examCode: currentResults[0]?.examCode, sessions:[...new Set(currentResults.map(r=>r.academicSession))], terms:[...new Set(currentResults.map(r=>r.term))]}); });
-    $('resultTableBody').addEventListener('change', (event) => {
-      const box = event.target.closest('input.row-check');
-      if (!box) return;
-      const key = box.getAttribute('data-row-key') || '';
-      if (!key) return;
-      if (box.checked) currentSelectionKeys.add(key);
-      else currentSelectionKeys.delete(key);
-      if (currentResults.length) renderReport({student:currentStudent,results:currentResults,settings:currentSettings,examCode: currentResults[0]?.examCode, sessions:[...new Set(currentResults.map(r=>r.academicSession))], terms:[...new Set(currentResults.map(r=>r.term))]});
-    });
 
     document.querySelectorAll('[data-auth-tab]').forEach(btn => btn.addEventListener('click', ()=> setAuthTab(btn.dataset.authTab)));
 
@@ -1223,7 +1258,6 @@
         $('authView').classList.add('hidden');
         $('appView').classList.remove('hidden');
         $('logoutBtn').classList.remove('hidden');
-        await loadAvailableExamCodes();
         showToast(res.message);
       }catch(err){ showToast(err.message, 'error'); }
     });
@@ -1267,7 +1301,6 @@
         $('authView').classList.add('hidden');
         $('appView').classList.remove('hidden');
         $('logoutBtn').classList.remove('hidden');
-        await loadAvailableExamCodes();
       }
     })();
   </script>
