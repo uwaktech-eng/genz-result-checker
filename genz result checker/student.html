@@ -559,7 +559,7 @@
       publicData = res.data;
       currentSettings = res.data.settings || {};
       $('brandHeader').textContent = currentSettings.BRAND_NAME || 'Genz Edutech Innovations';
-      $('portalNote').innerHTML = currentSettings.PORTAL_NOTICE || 'Enter a specific exam code to load just that result, or leave the exam code blank to load all published results for your account.';
+      $('portalNote').innerHTML = currentSettings.PORTAL_NOTICE || 'Leave exam code blank to automatically load all published results for your account after login. Enter a specific exam code only when you want to check that particular result.';
       applyFavicon(currentSettings.FAVICON_URL || currentSettings.BRAND_LOGO_URL || '');
       if ($('signupClassLevel')) $('signupClassLevel').placeholder = 'e.g. Year 5 / JSS 1 / Undergraduate';
       if ($('signupCategory') && (publicData.categoryOptions || []).length){ fillOptions($('signupCategory'), publicData.categoryOptions || [], 'Select category'); }
@@ -1258,7 +1258,9 @@
         $('authView').classList.add('hidden');
         $('appView').classList.remove('hidden');
         $('logoutBtn').classList.remove('hidden');
+        $('examCodeInput').value = '';
         showToast(res.message);
+        await loadResult();
       }catch(err){ showToast(err.message, 'error'); }
     });
 
@@ -1301,6 +1303,9 @@
         $('authView').classList.add('hidden');
         $('appView').classList.remove('hidden');
         $('logoutBtn').classList.remove('hidden');
+        if (!$('examCodeInput').value.trim()) {
+          await loadResult();
+        }
       }
     })();
   </script>
