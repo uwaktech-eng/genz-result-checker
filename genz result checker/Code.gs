@@ -912,12 +912,21 @@ function loadStudentExamCodes_(payload) {
 }
 
 function parseExamCodeList_(value) {
-  return uniqueList_(String(value || '').split(',').map(function(code) {
+  return uniqueList_(String(value || '').split(/[;,\n]+/).map(function(code) {
     return sanitizeValue_(code).toLowerCase();
   }).filter(Boolean));
 }
 
+function matchesAnyExamCodeFilter_(resultRow, examCodes) {
+  if (!examCodes || !examCodes.length) return true;
+  var rowExamCode = sanitizeValue_(resultRow.examCode).toLowerCase();
+  return examCodes.some(function(code) {
+    return rowExamCode === sanitizeValue_(code).toLowerCase();
+  });
+}
+
 function loadStudentResults_(payload) {
+
   var session = requireSession_(payload.token, 'student', sanitizeValue_(payload.clientId));
   var examCodeInput = sanitizeValue_(payload.examCode);
   var examCodes = parseExamCodeList_(examCodeInput);
@@ -929,9 +938,8 @@ function loadStudentResults_(payload) {
     .map(cleanResult_)
     .map(function(r) { r.classLevel = student.classLevel || ''; return r; })
     .filter(function(r) {
-      var examCodeValue = String(r.examCode || '').toLowerCase();
       return r.regId === session.id &&
-        (!examCodes.length || examCodes.indexOf(examCodeValue) !== -1) &&
+        matchesAnyExamCodeFilter_(r, examCodes) &&
         r.published && r.viewActive && !r.archived && !r.deleted &&
         (!academicSession || r.academicSession === academicSession) &&
         (!term || r.term === term);
@@ -950,7 +958,7 @@ function loadStudentResults_(payload) {
       return String(a.subject || '').localeCompare(String(b.subject || ''));
     });
   if (!results.length) {
-    throw new Error(examCodes.length ? 'No published result was found for the supplied exam code(s).' : 'No published result is currently available for your account.');
+    throw new Error(examCodes.length ? 'No published result was found for the supplied exam code(s). Use the exact exam codes separated with commas.' : 'No published result is currently available for your account.');
   }
   return ok_(examCodes.length ? 'Published results for the supplied exam code(s) loaded successfully.' : 'All published subjects loaded successfully.', {
     examCode: examCodeInput || '',
