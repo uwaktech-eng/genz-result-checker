@@ -292,7 +292,7 @@ function bootstrapSettings_() {
     FAVICON_URL: '',
     SIGNATURE_NAME: 'Authorized Signatory',
     SIGNATURE_URL: '',
-    PORTAL_NOTICE: 'Use your exam code to load results.',
+    PORTAL_NOTICE: 'Leave exam code blank to load all published results, or enter one or more exam codes separated with commas to load only those results.',
     CLASS_OPTIONS: 'Year 1,Year 2,Year 3,Year 4,Year 5,Year 6,JSS 1,JSS 2,JSS 3,SS 1,SS 2,SS 3,Undergraduate',
     CATEGORY_OPTIONS: 'Lower Primary,Upper Primary,Junior High School,Senior High School,Undergraduate',
     SUBJECT_OPTIONS: 'English Language,Mathematics,Basic Science,Social Studies',
@@ -911,46 +911,56 @@ function loadStudentExamCodes_(payload) {
   return ok_('Available exam codes loaded.', list);
 }
 
+function parseExamCodeList_(value) {
+  return uniqueList_(String(value || '').split(',').map(function(code) {
+    return sanitizeValue_(code).toLowerCase();
+  }).filter(Boolean));
+}
+
 function loadStudentResults_(payload) {
   var session = requireSession_(payload.token, 'student', sanitizeValue_(payload.clientId));
-  var examCode = sanitizeValue_(payload.examCode);
+  var examCodeInput = sanitizeValue_(payload.examCode);
+  var examCodes = parseExamCodeList_(examCodeInput);
   var academicSession = sanitizeValue_(payload.academicSession);
   var term = sanitizeValue_(payload.term);
   var student = cleanStudent_(getStudentByRegId_(session.id));
   if (!student) throw new Error('Student account not found.');
-  var results = getSheetObjects_(getSpreadsheet_().getSheetByName(SHEET_NAMES.RESULTS)).map(cleanResult_).map(function(r) {
-    r.classLevel = student.classLevel || '';
-    return r;
-  }).filter(function(r) {
-    if (r.regId !== session.id) return false;
-    if (!r.published || !r.viewActive || r.archived || r.deleted) return false;
-    if (examCode && String(r.examCode || '').toLowerCase() !== examCode.toLowerCase()) return false;
-    if (academicSession && r.academicSession !== academicSession) return false;
-    if (term && r.term !== term) return false;
-    return true;
-  });
+  var results = getSheetObjects_(getSpreadsheet_().getSheetByName(SHEET_NAMES.RESULTS))
+    .map(cleanResult_)
+    .map(function(r) { r.classLevel = student.classLevel || ''; return r; })
+    .filter(function(r) {
+      var examCodeValue = String(r.examCode || '').toLowerCase();
+      return r.regId === session.id &&
+        (!examCodes.length || examCodes.indexOf(examCodeValue) !== -1) &&
+        r.published && r.viewActive && !r.archived && !r.deleted &&
+        (!academicSession || r.academicSession === academicSession) &&
+        (!term || r.term === term);
+    })
+    .sort(function(a, b) {
+      var aDate = String(a.publishedAt || a.updatedAt || a.createdAt || '');
+      var bDate = String(b.publishedAt || b.updatedAt || b.createdAt || '');
+      var byDate = bDate.localeCompare(aDate);
+      if (byDate !== 0) return byDate;
+      var bySession = String(b.academicSession || '').localeCompare(String(a.academicSession || ''));
+      if (bySession !== 0) return bySession;
+      var byTerm = String(b.term || '').localeCompare(String(a.term || ''));
+      if (byTerm !== 0) return byTerm;
+      var byExam = String(a.examCode || '').localeCompare(String(b.examCode || ''));
+      if (byExam !== 0) return byExam;
+      return String(a.subject || '').localeCompare(String(b.subject || ''));
+    });
   if (!results.length) {
-    throw new Error(examCode ? 'No published result was found for that exam code.' : 'No published result was found for your registration number.');
+    throw new Error(examCodes.length ? 'No published result was found for the supplied exam code(s).' : 'No published result is currently available for your account.');
   }
-  results.sort(function(a, b) {
-    var codeCompare = String(a.examCode || '').localeCompare(String(b.examCode || ''));
-    if (codeCompare !== 0) return codeCompare;
-    var sessionCompare = String(a.academicSession || '').localeCompare(String(b.academicSession || ''));
-    if (sessionCompare !== 0) return sessionCompare;
-    var termCompare = String(a.term || '').localeCompare(String(b.term || ''));
-    if (termCompare !== 0) return termCompare;
-    return String(a.subject || '').localeCompare(String(b.subject || ''));
-  });
-  return ok_(examCode ? 'That exam result loaded successfully.' : 'All published results loaded successfully.', {
-    examCode: examCode,
-    requestedExamCode: examCode,
-    mode: examCode ? 'single' : 'all',
+  return ok_(examCodes.length ? 'Published results for the supplied exam code(s) loaded successfully.' : 'All published subjects loaded successfully.', {
+    examCode: examCodeInput || '',
+    examCodeList: examCodes,
+    loadMode: examCodes.length > 1 ? 'multi' : (examCodes.length ? 'single' : 'all'),
     student: student,
     settings: getSettings_(),
     results: results,
     sessions: uniqueList_(results.map(function(r) { return r.academicSession; }).filter(Boolean)),
-    terms: uniqueList_(results.map(function(r) { return r.term; }).filter(Boolean)),
-    examCodes: uniqueList_(results.map(function(r) { return r.examCode; }).filter(Boolean))
+    terms: uniqueList_(results.map(function(r) { return r.term; }).filter(Boolean))
   });
 }
 
