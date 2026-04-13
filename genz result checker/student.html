@@ -196,7 +196,7 @@
 
         <form id="loginForm">
           <h2 style="margin:0 0 10px">Sign in</h2>
-          <p class="muted">Log in first, then optionally enter a specific <strong>exam code</strong>. Leave it blank to view and download <strong>all published results</strong> available to your account.</p>
+          <p class="muted">Log in to access your result portal. Leave <strong>exam code</strong> blank to load <strong>all published results automatically</strong>, or enter a code to load only that particular result.</p>
           <div class="grid grid-2">
             <div class="field"><label>Registration ID</label><input name="regId" required /></div>
             <div class="field"><label>Password</label><input type="password" name="password" required /></div>
@@ -254,7 +254,7 @@
 
       <div class="glass card">
         <h2 style="margin:0 0 10px">How result access works</h2>
-        <div class="inline-note" id="portalNote">After login, you may enter a specific exam code to load only that result. Leave the exam code blank to load every result that is both <strong>published</strong> and <strong>activated for view</strong> for your account.</div>
+        <div class="inline-note" id="portalNote">After login, leave exam code blank to load <strong>all published results</strong> for your registration number automatically. Enter an exam code only when you want to load that particular published result.</div>
         <div class="grid" style="margin-top:16px">
           <div class="glass card" style="padding:16px">
             <strong>Download as PDF</strong>
@@ -262,7 +262,7 @@
           </div>
           <div class="glass card" style="padding:16px">
             <strong>History filters</strong>
-            <p class="muted">Use the filters to narrow the loaded results by academic session or term after the records appear.</p>
+            <p class="muted">If multiple terms or sessions exist under the same exam code, you can filter the loaded report.</p>
           </div>
         </div>
       </div>
@@ -272,14 +272,14 @@
       <div class="glass card print-hide">
         <div class="result-design-row">
           <div class="grid grid-3">
-            <div class="field"><label>Exam Code <span class="muted">(optional)</span></label><input id="examCodeInput" placeholder="Leave blank to load all published results, or enter one exam code" /></div>
+            <div class="field"><label>Exam Code</label><input id="examCodeInput" placeholder="Optional: enter an exam code to load only that result" /></div>
             <div class="field"><label>Academic Session Filter</label><select id="sessionFilter"><option value="">All sessions</option></select></div>
             <div class="field"><label>Term Filter</label><select id="termFilter"><option value="">All terms</option></select></div>
           </div>
           <div class="field"><label>Result Design</label><select id="resultDesignSelect"></select><div class="a4-note">20 modern result skins apply to the screen view and PDF.</div></div>
         </div>
         <div class="actions">
-          <button class="btn btn-primary" id="loadResultBtn" type="button">Load Result</button>
+          <button class="btn btn-primary" id="loadResultBtn" type="button">Load Published Results</button>
           <button class="btn btn-soft" id="downloadPdfBtn" type="button">Download PDF</button>
         </div>
         <div class="status" id="resultLoadStatus"></div>
@@ -293,15 +293,13 @@
               <div class="muted">Select one or more subjects. Your on-screen generated result and downloaded PDF will follow the subjects you choose here.</div>
             </div>
             <div class="subject-pick-actions">
-              <button class="btn btn-soft" id="selectAllSubjectsBtn" type="button">Select All</button>
-              <button class="btn btn-soft" id="clearSelectedSubjectsBtn" type="button">Clear</button>
+                            <button class="btn btn-soft" id="clearSelectedSubjectsBtn" type="button">Clear</button>
               <div class="subject-pill-count" id="selectedSubjectCount">No result loaded yet</div>
             </div>
           </div>
           <div class="subject-pill-grid" id="subjectSelectionList"><div class="muted">Load a result first to choose subjects for the bulk report card.</div></div>
         </div>
       </div>
-
 
       <div class="glass card report-card" id="reportCapture">
         <div class="report-head">
@@ -416,6 +414,9 @@
     let currentDesign = 'royal';
     let selectedSubjects = [];
     let subjectSelectionTouched = false;
+    let currentRequestedExamCode = '';
+    let currentResultMode = 'all';
+    let currentExamCodes = [];
     const RESULT_DESIGNS = ['royal','emerald','sunset','violet','carbon','rose','ocean','gold','forest','candy','royal-2','emerald-2','sunset-2','violet-2','carbon-2','rose-2','ocean-2','gold-2','forest-2','candy-2'];
 
     const $ = id => document.getElementById(id);
@@ -559,7 +560,7 @@
       publicData = res.data;
       currentSettings = res.data.settings || {};
       $('brandHeader').textContent = currentSettings.BRAND_NAME || 'Genz Edutech Innovations';
-      $('portalNote').innerHTML = currentSettings.PORTAL_NOTICE || 'Leave exam code blank to automatically load all published results for your account after login. Enter a specific exam code only when you want to check that particular result.';
+      $('portalNote').innerHTML = currentSettings.PORTAL_NOTICE || 'Leave exam code blank to load all published results automatically, or enter a code to load only that result.';
       applyFavicon(currentSettings.FAVICON_URL || currentSettings.BRAND_LOGO_URL || '');
       if ($('signupClassLevel')) $('signupClassLevel').placeholder = 'e.g. Year 5 / JSS 1 / Undergraduate';
       if ($('signupCategory') && (publicData.categoryOptions || []).length){ fillOptions($('signupCategory'), publicData.categoryOptions || [], 'Select category'); }
@@ -860,10 +861,27 @@
       return { x: dx, y: dy, w: drawW, h: drawH };
     }
 
+    function getReportScopeLabel(resultData){
+      const examCodes = (resultData && resultData.examCodes) || currentExamCodes || [];
+      if (resultData && resultData.requestedExamCode) return resultData.requestedExamCode;
+      if (currentRequestedExamCode) return currentRequestedExamCode;
+      return examCodes.length === 1 ? examCodes[0] : 'ALL PUBLISHED RESULTS';
+    }
+
+    function getReportScopeNote(resultData){
+      const examCodes = (resultData && resultData.examCodes) || currentExamCodes || [];
+      if ((resultData && resultData.requestedExamCode) || currentRequestedExamCode) return 'Single exam result loaded';
+      if (!examCodes.length) return 'All published results loaded';
+      return examCodes.length === 1 ? 'All published subjects loaded automatically' : `${examCodes.length} published exam code(s) combined automatically`;
+    }
+
     function renderReport(resultData){
       currentStudent = resultData.student;
       currentResults = resultData.results || [];
       currentSettings = resultData.settings || currentSettings;
+      currentRequestedExamCode = resultData.requestedExamCode || resultData.examCode || '';
+      currentResultMode = resultData.mode || (currentRequestedExamCode ? 'single' : 'all');
+      currentExamCodes = resultData.examCodes || [...new Set(currentResults.map(r => r.examCode).filter(Boolean))];
 
       applyResultDesign($('resultDesignSelect').value || currentDesign);
       applyFavicon(currentSettings.FAVICON_URL || currentSettings.BRAND_LOGO_URL || '');
@@ -900,9 +918,11 @@
       const statusText = resultData.student.deleted ? 'Deleted Record' : resultData.student.archived ? 'Archived Record' : (resultData.student.active ? 'Active Record' : 'Inactive Record');
       const badgeTerm = (first?.term || currentResults[0]?.term || 'Result');
       const selectionSummary = totalAvailable ? `${totalSubjects} of ${totalAvailable} subject(s) selected` : 'No subject loaded yet';
+      const scopeLabel = getReportScopeLabel(resultData);
+      const scopeNote = getReportScopeNote(resultData);
 
       $('summaryStrip').innerHTML = [
-        ['Exam Code', resultData.examCode || 'All Published Results'],
+        ['Exam Scope', scopeLabel || '—'],
         ['Class', resultData.student.classLevel || '—'],
         ['Selected Subjects', totalSubjects],
         ['Loaded Subjects', totalAvailable],
@@ -921,17 +941,17 @@
           <div class="big">${esc(selectionSummary)}</div>
           <div class="sub">Your generated result and downloaded PDF will carry the selected subjects together with the brand logo, student passport, and admin signature.</div>
         </div>
-        <div class="selection-pill">${esc(first.examCode || resultData.examCode || 'All Published Results')} • ${esc(first.term || 'All Terms')}</div>
+        <div class="selection-pill">${esc(scopeLabel || 'ALL PUBLISHED RESULTS')} • ${esc(first.term || 'All Terms')}</div>
       `;
 
       $('studentStatusBadge').textContent = statusText;
       $('studentHeadlineSub').textContent = `${resultData.student.fullName || 'Student'} • ${resultData.student.regId || 'No Registration ID'} • ${resultData.student.classLevel || 'Class not set'}`;
-      $('resultBadgeLeft').textContent = `${String(badgeTerm).toUpperCase()} RESULT SHEET`;
-      $('resultBadgeRight').textContent = `${(first?.academicSession || currentResults[0]?.academicSession || 'Verified Record')}`;
-      $('metaExamCode').textContent = `Exam Code • ${resultData.examCode || 'All Published Results'}`;
+      $('resultBadgeLeft').textContent = `${currentResultMode === 'all' ? 'ALL PUBLISHED' : String(badgeTerm).toUpperCase()} RESULT SHEET`;
+      $('resultBadgeRight').textContent = `${scopeNote}`;
+      $('metaExamCode').textContent = `Exam Scope • ${scopeLabel || '—'}`;
       $('metaSessionTerm').textContent = `Session • ${first?.academicSession || '—'}${first?.term ? ' / ' + first.term : ''}`;
       $('metaGeneratedOn').textContent = `Generated • ${formatDisplayDate(new Date())}`;
-      $('heroVerificationText').textContent = `${statusText}. ${selectionSummary} prepared for bulk report card download.`;
+      $('heroVerificationText').textContent = `${statusText}. ${selectionSummary} prepared for bulk report card download. ${scopeNote}.`;
       $('heroGeneratedText').textContent = `The on-screen result mirrors the PDF design and includes the brand logo, student passport, and admin signature.`;
 
       $('resultTableBody').innerHTML = filtered.length ? filtered.map(r => `
@@ -949,13 +969,13 @@
       `).join('') : `<tr><td colspan="9" class="muted">No selected subject is available under the current filters. Tick one or more subjects above to build the bulk report card.</td></tr>`;
 
       $('examMetaGrid').innerHTML = [
-        ['Exam Code', first.examCode], ['Exam Title', first.examTitle], ['Academic Session', first.academicSession],
+        ['Exam Scope', scopeLabel], ['Exam Title', currentResultMode === 'all' ? 'All Published Results' : first.examTitle], ['Academic Session', first.academicSession],
         ['Term', first.term], ['Exam Date', first.examDate], ['Account Status', statusText], ['Pass Mark Number', first.passMarkNumber],
         ['Pass Mark Percentage', first.passMarkPercentage ? first.passMarkPercentage + '%' : '—'], ['Published Date', formatDisplayDate(first.publishedAt)], ['Selection', selectionSummary]
       ].map(([label,value]) => `<div class="info-item"><div class="info-label">${esc(label)}</div><div class="info-value">${esc(value || '—')}</div></div>`).join('');
 
       $('resultFooterMeta').innerHTML = [
-        ['Exam Title', first.examTitle || '—'],
+        ['Exam Title', currentResultMode === 'all' ? 'All Published Results' : (first.examTitle || '—')],
         ['Session / Term', `${first.academicSession || '—'}${first.term ? ' • ' + first.term : ''}`],
         ['Result Status', totalSubjects ? `${passed}/${totalSubjects} passed • ${avg}% average` : 'Select subject(s) to build the report'],
         ['Bulk Selection', selectionSummary]
@@ -990,25 +1010,42 @@
       })));
     }
 
-    async function loadResult(){
+    async function loadResult(options = {}){
       try{
         const examCode = $('examCodeInput').value.trim();
+        const loadingText = examCode ? 'Loading that exam result...' : 'Loading all published results...';
         const res = await apiRequest('loadStudentResults', {
           examCode: examCode,
           academicSession: $('sessionFilter').value,
           term: $('termFilter').value
-        }, 'POST', examCode ? 'Loading selected result...' : 'Loading all published results...');
+        }, 'POST', loadingText);
         selectedSubjects = [];
         subjectSelectionTouched = false;
         renderReport(res.data);
         $('resultLoadStatus').textContent = res.message;
         $('resultLoadStatus').className = 'status ok';
-        showToast(res.message);
+        if (!options.silentToast) showToast(res.message);
       }catch(err){
         $('resultLoadStatus').textContent = err.message;
         $('resultLoadStatus').className = 'status error';
-        showToast(err.message, 'error');
+        if (!options.silentToast) showToast(err.message, 'error');
+        throw err;
       }
+    }
+
+    function rerenderCurrentReport(){
+      if (!currentResults.length) return;
+      renderReport({
+        student: currentStudent,
+        results: currentResults,
+        settings: currentSettings,
+        examCode: currentRequestedExamCode,
+        requestedExamCode: currentRequestedExamCode,
+        mode: currentResultMode,
+        examCodes: currentExamCodes,
+        sessions: [...new Set(currentResults.map(r => r.academicSession).filter(Boolean))],
+        terms: [...new Set(currentResults.map(r => r.term).filter(Boolean))]
+      });
     }
 
     async function downloadPdf(){
@@ -1089,7 +1126,7 @@
         doc.setFont('helvetica','normal');
         doc.setFontSize(10.5);
         doc.text(`${currentStudent.fullName || 'Student'} • ${currentStudent.regId || '—'} • ${currentStudent.classLevel || 'Class not set'}`, 42, 190);
-        doc.text(`Exam: ${first.examTitle || first.examCode || '—'} • Session: ${first.academicSession || '—'}${first.term ? ' / ' + first.term : ''}`, 42, 206);
+        doc.text(`Exam: ${currentResultMode === 'all' ? getReportScopeLabel() : (first.examTitle || first.examCode || '—')} • Session: ${first.academicSession || '—'}${first.term ? ' / ' + first.term : ''}`, 42, 206);
         doc.text(`Published: ${publishedDate} • Average: ${avg}% • Passed: ${passed}/${totalSubjects || 0}`, 42, 222);
         doc.text(`Selection: ${totalSubjects}/${totalAvailable || totalSubjects} subject(s) included in this bulk report card`, 42, 238);
         doc.setFillColor(...palette.light);
@@ -1114,7 +1151,7 @@
         const cardW = 122;
         const cardGap = 11;
         const cards = [
-          ['Exam Code', first.examCode || '—'],
+          ['Exam Scope', currentResultMode === 'all' ? getReportScopeLabel() : (first.examCode || '—')],
           ['Subjects', String(totalSubjects || 0)],
           ['Average %', `${avg}%`],
           ['Published', publishedDate]
@@ -1205,7 +1242,7 @@
           doc.text(`Page ${i} of ${totalPages}`, pageW - 26, pageH - 12, { align:'right' });
         }
 
-        const code = first?.examCode || currentResults[0]?.examCode || 'result';
+        const code = currentResultMode === 'all' ? 'all_published_results' : (currentRequestedExamCode || first?.examCode || currentResults[0]?.examCode || 'result');
         const safeName = `${currentStudent.fullName || 'student'}_${code}_${totalSubjects}_subjects_bulk_result.pdf`.replace(/[^a-z0-9_\-.]+/gi,'_');
         doc.save(safeName);
         showToast('Designed PDF downloaded successfully.');
@@ -1219,16 +1256,10 @@
 
     $('loadResultBtn').addEventListener('click', loadResult);
     $('downloadPdfBtn').addEventListener('click', downloadPdf);
-    $('selectAllSubjectsBtn').addEventListener('click', () => {
-      const options = getSubjectOptions(getBaseFilteredResults());
-      subjectSelectionTouched = true;
-      selectedSubjects = options.map(item => item.key);
-      if (currentResults.length) renderReport({student:currentStudent,results:currentResults,settings:currentSettings,examCode: currentResults[0]?.examCode, sessions:[...new Set(currentResults.map(r=>r.academicSession))], terms:[...new Set(currentResults.map(r=>r.term))]});
-    });
     $('clearSelectedSubjectsBtn').addEventListener('click', () => {
       subjectSelectionTouched = true;
       selectedSubjects = [];
-      if (currentResults.length) renderReport({student:currentStudent,results:currentResults,settings:currentSettings,examCode: currentResults[0]?.examCode, sessions:[...new Set(currentResults.map(r=>r.academicSession))], terms:[...new Set(currentResults.map(r=>r.term))]});
+      if (currentResults.length) rerenderCurrentReport();
     });
     $('subjectSelectionList').addEventListener('change', e => {
       const target = e.target;
@@ -1240,13 +1271,13 @@
       } else {
         selectedSubjects = selectedSubjects.filter(item => item !== key);
       }
-      if (currentResults.length) renderReport({student:currentStudent,results:currentResults,settings:currentSettings,examCode: currentResults[0]?.examCode, sessions:[...new Set(currentResults.map(r=>r.academicSession))], terms:[...new Set(currentResults.map(r=>r.term))]});
+      if (currentResults.length) rerenderCurrentReport();
     });
     $('resultDesignSelect').innerHTML = RESULT_DESIGNS.map(v => `<option value="${esc(v)}">${esc(v.replace(/-/g,' ').replace(/\b\w/g, m => m.toUpperCase()))}</option>`).join('');
     $('resultDesignSelect').value = currentDesign;
     $('resultDesignSelect').addEventListener('change', e => applyResultDesign(e.target.value));
-    $('sessionFilter').addEventListener('change', () => { if (currentResults.length) renderReport({student:currentStudent,results:currentResults,settings:currentSettings,examCode: currentResults[0]?.examCode, sessions:[...new Set(currentResults.map(r=>r.academicSession))], terms:[...new Set(currentResults.map(r=>r.term))]}); });
-    $('termFilter').addEventListener('change', () => { if (currentResults.length) renderReport({student:currentStudent,results:currentResults,settings:currentSettings,examCode: currentResults[0]?.examCode, sessions:[...new Set(currentResults.map(r=>r.academicSession))], terms:[...new Set(currentResults.map(r=>r.term))]}); });
+    $('sessionFilter').addEventListener('change', () => { if (currentResults.length) rerenderCurrentReport(); });
+    $('termFilter').addEventListener('change', () => { if (currentResults.length) rerenderCurrentReport(); });
 
     document.querySelectorAll('[data-auth-tab]').forEach(btn => btn.addEventListener('click', ()=> setAuthTab(btn.dataset.authTab)));
 
@@ -1258,9 +1289,8 @@
         $('authView').classList.add('hidden');
         $('appView').classList.remove('hidden');
         $('logoutBtn').classList.remove('hidden');
-        $('examCodeInput').value = '';
+        await loadResult({ silentToast:true });
         showToast(res.message);
-        await loadResult();
       }catch(err){ showToast(err.message, 'error'); }
     });
 
@@ -1303,9 +1333,7 @@
         $('authView').classList.add('hidden');
         $('appView').classList.remove('hidden');
         $('logoutBtn').classList.remove('hidden');
-        if (!$('examCodeInput').value.trim()) {
-          await loadResult();
-        }
+        await loadResult({ silentToast:true });
       }
     })();
   </script>

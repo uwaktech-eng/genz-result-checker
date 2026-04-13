@@ -918,23 +918,39 @@ function loadStudentResults_(payload) {
   var term = sanitizeValue_(payload.term);
   var student = cleanStudent_(getStudentByRegId_(session.id));
   if (!student) throw new Error('Student account not found.');
-  var results = getSheetObjects_(getSpreadsheet_().getSheetByName(SHEET_NAMES.RESULTS)).map(cleanResult_).map(function(r){ r.classLevel = student.classLevel || ''; return r; }).filter(function(r) {
-    return r.regId === session.id &&
-      (!examCode || r.examCode.toLowerCase() === examCode.toLowerCase()) &&
-      r.published && r.viewActive && !r.archived && !r.deleted &&
-      (!academicSession || r.academicSession === academicSession) &&
-      (!term || r.term === term);
+  var results = getSheetObjects_(getSpreadsheet_().getSheetByName(SHEET_NAMES.RESULTS)).map(cleanResult_).map(function(r) {
+    r.classLevel = student.classLevel || '';
+    return r;
+  }).filter(function(r) {
+    if (r.regId !== session.id) return false;
+    if (!r.published || !r.viewActive || r.archived || r.deleted) return false;
+    if (examCode && String(r.examCode || '').toLowerCase() !== examCode.toLowerCase()) return false;
+    if (academicSession && r.academicSession !== academicSession) return false;
+    if (term && r.term !== term) return false;
+    return true;
   });
   if (!results.length) {
-    throw new Error(examCode ? 'No published result was found for that exam code.' : 'No published result is currently available for your account.');
+    throw new Error(examCode ? 'No published result was found for that exam code.' : 'No published result was found for your registration number.');
   }
-  return ok_(examCode ? 'Result loaded successfully.' : 'All published results loaded successfully.', {
-    examCode: examCode || '',
+  results.sort(function(a, b) {
+    var codeCompare = String(a.examCode || '').localeCompare(String(b.examCode || ''));
+    if (codeCompare !== 0) return codeCompare;
+    var sessionCompare = String(a.academicSession || '').localeCompare(String(b.academicSession || ''));
+    if (sessionCompare !== 0) return sessionCompare;
+    var termCompare = String(a.term || '').localeCompare(String(b.term || ''));
+    if (termCompare !== 0) return termCompare;
+    return String(a.subject || '').localeCompare(String(b.subject || ''));
+  });
+  return ok_(examCode ? 'That exam result loaded successfully.' : 'All published results loaded successfully.', {
+    examCode: examCode,
+    requestedExamCode: examCode,
+    mode: examCode ? 'single' : 'all',
     student: student,
     settings: getSettings_(),
     results: results,
     sessions: uniqueList_(results.map(function(r) { return r.academicSession; }).filter(Boolean)),
-    terms: uniqueList_(results.map(function(r) { return r.term; }).filter(Boolean))
+    terms: uniqueList_(results.map(function(r) { return r.term; }).filter(Boolean)),
+    examCodes: uniqueList_(results.map(function(r) { return r.examCode; }).filter(Boolean))
   });
 }
 
