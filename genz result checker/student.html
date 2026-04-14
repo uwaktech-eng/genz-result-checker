@@ -852,8 +852,8 @@
       return String(dataUrl || '').trim();
     }
 
-    async function getRenderedImageDataUrl(boxId){
-      const box = $(boxId);
+    async function getRenderedImageDataUrl(target){
+      const box = typeof target === 'string' ? $(target) : target;
       const img = box ? box.querySelector('img') : null;
       if (!img) return '';
       await ensureImagesReady(box);
@@ -1095,9 +1095,15 @@
       const passed = rows.filter(r => String(r.resultStatus).toUpperCase() === 'PASS').length;
       const avg = totalSubjects ? (rows.reduce((sum,r)=> sum + safeNumber(r.percentage), 0) / totalSubjects).toFixed(2) : '0.00';
       const publishedDate = formatDisplayDate(first.publishedAt || new Date());
-      const passportData = assets.passportUrl ? await fetchImageDataUrl(assets.passportUrl) : '';
-      const brandData = assets.brandLogoUrl ? await fetchImageDataUrl(assets.brandLogoUrl) : '';
-      const signatureData = assets.signatureUrl ? await fetchImageDataUrl(assets.signatureUrl) : '';
+      let passportData = assets.passportUrl ? await fetchImageDataUrl(assets.passportUrl) : '';
+      let brandData = assets.brandLogoUrl ? await fetchImageDataUrl(assets.brandLogoUrl) : '';
+      let signatureData = assets.signatureUrl ? await fetchImageDataUrl(assets.signatureUrl) : '';
+      if (!brandData) brandData = await getRenderedImageDataUrl('brandLogoBox');
+      if (!passportData) passportData = await getRenderedImageDataUrl('passportBox');
+      if (!signatureData) {
+        const signatureImageWrap = $('signatureBox') ? $('signatureBox').querySelector('[data-role="signatureImage"]') : null;
+        signatureData = await getRenderedImageDataUrl(signatureImageWrap);
+      }
       const signatureName = assets.signatureName || 'Authorized Signatory';
 
       doc.setFillColor(...palette.light);
