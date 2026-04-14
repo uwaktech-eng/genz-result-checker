@@ -974,43 +974,132 @@ function loadStudentResults_(payload) {
 
 function getImageDataUrl_(payload) {
   requireSession_(payload.token, '', sanitizeValue_(payload.clientId));
-  var rawInput = sanitizeValue_(payload.url || payload.imageUrl || payload.fileId || '');
-  var url = normalizeImageUrl_(rawInput);
-  if (!url && !rawInput) throw new Error('Image URL is required.');
-  try {
-    var blob = null;
-    var contentType = '';
-    var driveFileId = extractDriveFileId_(rawInput) || extractDriveFileId_(url);
-    if (driveFileId) {
-      var driveFile = DriveApp.getFileById(driveFileId);
-      blob = driveFile.getBlob();
-      contentType = sanitizeValue_(blob.getContentType() || '');
+  var raw = sanitizeValue_((payload && (payload.url || payload.imageUrl || payload.src || payload.fileId)) || '');
+  if (!raw) throw new Error('Provide an image URL or file ID.');
+  var driveId = extractDriveFileId_(raw);
+  var blob = null;
+  var source = '';
+  var mimeType = '';
+  var safeMimePattern = /^(image\/(png|jpe?g|webp|gif|bmp|svg\+xml))$/i;
+
+  if (driveId) {
+    var driveCandidates = buildPublicImageCandidates_(driveId);
+    for (var d = 0; d < driveCandidates.length; d += 1) {
+      var driveCandidate = driveCandidates[d];
+      if (!driveCandidate) continue;
+      try {
+        var driveFetched = UrlFetchApp.fetch(driveCandidate, {
+          muteHttpExceptions: true,
+          followRedirects: true,
+          headers: {
+            'User-Agent': 'Mozilla/5.0',
+            'Accept': 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8'
+          }
+        });
+        var driveCode = Number(driveFetched.getResponseCode() || 0);
+        if (driveCode >= 200 && driveCode < 300) {
+          var driveFetchedBlob = driveFetched.getBlob();
+          var driveFetchedType = sanitizeValue_(driveFetchedBlob.getContentType()) || sanitizeValue_(driveFetched.getHeaders()['Content-Type']);
+          if (safeMimePattern.test(driveFetchedType)) {
+            blob = driveFetchedBlob;
+            mimeType = driveFetchedType;
+            source = 'drive_public';
+            break;
+          }
+        }
+      } catch (driveFetchErr) {}
     }
-    if (!blob) {
-      var response = UrlFetchApp.fetch(url, {
-        muteHttpExceptions: true,
-        followRedirects: true,
-        headers: { 'User-Agent': 'Mozilla/5.0 AppsScript PDF Image Fetcher' }
-      });
-      var code = Number(response.getResponseCode() || 0);
-      if (code >= 400) throw new Error('Image fetch failed with status ' + code + '.');
-      blob = response.getBlob();
-      contentType = sanitizeValue_(blob.getContentType() || response.getHeaders()['Content-Type'] || '');
-      if ((!contentType || contentType.indexOf('image/') !== 0) && driveFileId) {
-        try {
-          var fallbackFile = DriveApp.getFileById(driveFileId);
-          blob = fallbackFile.getBlob();
-          contentType = sanitizeValue_(blob.getContentType() || '');
-        } catch (fallbackErr) {}
-      }
-    }
-    if (!blob) throw new Error('Image blob was not available.');
-    if (!contentType || contentType.indexOf('image/') !== 0) contentType = 'image/png';
-    var dataUrl = 'data:' + contentType + ';base64,' + Utilities.base64Encode(blob.getBytes());
-    return ok_('Image data prepared.', { dataUrl: dataUrl, contentType: contentType, fileId: driveFileId || '' });
-  } catch (err) {
-    throw new Error('Unable to prepare image for PDF rendering.');
   }
+
+  if (!blob) {
+    try {
+      if (driveId) {
+        var file = DriveApp.getFileById(driveId);
+        blob = file.getBlob();
+        source = 'drive';
+        if ((!blob.getContentType() || !/^image\//i.test(blob.getContentType())) && sanitizeValue_(file.getName())) {
+          blob = blob.setContentTypeFromExtension();
+        }
+        mimeType = sanitizeValue_(blob.getContentType());
+      }
+    } catch (driveErr) {}
+  }
+
+  if (!blob) {
+    var candidates = buildPublicImageCandidates_(raw);
+    for (var i = 0; i < candidates.length; i += 1) {
+      var candidate = candidates[i];
+      if (!candidate) continue;
+      try {
+        var fetched = UrlFetchApp.fetch(candidate, {
+          muteHttpExceptions: true,
+          followRedirects: true,
+          headers: {
+            'User-Agent': 'Mozilla/5.0',
+            'Accept': 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8'
+          }
+        });
+        var code = Number(fetched.getResponseCode() || 0);
+        if (code >= 200 && code < 300) {
+          var fetchedBlob = fetched.getBlob();
+          var contentType = sanitizeValue_(fetchedBlob.getContentType()) || sanitizeValue_(fetched.getHeaders()['Content-Type']);
+          if (/^image\//i.test(contentType)) {
+            blob = fetchedBlob;
+            mimeType = contentType;
+            source = 'url';
+            break;
+          }
+        }
+      } catch (fetchErr) {}
+    }
+  }
+
+  if (!blob) throw new Error('Unable to load that image for PDF export.');
+
+  mimeType = sanitizeValue_(mimeType || blob.getContentType());
+  if (!/^image\//i.test(mimeType)) {
+    mimeType = guessMimeTypeFromName_(raw);
+    try { blob = blob.setContentType(mimeType); } catch (setErr) {}
+  }
+
+  if (!safeMimePattern.test(mimeType) && driveId) {
+    var safeCandidates = buildPublicImageCandidates_(driveId);
+    for (var j = 0; j < safeCandidates.length; j += 1) {
+      var safeCandidate = safeCandidates[j];
+      if (!safeCandidate) continue;
+      try {
+        var safeFetched = UrlFetchApp.fetch(safeCandidate, {
+          muteHttpExceptions: true,
+          followRedirects: true,
+          headers: {
+            'User-Agent': 'Mozilla/5.0',
+            'Accept': 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8'
+          }
+        });
+        var safeCode = Number(safeFetched.getResponseCode() || 0);
+        if (safeCode >= 200 && safeCode < 300) {
+          var safeBlob = safeFetched.getBlob();
+          var safeType = sanitizeValue_(safeBlob.getContentType()) || sanitizeValue_(safeFetched.getHeaders()['Content-Type']);
+          if (safeMimePattern.test(safeType)) {
+            blob = safeBlob;
+            mimeType = safeType;
+            source = 'drive_public_safe';
+            break;
+          }
+        }
+      } catch (safeErr) {}
+    }
+  }
+
+  if (!/^image\//i.test(mimeType)) throw new Error('The selected file is not an image.');
+  var bytes = blob.getBytes();
+  if (!bytes || !bytes.length) throw new Error('Image data is empty.');
+  return ok_('Image data prepared.', {
+    source: source || (driveId ? 'drive' : 'url'),
+    mimeType: mimeType,
+    byteLength: bytes.length,
+    dataUrl: 'data:' + mimeType + ';base64,' + Utilities.base64Encode(bytes)
+  });
 }
 
 function sendBulkEmail_(payload) {
@@ -1614,10 +1703,16 @@ function normalizeImageUrl_(url) {
   var cssMatch = url.match(/url\((['"]?)(.*?)\1\)/i);
   if (cssMatch && cssMatch[2]) url = sanitizeValue_(cssMatch[2]);
   var match = extractDriveFileId_(url);
-  if (match) return 'https://drive.google.com/thumbnail?id=' + match + '&sz=w1600';
+  if (match) return 'https://drive.google.com/thumbnail?id=' + match + '&sz=w2000';
+  if (/dropbox\.com/i.test(url)) {
+    var next = url.replace(/\?dl=0$/i, '?raw=1').replace(/\?dl=1$/i, '?raw=1');
+    if (!/[?&]raw=1/i.test(next)) next += (next.indexOf('?') >= 0 ? '&' : '?') + 'raw=1';
+    return next;
+  }
+  var gh = url.match(/^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/([^\/]+)\/(.+)$/i);
+  if (gh) return 'https://raw.githubusercontent.com/' + gh[1] + '/' + gh[2] + '/' + gh[3] + '/' + gh[4];
   return url;
 }
-
 
 function extractDriveFileId_(value) {
   var raw = sanitizeValue_(value);
@@ -1627,8 +1722,40 @@ function extractDriveFileId_(value) {
   if (!match) match = raw.match(/[?&]id=([a-zA-Z0-9_-]+)/i);
   if (!match) match = raw.match(/thumbnail\?[^#]*id=([a-zA-Z0-9_-]+)/i);
   if (!match) match = raw.match(/uc\?export=(?:view|download)&id=([a-zA-Z0-9_-]+)/i);
+  if (!match) match = raw.match(/drive\.usercontent\.google\.com\/(?:download|u\/\d+\/uc)\?[^#]*id=([a-zA-Z0-9_-]+)/i);
   if (!match && /^[A-Za-z0-9_-]{20,}$/.test(raw)) match = [raw, raw];
   return match && match[1] ? sanitizeValue_(match[1]) : '';
+}
+
+function buildPublicImageCandidates_(value) {
+  var raw = sanitizeValue_(value);
+  if (!raw) return [];
+  var out = [];
+  function push(nextValue) {
+    var next = sanitizeValue_(nextValue);
+    if (next && out.indexOf(next) === -1) out.push(next);
+  }
+  push(normalizeImageUrl_(raw));
+  var driveId = extractDriveFileId_(raw);
+  if (driveId) {
+    push('https://drive.google.com/thumbnail?id=' + driveId + '&sz=w2000');
+    push('https://drive.google.com/uc?export=view&id=' + driveId);
+    push('https://drive.google.com/uc?id=' + driveId);
+    push('https://drive.usercontent.google.com/download?id=' + driveId + '&export=view&authuser=0');
+  }
+  push(raw);
+  return out;
+}
+
+function guessMimeTypeFromName_(name) {
+  var lower = sanitizeValue_(name).toLowerCase();
+  if (/\.png$/i.test(lower)) return 'image/png';
+  if (/\.(jpg|jpeg)$/i.test(lower)) return 'image/jpeg';
+  if (/\.webp$/i.test(lower)) return 'image/webp';
+  if (/\.gif$/i.test(lower)) return 'image/gif';
+  if (/\.svg$/i.test(lower)) return 'image/svg+xml';
+  if (/\.bmp$/i.test(lower)) return 'image/bmp';
+  return 'application/octet-stream';
 }
 
 function buildDriveImageUrls_(fileId) {

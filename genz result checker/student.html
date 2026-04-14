@@ -753,6 +753,8 @@
       if (match && match[1]) {
         push(`https://drive.google.com/thumbnail?id=${match[1]}&sz=w2000`);
         push(`https://drive.google.com/uc?export=view&id=${match[1]}`);
+        push(`https://drive.google.com/uc?id=${match[1]}`);
+        push(`https://drive.usercontent.google.com/download?id=${match[1]}&export=view&authuser=0`);
       }
       return out;
     }
@@ -859,9 +861,38 @@
       return '';
     }
 
+    async function normalizePdfImageDataUrl(dataUrl, preferredType='image/jpeg', quality=0.92){
+      const raw = String(dataUrl || '').trim();
+      if (!raw) return '';
+      if (/^data:image\/jpeg;/i.test(raw) || /^data:image\/jpg;/i.test(raw)) return raw;
+      try{
+        return await new Promise(resolve => {
+          const img = new Image();
+          img.onload = function(){
+            try{
+              const width = Math.max(1, this.naturalWidth || this.width || 1);
+              const height = Math.max(1, this.naturalHeight || this.height || 1);
+              const canvas = document.createElement('canvas');
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx.fillStyle = '#ffffff';
+              ctx.fillRect(0, 0, width, height);
+              ctx.drawImage(this, 0, 0, width, height);
+              const clean = canvas.toDataURL(preferredType, quality);
+              resolve(String(clean || raw));
+            }catch(err){ resolve(raw); }
+          };
+          img.onerror = () => resolve(raw);
+          img.src = raw;
+        });
+      }catch(err){ return raw; }
+    }
+
     async function preparePdfImage(url){
       const dataUrl = await fetchImageDataUrl(url || '');
-      return String(dataUrl || '').trim();
+      if (!dataUrl) return '';
+      return await normalizePdfImageDataUrl(String(dataUrl || '').trim());
     }
 
     async function getRenderedImageDataUrl(target){
@@ -880,7 +911,7 @@
       }catch(err){}
       const src = img.currentSrc || img.src || '';
       if (!src) return '';
-      return await fetchCandidateAsDataUrl(src) || await fetchImageDataUrlFromBackend(src);
+      return await fetchImageDataUrlFromBackend(src) || await fetchCandidateAsDataUrl(src);
     }
 
     function detectImageFormatFromDataUrl(dataUrl){
@@ -892,13 +923,18 @@
 
     async function loadImageIntoElement(box, raw, alt='Image', contain=false, emptyText='No image'){
       if (!box) return false;
-      const candidates = publicImageCandidates(raw);
+      const backendDataUrl = await fetchImageDataUrl(raw || '');
+      const candidates = [];
+      const push = value => { if (value && !candidates.includes(value)) candidates.push(value); };
+      push(backendDataUrl);
+      publicImageCandidates(raw).forEach(push);
       if (!candidates.length){ box.textContent = emptyText; return false; }
       return await new Promise(resolve => {
         let idx = 0;
         const img = new Image();
         img.crossOrigin = 'anonymous';
         img.referrerPolicy = 'no-referrer';
+        img.decoding = 'async';
         img.alt = alt;
         img.style.width = '100%';
         img.style.height = '100%';
@@ -1107,9 +1143,9 @@
       const passed = rows.filter(r => String(r.resultStatus).toUpperCase() === 'PASS').length;
       const avg = totalSubjects ? (rows.reduce((sum,r)=> sum + safeNumber(r.percentage), 0) / totalSubjects).toFixed(2) : '0.00';
       const publishedDate = formatDisplayDate(first.publishedAt || new Date());
-      let passportData = assets.passportUrl ? await fetchImageDataUrl(assets.passportUrl) : '';
-      let brandData = assets.brandLogoUrl ? await fetchImageDataUrl(assets.brandLogoUrl) : '';
-      let signatureData = assets.signatureUrl ? await fetchImageDataUrl(assets.signatureUrl) : '';
+      let passportData = assets.passportUrl ? await preparePdfImage(assets.passportUrl) : '';
+      let brandData = assets.brandLogoUrl ? await preparePdfImage(assets.brandLogoUrl) : '';
+      let signatureData = assets.signatureUrl ? await preparePdfImage(assets.signatureUrl) : '';
       if (!brandData) brandData = await getRenderedImageDataUrl('brandLogoBox');
       if (!passportData) passportData = await getRenderedImageDataUrl('passportBox');
       if (!signatureData) {
