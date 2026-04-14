@@ -4,6 +4,9 @@ const REQUEST_TTL_SECONDS = 60 * 5;
 const RESET_CODE_TTL_MINUTES = 15;
 const PASSWORD_HASH_VERSION = 'v2';
 const PASSWORD_HASH_ROUNDS = 4000;
+const SETTINGS_CACHE_SECONDS = 300;
+const REMARKS_CACHE_SECONDS = 300;
+const PUBLIC_BOOTSTRAP_CACHE_SECONDS = 300;
 
 const SHEET_NAMES = {
   SETTINGS: 'SETTINGS',
@@ -342,16 +345,53 @@ function bootstrapRemarks_() {
     [90, 100, 'A+', 'Outstanding performance. Exceptional work.']
   ];
   sh.getRange(2, 1, rows.length, rows[0].length).setValues(rows);
+  invalidateRemarkBandsCache_();
 }
 
 function getSettings_() {
+  var cache = CacheService.getScriptCache();
+  var cached = cache.get('SETTINGS_CACHE_V1');
+  if (cached) {
+    var parsed = parseJson_(cached);
+    if (parsed && typeof parsed === 'object') return parsed;
+  }
   var sh = getSpreadsheet_().getSheetByName(SHEET_NAMES.SETTINGS);
   var rows = getSheetObjects_(sh);
   var out = {};
   rows.forEach(function(row) {
     if (row.Key) out[String(row.Key).trim()] = row.Value;
   });
+  cache.put('SETTINGS_CACHE_V1', JSON.stringify(out), SETTINGS_CACHE_SECONDS);
   return out;
+}
+
+function invalidateSettingsCache_() {
+  var cache = CacheService.getScriptCache();
+  cache.remove('SETTINGS_CACHE_V1');
+  cache.remove('PUBLIC_BOOTSTRAP_CACHE_V1');
+}
+
+function getRemarkBands_() {
+  var cache = CacheService.getScriptCache();
+  var cached = cache.get('REMARK_BANDS_CACHE_V1');
+  if (cached) {
+    var parsed = parseJson_(cached);
+    if (Array.isArray(parsed)) return parsed;
+  }
+  var bands = getSheetObjects_(getSpreadsheet_().getSheetByName(SHEET_NAMES.REMARKS)).map(function(item) {
+    return {
+      min: Number(item.MinPercent || 0),
+      max: Number(item.MaxPercent || 0),
+      label: String(item.BandLabel || ''),
+      remark: String(item.Remark || '')
+    };
+  });
+  cache.put('REMARK_BANDS_CACHE_V1', JSON.stringify(bands), REMARKS_CACHE_SECONDS);
+  return bands;
+}
+
+function invalidateRemarkBandsCache_() {
+  CacheService.getScriptCache().remove('REMARK_BANDS_CACHE_V1');
 }
 
 function upsertSetting_(key, value) {
@@ -365,8 +405,14 @@ function upsertSetting_(key, value) {
 }
 
 function getPublicBootstrap_() {
+  var cache = CacheService.getScriptCache();
+  var cached = cache.get('PUBLIC_BOOTSTRAP_CACHE_V1');
+  if (cached) {
+    var parsed = parseJson_(cached);
+    if (parsed && parsed.ok) return parsed;
+  }
   var settings = getSettings_();
-  return ok_('Public portal settings loaded.', {
+  var payload = ok_('Public portal settings loaded.', {
     settings: settings,
     classOptions: parseListSetting_(settings.CLASS_OPTIONS),
     categoryOptions: parseListSetting_(settings.CATEGORY_OPTIONS),
@@ -374,6 +420,8 @@ function getPublicBootstrap_() {
     allowStudentSignup: normalizeBoolean_(settings.STUDENT_SIGNUP_ENABLED, false),
     allowAdminSignup: normalizeBoolean_(settings.PUBLIC_ADMIN_SIGNUP_ENABLED, false)
   });
+  cache.put('PUBLIC_BOOTSTRAP_CACHE_V1', JSON.stringify(payload), PUBLIC_BOOTSTRAP_CACHE_SECONDS);
+  return payload;
 }
 
 
@@ -601,9 +649,14 @@ function getAdminBootstrap_(payload) {
 function saveSettings_(payload) {
   requirePrincipalAdmin_(payload.token, sanitizeValue_(payload.clientId));
   var keys = ['BRAND_NAME','HEAD_OFFICE_ADDRESS','SCHOOL_NAME','SCHOOL_PHONE','SCHOOL_EMAIL','PRINCIPAL_NAME','ACADEMIC_SESSION','TERM','EXAM_TITLE','PASS_MARK_NUMBER','PASS_MARK_PERCENTAGE','SHOW_POSITION_ON_REPORT','SIGNATURE_NAME','SIGNATURE_URL','BRAND_LOGO_URL','FAVICON_URL','PORTAL_NOTICE','CLASS_OPTIONS','CATEGORY_OPTIONS','SUBJECT_OPTIONS','STUDENT_SIGNUP_ENABLED','PUBLIC_ADMIN_SIGNUP_ENABLED','RESULT_FOOTER_NOTE','RESULT_DETAIL_FIELDS'];
+  var changed = false;
   keys.forEach(function(key) {
-    if (Object.prototype.hasOwnProperty.call(payload, key)) upsertSetting_(key, sanitizeSettingValue_(key, payload[key]));
+    if (Object.prototype.hasOwnProperty.call(payload, key)) {
+      upsertSetting_(key, sanitizeSettingValue_(key, payload[key]));
+      changed = true;
+    }
   });
+  if (changed) invalidateSettingsCache_();
   logAudit_('admin', requireSession_(payload.token, 'admin', sanitizeValue_(payload.clientId)).id, 'saveSettings', 'OK', 'Portal settings updated.');
   return ok_('Settings saved successfully.', { settings: getSettings_() });
 }
@@ -689,18 +742,27 @@ function setStudentState_(payload) {
 
 function importStudentsCsv_(payload) {
   requireAdmin_(payload.token, sanitizeValue_(payload.clientId));
-  var rows = Array.isArray(payload.rows) ? payload.rows : [];
-  if (!rows.length) throw new Error('No student rows were provided.');
+  var inputRows = Array.isArray(payload.rows) ? payload.rows : [];
+  if (!inputRows.length) throw new Error('No student rows were provided.');
   var sh = getSpreadsheet_().getSheetByName(SHEET_NAMES.STUDENTS);
+  var bundle = getSheetDataBundle_(sh);
+  var headers = bundle.headers;
+  var rows = bundle.rows;
+  var rowMap = {};
+  rows.forEach(function(row, idx) {
+    var obj = objectFromHeadersRow_(headers, row);
+    var regId = sanitizeRegId_(obj.RegID);
+    if (regId) rowMap[regId] = idx;
+  });
   var created = 0;
   var updated = 0;
-  rows.forEach(function(src) {
+  inputRows.forEach(function(src) {
     var regId = sanitizeRegId_(src.regId || src.RegID);
     if (!regId) return;
-    var existing = findObjectRow_(sh, function(obj) { return sanitizeRegId_(obj.RegID) === regId; });
+    var existingIdx = Object.prototype.hasOwnProperty.call(rowMap, regId) ? rowMap[regId] : -1;
+    var current = existingIdx > -1 ? objectFromHeadersRow_(headers, rows[existingIdx]) : {};
     var password = String(src.password || src.Password || '');
-    var current = existing ? existing.obj : {};
-    var passwordRecord = existing ? {
+    var passwordRecord = existingIdx > -1 ? {
       hash: current.PasswordHash || '',
       salt: current.PasswordSalt || '',
       version: current.PasswordVersion || ''
@@ -732,14 +794,16 @@ function importStudentsCsv_(payload) {
       UpdatedAt: isoNow_(),
       LastLoginAt: current.LastLoginAt || ''
     });
-    if (existing) {
-      updateObjectRow_(sh, existing.rowIndex, record);
+    if (existingIdx > -1) {
+      rows[existingIdx] = objectToRowByHeaders_(headers, record);
       updated++;
     } else {
-      appendObjectRow_(sh, record);
+      rowMap[regId] = rows.length;
+      rows.push(objectToRowByHeaders_(headers, record));
       created++;
     }
   });
+  overwriteSheetBody_(sh, headers, rows);
   return ok_('Student CSV import completed.', { created: created, updated: updated });
 }
 
@@ -760,31 +824,50 @@ function bulkUpdatePassports_(payload) {
   if (!regIds.length) throw new Error('Select at least one student first.');
   if (!passportUrl) throw new Error('Passport URL is required.');
   var sh = getSpreadsheet_().getSheetByName(SHEET_NAMES.STUDENTS);
+  var bundle = getSheetDataBundle_(sh);
+  var headers = bundle.headers;
+  var rows = bundle.rows;
+  var targets = {};
+  regIds.map(sanitizeRegId_).forEach(function(id) { if (id) targets[id] = true; });
   var updated = 0;
-  regIds.forEach(function(id) {
-    var row = findObjectRow_(sh, function(obj) { return sanitizeRegId_(obj.RegID) === sanitizeRegId_(id); });
-    if (!row) return;
-    updateObjectRow_(sh, row.rowIndex, { PassportUrl: passportUrl, UpdatedAt: isoNow_() });
+  rows = rows.map(function(row) {
+    var obj = objectFromHeadersRow_(headers, row);
+    var regId = sanitizeRegId_(obj.RegID);
+    if (!targets[regId]) return row;
+    obj.PassportUrl = passportUrl;
+    obj.UpdatedAt = isoNow_();
     updated++;
+    return objectToRowByHeaders_(headers, obj);
   });
+  overwriteSheetBody_(sh, headers, rows);
   return ok_('Passport URLs updated.', { updated: updated });
 }
 
 function importPassportsCsv_(payload) {
   requireAdmin_(payload.token, sanitizeValue_(payload.clientId));
-  var rows = Array.isArray(payload.rows) ? payload.rows : [];
-  if (!rows.length) throw new Error('No passport rows were provided.');
+  var inputRows = Array.isArray(payload.rows) ? payload.rows : [];
+  if (!inputRows.length) throw new Error('No passport rows were provided.');
   var sh = getSpreadsheet_().getSheetByName(SHEET_NAMES.STUDENTS);
-  var updated = 0;
-  rows.forEach(function(src) {
+  var bundle = getSheetDataBundle_(sh);
+  var headers = bundle.headers;
+  var rows = bundle.rows;
+  var passportMap = {};
+  inputRows.forEach(function(src) {
     var regId = sanitizeRegId_(src.regId || src.RegID);
     var passportUrl = normalizeImageUrl_(src.passportUrl || src.PassportUrl || src.imageUrl);
-    if (!regId || !passportUrl) return;
-    var row = findObjectRow_(sh, function(obj) { return sanitizeRegId_(obj.RegID) === regId; });
-    if (!row) return;
-    updateObjectRow_(sh, row.rowIndex, { PassportUrl: passportUrl, UpdatedAt: isoNow_() });
-    updated++;
+    if (regId && passportUrl) passportMap[regId] = passportUrl;
   });
+  var updated = 0;
+  rows = rows.map(function(row) {
+    var obj = objectFromHeadersRow_(headers, row);
+    var regId = sanitizeRegId_(obj.RegID);
+    if (!passportMap[regId]) return row;
+    obj.PassportUrl = passportMap[regId];
+    obj.UpdatedAt = isoNow_();
+    updated++;
+    return objectToRowByHeaders_(headers, obj);
+  });
+  overwriteSheetBody_(sh, headers, rows);
   return ok_('Passport CSV import completed.', { updated: updated });
 }
 
@@ -794,68 +877,83 @@ function saveResultEntries_(payload) {
   if (!entries.length) throw new Error('No result entries were provided.');
   var sh = getSpreadsheet_().getSheetByName(SHEET_NAMES.RESULTS);
   var settings = getSettings_();
+  var bundle = getSheetDataBundle_(sh);
+  var headers = bundle.headers;
+  var rows = bundle.rows;
+  var resultIndex = {};
+  rows.forEach(function(row, idx) {
+    var obj = objectFromHeadersRow_(headers, row);
+    var key = buildResultCompositeKey_(obj);
+    if (key) resultIndex[key] = idx;
+  });
+  var validStudents = buildStudentRegIndex_();
   var saved = 0;
   entries.forEach(function(entry) {
     var normalized = normalizeResultEntry_(entry, settings);
     if (!normalized.RegID || !normalized.ExamCode || !normalized.Subject) return;
-    if (!getStudentByRegId_(normalized.RegID)) throw new Error('Student not found: ' + normalized.RegID);
-    var existing = findObjectRow_(sh, function(obj) {
-      return sanitizeRegId_(obj.RegID) === normalized.RegID &&
-        sanitizeValue_(obj.ExamCode).toLowerCase() === normalized.ExamCode.toLowerCase() &&
-        sanitizeValue_(obj.Subject).toLowerCase() === normalized.Subject.toLowerCase() &&
-        sanitizeValue_(obj.AcademicSession).toLowerCase() === normalized.AcademicSession.toLowerCase() &&
-        sanitizeValue_(obj.Term).toLowerCase() === normalized.Term.toLowerCase();
-    });
-    if (existing) {
-      normalized.ResultID = existing.obj.ResultID || normalized.ResultID;
-      normalized.CreatedAt = existing.obj.CreatedAt || normalized.CreatedAt;
-      normalized.Archived = existing.obj.Archived || false;
-      normalized.Deleted = existing.obj.Deleted || false;
-      if (normalized.Published && !existing.obj.PublishedAt) normalized.PublishedAt = isoNow_();
-      if (existing.obj.PublishedAt && normalized.Published) normalized.PublishedAt = existing.obj.PublishedAt;
-      updateObjectRow_(sh, existing.rowIndex, normalized);
+    if (!validStudents[normalized.RegID]) throw new Error('Student not found: ' + normalized.RegID);
+    var key = buildResultCompositeKey_(normalized);
+    var existingIdx = Object.prototype.hasOwnProperty.call(resultIndex, key) ? resultIndex[key] : -1;
+    if (existingIdx > -1) {
+      var existingObj = objectFromHeadersRow_(headers, rows[existingIdx]);
+      normalized.ResultID = existingObj.ResultID || normalized.ResultID;
+      normalized.CreatedAt = existingObj.CreatedAt || normalized.CreatedAt;
+      normalized.Archived = existingObj.Archived || false;
+      normalized.Deleted = existingObj.Deleted || false;
+      if (normalized.Published && !existingObj.PublishedAt) normalized.PublishedAt = isoNow_();
+      if (existingObj.PublishedAt && normalized.Published) normalized.PublishedAt = existingObj.PublishedAt;
+      rows[existingIdx] = objectToRowByHeaders_(headers, normalized);
     } else {
-      appendObjectRow_(sh, normalized);
+      resultIndex[key] = rows.length;
+      rows.push(objectToRowByHeaders_(headers, normalized));
     }
     saved++;
   });
-  recalculateRankings_();
+  applyResultRankingToRows_(headers, rows);
+  overwriteSheetBody_(sh, headers, rows);
   return ok_('Result entries saved successfully.', { saved: saved });
 }
 
 function importResultsCsv_(payload) {
   requireAdmin_(payload.token, sanitizeValue_(payload.clientId));
-  var rows = Array.isArray(payload.rows) ? payload.rows : [];
-  if (!rows.length) throw new Error('No result rows were provided.');
+  var inputRows = Array.isArray(payload.rows) ? payload.rows : [];
+  if (!inputRows.length) throw new Error('No result rows were provided.');
   var sh = getSpreadsheet_().getSheetByName(SHEET_NAMES.RESULTS);
   var settings = getSettings_();
+  var bundle = getSheetDataBundle_(sh);
+  var headers = bundle.headers;
+  var rows = bundle.rows;
+  var resultIndex = {};
+  rows.forEach(function(row, idx) {
+    var obj = objectFromHeadersRow_(headers, row);
+    var key = buildResultCompositeKey_(obj);
+    if (key) resultIndex[key] = idx;
+  });
   var created = 0;
   var updated = 0;
-  rows.forEach(function(src) {
+  inputRows.forEach(function(src) {
     var normalized = normalizeResultEntry_(src, settings);
     if (!normalized.RegID || !normalized.ExamCode || !normalized.Subject) return;
-    var existing = findObjectRow_(sh, function(obj) {
-      return sanitizeRegId_(obj.RegID) === normalized.RegID &&
-        sanitizeValue_(obj.ExamCode).toLowerCase() === normalized.ExamCode.toLowerCase() &&
-        sanitizeValue_(obj.Subject).toLowerCase() === normalized.Subject.toLowerCase() &&
-        sanitizeValue_(obj.AcademicSession).toLowerCase() === normalized.AcademicSession.toLowerCase() &&
-        sanitizeValue_(obj.Term).toLowerCase() === normalized.Term.toLowerCase();
-    });
-    if (existing) {
-      normalized.ResultID = existing.obj.ResultID || normalized.ResultID;
-      normalized.CreatedAt = existing.obj.CreatedAt || normalized.CreatedAt;
-      normalized.Archived = existing.obj.Archived || false;
-      normalized.Deleted = existing.obj.Deleted || false;
-      if (normalized.Published && !existing.obj.PublishedAt) normalized.PublishedAt = isoNow_();
-      if (existing.obj.PublishedAt && normalized.Published) normalized.PublishedAt = existing.obj.PublishedAt;
-      updateObjectRow_(sh, existing.rowIndex, normalized);
+    var key = buildResultCompositeKey_(normalized);
+    var existingIdx = Object.prototype.hasOwnProperty.call(resultIndex, key) ? resultIndex[key] : -1;
+    if (existingIdx > -1) {
+      var existingObj = objectFromHeadersRow_(headers, rows[existingIdx]);
+      normalized.ResultID = existingObj.ResultID || normalized.ResultID;
+      normalized.CreatedAt = existingObj.CreatedAt || normalized.CreatedAt;
+      normalized.Archived = existingObj.Archived || false;
+      normalized.Deleted = existingObj.Deleted || false;
+      if (normalized.Published && !existingObj.PublishedAt) normalized.PublishedAt = isoNow_();
+      if (existingObj.PublishedAt && normalized.Published) normalized.PublishedAt = existingObj.PublishedAt;
+      rows[existingIdx] = objectToRowByHeaders_(headers, normalized);
       updated++;
     } else {
-      appendObjectRow_(sh, normalized);
+      resultIndex[key] = rows.length;
+      rows.push(objectToRowByHeaders_(headers, normalized));
       created++;
     }
   });
-  recalculateRankings_();
+  applyResultRankingToRows_(headers, rows);
+  overwriteSheetBody_(sh, headers, rows);
   return ok_('Result CSV import completed.', { created: created, updated: updated });
 }
 
@@ -1062,21 +1160,30 @@ function bulkSetResultState_(payload) {
   var state = sanitizeValue_(payload.state).toLowerCase();
   if (!ids.length) throw new Error('Select at least one result first.');
   var sh = getSpreadsheet_().getSheetByName(SHEET_NAMES.RESULTS);
-  var rows = getSheetObjectsWithIndex_(sh);
+  var bundle = getSheetDataBundle_(sh);
+  var headers = bundle.headers;
+  var rows = bundle.rows;
+  var idSet = {};
+  ids.forEach(function(id) { if (id) idSet[String(id)] = true; });
   var changed = 0;
-  ids.forEach(function(id) {
-    var row = rows.find(function(item){ return String(item.obj.ResultID || '') === String(id || ''); });
-    if (!row) return;
-    if (state === 'harddelete') {
-      sh.deleteRow(row.rowIndex);
-      rows = getSheetObjectsWithIndex_(sh);
-    } else {
-      var patch = resultStatePatch_(state, row.obj);
+  if (state === 'harddelete') {
+    rows = rows.filter(function(row) {
+      var obj = objectFromHeadersRow_(headers, row);
+      var match = !!idSet[String(obj.ResultID || '')];
+      if (match) changed++;
+      return !match;
+    });
+  } else {
+    rows = rows.map(function(row) {
+      var obj = objectFromHeadersRow_(headers, row);
+      if (!idSet[String(obj.ResultID || '')]) return row;
+      var patch = resultStatePatch_(state, obj);
       patch.UpdatedAt = isoNow_();
-      updateObjectRow_(sh, row.rowIndex, patch);
-    }
-    changed++;
-  });
+      changed++;
+      return objectToRowByHeaders_(headers, Object.assign({}, obj, patch));
+    });
+  }
+  overwriteSheetBody_(sh, headers, rows);
   logAudit_('admin', session.id, 'bulkSetResultState', 'OK', state + ' x' + changed);
   return ok_(changed + ' result(s) updated.');
 }
@@ -1349,64 +1456,20 @@ function normalizeResultEntry_(src, settings) {
 
 function recalculateRankings_(examCode, academicSession, term) {
   var sh = getSpreadsheet_().getSheetByName(SHEET_NAMES.RESULTS);
-  var rows = getSheetObjectsWithIndex_(sh);
-  var filtered = rows.filter(function(item) {
-    var obj = item.obj;
-    if (normalizeBoolean_(obj.Deleted, false) || normalizeBoolean_(obj.Archived, false)) return false;
-    if (examCode && sanitizeValue_(obj.ExamCode).toLowerCase() !== sanitizeValue_(examCode).toLowerCase()) return false;
-    if (academicSession && sanitizeValue_(obj.AcademicSession) !== sanitizeValue_(academicSession)) return false;
-    if (term && sanitizeValue_(obj.Term) !== sanitizeValue_(term)) return false;
-    return true;
-  });
-  var groups = {};
-  filtered.forEach(function(item) {
-    var key = [sanitizeValue_(item.obj.ExamCode).toLowerCase(), sanitizeValue_(item.obj.Subject).toLowerCase(), sanitizeValue_(item.obj.AcademicSession), sanitizeValue_(item.obj.Term)].join('|');
-    groups[key] = groups[key] || [];
-    groups[key].push(item);
-  });
-  var affected = 0;
-  Object.keys(groups).forEach(function(key) {
-    var group = groups[key].slice().sort(function(a, b) {
-      return Number(b.obj.StudentScore || -1) - Number(a.obj.StudentScore || -1);
-    });
-    var position = 0;
-    var lastScore = null;
-    group.forEach(function(item, idx) {
-      var score = item.obj.StudentScore === '' ? null : Number(item.obj.StudentScore);
-      var maxScore = item.obj.MaxScore === '' ? null : Number(item.obj.MaxScore);
-      if (score == null || maxScore == null || maxScore <= 0) {
-        updateObjectRow_(sh, item.rowIndex, {
-          Position: '',
-          Percentage: '',
-          Grade: '',
-          Remark: '',
-          UpdatedAt: isoNow_()
-        });
-        affected++;
-        return;
-      }
-      if (lastScore === null || score < lastScore) position = idx + 1;
-      lastScore = score;
-      var percentage = round2_((score / maxScore) * 100);
-      updateObjectRow_(sh, item.rowIndex, {
-        Position: position,
-        Percentage: percentage,
-        Grade: getGradeFromPercentage_(percentage),
-        Remark: getRemarkFromPercentage_(percentage),
-        UpdatedAt: isoNow_()
-      });
-      affected++;
-    });
-  });
+  var bundle = getSheetDataBundle_(sh);
+  var headers = bundle.headers;
+  var rows = bundle.rows;
+  var affected = applyResultRankingToRows_(headers, rows, examCode, academicSession, term);
+  overwriteSheetBody_(sh, headers, rows);
   return affected;
 }
 
 function getRemarkFromPercentage_(percentage) {
-  var bands = getSheetObjects_(getSpreadsheet_().getSheetByName(SHEET_NAMES.REMARKS));
+  var bands = getRemarkBands_();
   var band = bands.find(function(item) {
-    return Number(percentage) >= Number(item.MinPercent) && Number(percentage) <= Number(item.MaxPercent);
+    return Number(percentage) >= Number(item.min) && Number(percentage) <= Number(item.max);
   });
-  return band ? String(band.Remark || '') : 'No remark configured for this score band.';
+  return band ? String(band.remark || '') : 'No remark configured for this score band.';
 }
 
 function getGradeFromPercentage_(percentage) {
@@ -1506,6 +1569,112 @@ function cleanResult_(r) {
     updatedAt: sanitizeValue_(r.UpdatedAt),
     resultStatus: getResultStatus_(studentScore, percentage, r.PassMarkNumber, r.PassMarkPercentage)
   };
+}
+
+
+function getSheetDataBundle_(sheet) {
+  var lastRow = sheet.getLastRow();
+  var lastCol = sheet.getLastColumn();
+  var headers = lastCol ? sheet.getRange(1, 1, 1, lastCol).getValues()[0] : [];
+  var rows = (lastRow > 1 && lastCol) ? sheet.getRange(2, 1, lastRow - 1, lastCol).getValues() : [];
+  return { headers: headers, rows: rows };
+}
+
+function objectFromHeadersRow_(headers, row) {
+  var obj = {};
+  headers.forEach(function(h, i) { obj[h] = row[i]; });
+  return obj;
+}
+
+function objectToRowByHeaders_(headers, obj) {
+  return headers.map(function(h) { return Object.prototype.hasOwnProperty.call(obj, h) ? obj[h] : ''; });
+}
+
+function overwriteSheetBody_(sheet, headers, rows) {
+  var lastRow = sheet.getLastRow();
+  var lastCol = sheet.getLastColumn();
+  if (!headers || !headers.length) return;
+  if (lastRow > 1 && lastCol) {
+    sheet.getRange(2, 1, lastRow - 1, lastCol).clearContent();
+  }
+  if (rows && rows.length) {
+    sheet.getRange(2, 1, rows.length, headers.length).setValues(rows);
+  }
+}
+
+function buildStudentRegIndex_() {
+  var sh = getSpreadsheet_().getSheetByName(SHEET_NAMES.STUDENTS);
+  var rows = getSheetObjects_(sh);
+  var out = {};
+  rows.forEach(function(row) {
+    var regId = sanitizeRegId_(row.RegID);
+    if (regId) out[regId] = true;
+  });
+  return out;
+}
+
+function buildResultCompositeKey_(obj) {
+  var regId = sanitizeRegId_(obj.RegID || obj.regId);
+  var examCode = sanitizeValue_(obj.ExamCode || obj.examCode).toLowerCase();
+  var subject = sanitizeValue_(obj.Subject || obj.subject).toLowerCase();
+  var session = sanitizeValue_(obj.AcademicSession || obj.academicSession).toLowerCase();
+  var term = sanitizeValue_(obj.Term || obj.term).toLowerCase();
+  if (!regId || !examCode || !subject) return '';
+  return [regId, examCode, subject, session, term].join('|');
+}
+
+function applyResultRankingToRows_(headers, rows, examCode, academicSession, term) {
+  if (!headers || !headers.length) return 0;
+  var groups = {};
+  var affected = 0;
+  var now = isoNow_();
+  var h = {};
+  headers.forEach(function(name, idx) { h[name] = idx; });
+  rows.forEach(function(row, idx) {
+    var obj = objectFromHeadersRow_(headers, row);
+    if (normalizeBoolean_(obj.Deleted, false) || normalizeBoolean_(obj.Archived, false)) return;
+    if (examCode && sanitizeValue_(obj.ExamCode).toLowerCase() !== sanitizeValue_(examCode).toLowerCase()) return;
+    if (academicSession && sanitizeValue_(obj.AcademicSession) !== sanitizeValue_(academicSession)) return;
+    if (term && sanitizeValue_(obj.Term) !== sanitizeValue_(term)) return;
+    var key = [
+      sanitizeValue_(obj.ExamCode).toLowerCase(),
+      sanitizeValue_(obj.Subject).toLowerCase(),
+      sanitizeValue_(obj.AcademicSession),
+      sanitizeValue_(obj.Term)
+    ].join('|');
+    groups[key] = groups[key] || [];
+    groups[key].push({ idx: idx, obj: obj });
+  });
+  Object.keys(groups).forEach(function(key) {
+    var group = groups[key].slice().sort(function(a, b) {
+      return Number(b.obj.StudentScore || -1) - Number(a.obj.StudentScore || -1);
+    });
+    var position = 0;
+    var lastScore = null;
+    group.forEach(function(item, index) {
+      var score = item.obj.StudentScore === '' ? null : Number(item.obj.StudentScore);
+      var maxScore = item.obj.MaxScore === '' ? null : Number(item.obj.MaxScore);
+      if (score == null || maxScore == null || maxScore <= 0) {
+        rows[item.idx][h.Position] = '';
+        rows[item.idx][h.Percentage] = '';
+        rows[item.idx][h.Grade] = '';
+        rows[item.idx][h.Remark] = '';
+        rows[item.idx][h.UpdatedAt] = now;
+        affected++;
+        return;
+      }
+      if (lastScore === null || score < lastScore) position = index + 1;
+      lastScore = score;
+      var percentage = round2_((score / maxScore) * 100);
+      rows[item.idx][h.Position] = position;
+      rows[item.idx][h.Percentage] = percentage;
+      rows[item.idx][h.Grade] = getGradeFromPercentage_(percentage);
+      rows[item.idx][h.Remark] = getRemarkFromPercentage_(percentage);
+      rows[item.idx][h.UpdatedAt] = now;
+      affected++;
+    });
+  });
+  return affected;
 }
 
 function getSheetObjects_(sheet) {
@@ -1710,6 +1879,7 @@ function uploadBrandingAsset_(payload) {
   var links = buildDriveImageUrls_(file.getId());
   var savedUrl = links.thumbnailUrl || links.viewUrl || file.getUrl();
   upsertSetting_(settingKey, savedUrl);
+  invalidateSettingsCache_();
   logAudit_('admin', session.id, 'uploadBrandingAsset', 'OK', settingKey + ' uploaded');
   return ok_((labelMap[settingKey] || 'Image') + ' uploaded successfully.', {
     settingKey: settingKey,

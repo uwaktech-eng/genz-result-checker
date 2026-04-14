@@ -336,7 +336,7 @@
             <div class="student-headline">
               <div>
                 <div class="student-title">Student Performance Summary</div>
-                <div class="student-sub" id="studentHeadlineSub">Official academic result breakdown for the selected exam code.</div>
+                <div class="student-sub" id="studentHeadlineSub">Official single report card carrying every loaded published subject for the student.</div>
               </div>
               <div class="report-badge" id="studentStatusBadge">Active Record</div>
             </div>
@@ -356,14 +356,15 @@
             <div class="table-card-title" style="padding:16px 16px 0">
               <div>
                 <div class="table-title">Detailed Subject Breakdown</div>
-                <div class="table-subtitle">Scores, grades, ranking, and publication status for each subject entry.</div>
+                <div class="table-subtitle">Every published subject for the loaded student report card, including exam code, session, term, score, grade, ranking, and status.</div>
               </div>
             </div>
             <table>
               <thead>
                 <tr>
                   <th>Exam Code</th>
-                  <th>Class</th>
+                  <th>Session</th>
+                  <th>Term</th>
                   <th>Subject</th>
                   <th>Score</th>
                   <th>Percentage</th>
@@ -581,10 +582,6 @@
     }
 
     function renderStudentProfile(student){
-      const passportBox = $('passportBox');
-      const passportUrl = normalizeImageUrl(student.passportUrl || '');
-      if (passportUrl) passportBox.innerHTML = `<img src="${esc(passportUrl)}" alt="Passport" crossorigin="anonymous" referrerpolicy="no-referrer" />`;
-      else passportBox.textContent = 'No passport';
 
       const fieldValues = {
         fullName: student.fullName, regId: student.regId, classLevel: student.classLevel, category: student.category, schoolName: student.schoolName,
@@ -850,6 +847,30 @@
       return fmt === 'JPG' ? 'JPEG' : fmt;
     }
 
+
+    async function loadImageIntoElement(box, raw, alt='Image', contain=false, emptyText='No image'){
+      if (!box) return false;
+      const candidates = publicImageCandidates(raw);
+      if (!candidates.length){ box.textContent = emptyText; return false; }
+      return await new Promise(resolve => {
+        let idx = 0;
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.referrerPolicy = 'no-referrer';
+        img.alt = alt;
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = contain ? 'contain' : 'cover';
+        img.onload = () => { box.innerHTML = ''; box.appendChild(img); resolve(true); };
+        img.onerror = () => {
+          idx += 1;
+          if (idx < candidates.length) img.src = candidates[idx];
+          else { box.textContent = emptyText; resolve(false); }
+        };
+        img.src = candidates[idx];
+      });
+    }
+
     async function getImageDimensions(dataUrl){
       return await new Promise(resolve => {
         const img = new Image();
@@ -874,7 +895,7 @@
       return { x: dx, y: dy, w: drawW, h: drawH };
     }
 
-    function renderReport(resultData){
+    async function renderReport(resultData){
       currentStudent = resultData.student;
       currentResults = resultData.results || [];
       currentSettings = resultData.settings || currentSettings;
@@ -887,8 +908,7 @@
       $('schoolPhone').textContent = currentSettings.SCHOOL_PHONE || '';
       $('schoolEmail').textContent = currentSettings.SCHOOL_EMAIL || '';
       const assets = getDisplayAssets(resultData);
-      const logoUrl = assets.brandLogoUrl;
-      $('brandLogoBox').innerHTML = logoUrl ? `<img src="${esc(logoUrl)}" alt="Logo" crossorigin="anonymous" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:contain" />` : initialsFromText(currentSettings.BRAND_NAME || 'Logo');
+      await loadImageIntoElement($('brandLogoBox'), assets.brandLogoUrl || '', 'Brand Logo', true, initialsFromText(currentSettings.BRAND_NAME || 'Logo'));
 
       renderStudentProfile(resultData.student);
 
@@ -942,8 +962,8 @@
 
       $('studentStatusBadge').textContent = statusText;
       $('studentHeadlineSub').textContent = `${resultData.student.fullName || 'Student'} • ${resultData.student.regId || 'No Registration ID'} • ${resultData.student.classLevel || 'Class not set'}`;
-      $('resultBadgeLeft').textContent = `${String(badgeTerm).toUpperCase()} RESULT SHEET`;
-      $('resultBadgeRight').textContent = `${(first?.academicSession || currentResults[0]?.academicSession || 'Verified Record')}`;
+      $('resultBadgeLeft').textContent = `SINGLE REPORT CARD`;
+      $('resultBadgeRight').textContent = `${totalSubjects} PUBLISHED SUBJECT(S)`;
       $('metaExamCode').textContent = `Exam Code Filter • ${resultData.examCode || 'All Published Results'}`;
       $('metaSessionTerm').textContent = `Session • ${first?.academicSession || '—'}${first?.term ? ' / ' + first.term : ''}`;
       $('metaGeneratedOn').textContent = `Generated • ${formatDisplayDate(new Date())}`;
@@ -952,9 +972,10 @@
 
       $('resultTableBody').innerHTML = filtered.length ? filtered.map(r => `
         <tr>
-          <td>${esc(r.examCode)}</td>
-          <td>${esc(r.classLevel || resultData.student.classLevel || '—')}</td>
-          <td>${esc(r.subject)}</td>
+          <td>${esc(r.examCode || '—')}</td>
+          <td>${esc(r.academicSession || '—')}</td>
+          <td>${esc(r.term || '—')}</td>
+          <td>${esc(r.subject || '—')}</td>
           <td>${esc(r.studentScore || '—')} / ${esc(r.maxScore || '—')}</td>
           <td>${esc(r.percentage || '—')}%</td>
           <td>${esc(r.grade || '—')}</td>
@@ -962,10 +983,10 @@
           <td><span class="tag ${String(r.resultStatus).toUpperCase()==='PASS'?'tag-pass':String(r.resultStatus).toUpperCase()==='FAIL'?'tag-fail':'tag-pending'}">${esc(r.resultStatus || 'PENDING')}</span></td>
           <td>${esc(formatDisplayDate(r.publishedAt || '—'))}</td>
         </tr>
-      `).join('') : `<tr><td colspan="9" class="muted">No published subject is available under the current filters.</td></tr>`;
+      `).join('') : `<tr><td colspan="10" class="muted">No published subject is available under the current filters.</td></tr>`;
 
       $('examMetaGrid').innerHTML = [
-        ['Exam Code Filter', resultData.examCode || first.examCode || 'All Published Results'], ['Exam Title', first.examTitle], ['Academic Session', first.academicSession],
+        ['Exam Code Filter', $('examCodeInput').value.trim() || first.examCode || 'All Published Results'], ['Exam Title', first.examTitle], ['Academic Session', first.academicSession],
         ['Term', first.term], ['Exam Date', first.examDate], ['Account Status', statusText], ['Pass Mark Number', first.passMarkNumber],
         ['Pass Mark Percentage', first.passMarkPercentage ? first.passMarkPercentage + '%' : '—'], ['Published Date', formatDisplayDate(first.publishedAt)], ['Selection', selectionSummary]
       ].map(([label,value]) => `<div class="info-item"><div class="info-label">${esc(label)}</div><div class="info-value">${esc(value || '—')}</div></div>`).join('');
@@ -985,11 +1006,10 @@
         </div>
       `).join('') : `<div class="muted">No remarks are available for the currently loaded published subjects.</div>`;
 
-      const signatureUrl = assets.signatureUrl;
       const signatureName = assets.signatureName;
-      $('signatureBox').innerHTML = signatureUrl
-        ? `<img src="${esc(signatureUrl)}" alt="Signature" crossorigin="anonymous" referrerpolicy="no-referrer" /><div class="signature-role">Signed by Admin</div><div class="signature-name">${esc(signatureName)}</div><div class="signature-caption">Official approval signature appears on both this generated result and the downloaded PDF.</div>`
-        : `<div class="muted">No signature added</div><div class="signature-role">Signatory</div><div class="signature-name">${esc(signatureName)}</div><div class="signature-caption">Add admin signature in settings so it shows on both generated and downloaded result.</div>`;
+      $('signatureBox').innerHTML = `<div data-role="signatureImage" style="min-height:74px;display:flex;align-items:center;justify-content:center">${assets.signatureUrl ? 'Loading signature...' : 'No signature added'}</div><div class="signature-role">Signed by Admin</div><div class="signature-name">${esc(signatureName)}</div><div class="signature-caption">Official approval signature appears on both this generated result and the downloaded PDF report card.</div>`;
+      await loadImageIntoElement($('passportBox'), resultData.student && resultData.student.passportUrl || '', 'Passport', false, 'No passport');
+      await loadImageIntoElement($('signatureBox').querySelector('[data-role="signatureImage"]'), assets.signatureUrl || '', 'Signature', true, 'No signature added');
     }
 
     async function ensureImagesReady(root){
@@ -1016,10 +1036,10 @@
         }, 'POST', examCode ? 'Loading selected exam code result(s)...' : 'Loading all published results...');
         selectedSubjects = [];
         subjectSelectionTouched = false;
-        renderReport(res.data);
+        await renderReport(res.data);
         $('resultLoadStatus').textContent = res.message + (examCode ? ' (' + examCode + ')' : '');
         $('resultLoadStatus').className = 'status ok';
-        showToast(res.message + (examCode ? ' (' + examCode + ')' : ''));
+showToast(res.message);
       }catch(err){
         $('resultLoadStatus').textContent = err.message;
         $('resultLoadStatus').className = 'status error';
@@ -1036,7 +1056,7 @@
         showToast('PDF library did not load completely. Refresh the page and try again.', 'error');
         return;
       }
-      showLoading('Preparing designed PDF result...');
+      showLoading('Preparing colorful report card PDF...');
       try{
         const baseRows = getBaseFilteredResults();
         const rows = getSelectedRows(baseRows);
@@ -1131,7 +1151,7 @@
         const cardW = 122;
         const cardGap = 11;
         const cards = [
-          ['Exam Code Filter', resultData.examCode || first.examCode || 'All Published Results'],
+          ['Exam Code Filter', $('examCodeInput').value.trim() || first.examCode || 'All Published Results'],
           ['Subjects', String(totalSubjects || 0)],
           ['Average %', `${avg}%`],
           ['Published', publishedDate]
@@ -1154,8 +1174,11 @@
         doc.autoTable({
           startY: 378,
           margin: { left: 26, right: 26 },
-          head: [['Subject', 'Score', 'Percent', 'Grade', 'Rank', 'Status']],
+          head: [['Exam Code','Session','Term','Subject', 'Score', 'Percent', 'Grade', 'Rank', 'Status']],
           body: rows.map(r => [
+            r.examCode || '—',
+            r.academicSession || '—',
+            r.term || '—',
             r.subject || '—',
             `${r.studentScore || '—'} / ${r.maxScore || '—'}`,
             `${r.percentage || '—'}%`,
@@ -1174,8 +1197,8 @@
         doc.autoTable({
           startY: y,
           margin: { left: 26, right: 26 },
-          head: [['Subject', 'Remark', 'Teacher Comment']],
-          body: rows.map(r => [r.subject || '—', r.remark || '—', r.teacherComment || 'No teacher comment']),
+          head: [['Exam / Subject', 'Remark', 'Teacher Comment']],
+          body: rows.map(r => [`${r.examCode || '—'} • ${r.subject || '—'}`, r.remark || '—', r.teacherComment || 'No teacher comment']),
           theme: 'grid',
           styles: { fontSize: 9.2, cellPadding: 7, lineColor: palette.line, lineWidth: 0.8, textColor:[23,38,64], overflow:'linebreak' },
           headStyles: { fillColor: palette.accent, textColor:[255,255,255], fontStyle:'bold' },
@@ -1223,7 +1246,7 @@
         }
 
         const code = (resultDataExamCodeForFileName() || first?.examCode || currentResults[0]?.examCode || 'result');
-        const safeName = `${currentStudent.fullName || 'student'}_${code}_${totalSubjects}_published_subjects_result.pdf`.replace(/[^a-z0-9_\-.]+/gi,'_');
+        const safeName = `${currentStudent.fullName || 'student'}_${code}_${totalSubjects}_published_subjects_report_card.pdf`.replace(/[^a-z0-9_\-.]+/gi,'_');
         doc.save(safeName);
         showToast('Designed PDF downloaded successfully.');
       }catch(err){
@@ -1274,7 +1297,7 @@
         $('appView').classList.remove('hidden');
         $('logoutBtn').classList.remove('hidden');
         $('examCodeInput').value = '';
-        showToast(res.message + (examCode ? ' (' + examCode + ')' : ''));
+showToast(res.message);
         await loadResult();
       }catch(err){ showToast(err.message, 'error'); }
     });
@@ -1283,7 +1306,7 @@
       e.preventDefault();
       try{
         const res = await apiRequest('studentSignup', serializeForm(e.target), 'POST', 'Creating account...');
-        showToast(res.message + (examCode ? ' (' + examCode + ')' : ''));
+showToast(res.message);
         e.target.reset();
         setAuthTab('login');
       }catch(err){ showToast(err.message, 'error'); }
@@ -1294,7 +1317,7 @@
       try{
         const data = serializeForm(e.target);
         const res = await apiRequest('requestPasswordReset', {role:'student', identifier:data.identifier}, 'POST', 'Sending reset code...');
-        showToast(res.message + (examCode ? ' (' + examCode + ')' : ''));
+showToast(res.message);
       }catch(err){ showToast(err.message, 'error'); }
     });
 
@@ -1303,7 +1326,7 @@
       try{
         const data = serializeForm(e.target);
         const res = await apiRequest('resetPassword', {role:'student', ...data}, 'POST', 'Resetting password...');
-        showToast(res.message + (examCode ? ' (' + examCode + ')' : ''));
+showToast(res.message);
         setAuthTab('login');
       }catch(err){ showToast(err.message, 'error'); }
     });

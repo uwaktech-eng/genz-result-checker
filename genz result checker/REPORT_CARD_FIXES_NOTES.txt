@@ -1,0 +1,10 @@
+RESULT CHECKER PATCH NOTES - REPORT CARD FIXES
+
+- Fixed student PDF generation failure caused by a broken variable reference in the export path.
+- Strengthened on-screen student result asset rendering (brand logo, passport, signature) with image fallback loading.
+- Student report table now shows exam code, session, term, subject, score, grade, rank, status, and published date.
+- Student PDF report card now includes exam code, session, and term columns and keeps multi-page structure via jsPDF autoTable.
+- Admin report-card grouping now uses ALL PUBLISHED RESULTS per student, not per single exam bundle.
+- Admin preview redesigned as a modern colorful glassy single report card.
+- Admin PDF export rebuilt as a real paginated PDF instead of one tall screenshot, so spillover to next pages is structured and realistic.
+- Admin single PDF and ZIP exports now produce single report cards per student carrying all published subjects.

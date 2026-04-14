@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +7,7 @@
   <title>Admin Portal | Genz Edutech Innovations</title>
   <link rel="icon" id="faviconLink" href="data:," />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
@@ -204,6 +204,13 @@
     .pdf-signature-box{border-top:1px solid #cdd9eb;padding-top:8px;text-align:center;color:#16304d}
     .pdf-signature-box img{max-width:160px;max-height:60px;display:block;margin:0 auto 8px}
     .pdf-inline-note{padding:12px 14px;border-radius:16px;background:linear-gradient(135deg,#eef6ff,#f8fbff);border:1px solid #dbe7fb;color:#2a4f77;font-size:14px}
+
+    .selection-spotlight{padding:16px 18px;border-radius:22px;border:1px solid #dce6fb;display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap;box-shadow:0 16px 30px rgba(44,71,120,.06)}
+    .selection-spotlight strong{display:block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#5f7493;margin-bottom:7px}
+    .selection-spotlight .big{font-size:1.12rem;font-weight:900;color:#142646}
+    .selection-spotlight .sub{margin-top:6px;color:#5b718f;font-size:13px}
+    .pdf-export-body .selection-pill{display:inline-flex;align-items:center;gap:8px;padding:11px 15px;border-radius:999px;background:rgba(255,255,255,.88);border:1px solid rgba(219,229,247,.98);color:#173459;font-weight:900;box-shadow:0 10px 22px rgba(44,71,120,.08)}
+
     .report-workbench{position:fixed;left:-10000px;top:0;width:920px;z-index:-1;opacity:0;pointer-events:none}
     .preview-surface{padding:14px;border-radius:18px;border:1px dashed rgba(255,255,255,.16);background:rgba(255,255,255,.04)}
     .export-mini{font-size:12px;color:#9db2cf}
@@ -357,7 +364,7 @@
           <div class="toolbar">
             <div>
               <h2 class="panel-title">Result PDF Export Manager</h2>
-              <div class="muted">Search, preview, export a single PDF, or export many PDFs inside one ZIP file.</div>
+              <div class="muted">Search students, preview the full single report card, export one colorful PDF, or export many report cards inside one ZIP file.</div>
             </div>
             <div class="actions">
               <button class="btn btn-soft" type="button" id="refreshResultExportManagerBtn">Refresh List</button>
@@ -386,15 +393,15 @@
           <div class="glass card" style="padding:16px;margin-top:18px">
             <div class="toolbar">
               <div>
-                <h3 class="panel-title" style="margin-bottom:4px">Preview Selected Result</h3>
-                <div class="muted">Preview any result here before exporting a single PDF.</div>
+                <h3 class="panel-title" style="margin-bottom:4px">Preview Single Report Card</h3>
+                <div class="muted">Preview a single student report card here before exporting the colorful PDF.</div>
               </div>
               <div class="actions">
                 <button class="btn btn-primary" type="button" id="downloadPreviewPdfBtn">Export Preview as PDF</button>
               </div>
             </div>
             <div class="status" id="reportPreviewStatus"></div>
-            <div id="reportPreviewMount" class="preview-surface muted" style="margin-top:14px">Click <strong>Preview</strong> on any result row to inspect it here before export.</div>
+            <div id="reportPreviewMount" class="preview-surface muted" style="margin-top:14px">Click <strong>Preview</strong> on any student row to inspect the full colorful single report card here before export.</div>
           </div>
         </div>
       </section>
@@ -1230,36 +1237,44 @@
       const studentMap = new Map((bootstrapData.students || []).map(s => [String(s.regId || '').toUpperCase(), s]));
       const bucket = new Map();
       (bootstrapData.results || []).forEach(r => {
-        if (r.deleted || r.archived) return;
+        if (r.deleted || r.archived || !r.published) return;
         const regId = String(r.regId || '').toUpperCase();
-        const key = [regId, r.examCode || '', r.academicSession || '', r.term || ''].join('|');
-        if (!bucket.has(key)) {
-          bucket.set(key, {
-            key,
+        if (!regId) return;
+        if (!bucket.has(regId)) {
+          bucket.set(regId, {
+            key: regId,
             regId,
-            examCode: r.examCode || '',
-            examTitle: r.examTitle || '',
-            academicSession: r.academicSession || '',
-            term: r.term || '',
-            examDate: r.examDate || '',
+            examCode: 'ALL_PUBLISHED',
+            examTitle: 'All Published Results',
+            academicSession: '',
+            term: '',
+            examDate: '',
             rows: [],
             student: studentMap.get(regId) || { regId: regId, fullName: r.regId || regId },
             publishedAt: r.publishedAt || r.updatedAt || '',
             updatedAt: r.updatedAt || '',
-            published: !!r.published,
+            published: true,
             viewActive: !!r.viewActive
           });
         }
-        const group = bucket.get(key);
+        const group = bucket.get(regId);
         group.rows.push(r);
         if (r.publishedAt && String(r.publishedAt) > String(group.publishedAt || '')) group.publishedAt = r.publishedAt;
         if (r.updatedAt && String(r.updatedAt) > String(group.updatedAt || '')) group.updatedAt = r.updatedAt;
-        if (r.published) group.published = true;
         if (r.viewActive) group.viewActive = true;
-        if (!group.examTitle && r.examTitle) group.examTitle = r.examTitle;
       });
       return Array.from(bucket.values()).map(group => {
-        group.rows.sort((a,b) => String(a.subject || '').localeCompare(String(b.subject || '')));
+        const termRank = { '1ST TERM': 1, 'FIRST TERM': 1, '2ND TERM': 2, 'SECOND TERM': 2, '3RD TERM': 3, 'THIRD TERM': 3 };
+        group.rows.sort((a,b) => {
+          const bySession = String(b.academicSession || '').localeCompare(String(a.academicSession || ''));
+          if (bySession !== 0) return bySession;
+          const ta = termRank[String(a.term || '').toUpperCase()] || 99;
+          const tb = termRank[String(b.term || '').toUpperCase()] || 99;
+          if (ta !== tb) return ta - tb;
+          const byExam = String(a.examCode || '').localeCompare(String(b.examCode || ''));
+          if (byExam !== 0) return byExam;
+          return String(a.subject || '').localeCompare(String(b.subject || ''));
+        });
         group.subjectCount = group.rows.length;
         group.totalScore = group.rows.reduce((sum, row) => sum + num(row.studentScore), 0);
         group.avgPercentage = group.subjectCount ? (group.rows.reduce((sum, row) => sum + num(row.percentage), 0) / group.subjectCount) : 0;
@@ -1267,6 +1282,9 @@
         group.classLevel = group.student.classLevel || '';
         group.fullName = group.student.fullName || group.regId;
         group.category = group.student.category || '';
+        group.examCodes = uniqueValues(group.rows.map(r => r.examCode).filter(Boolean));
+        group.sessions = uniqueValues(group.rows.map(r => r.academicSession).filter(Boolean));
+        group.terms = uniqueValues(group.rows.map(r => r.term).filter(Boolean));
         return group;
       }).sort((a,b) => String(b.publishedAt || b.updatedAt || '').localeCompare(String(a.publishedAt || a.updatedAt || '')));
     }
@@ -1292,7 +1310,7 @@
       return getResultReportGroups().filter(group => {
         const hay = `${group.regId} ${group.fullName} ${group.classLevel} ${group.category} ${group.examCode} ${group.examTitle} ${group.academicSession} ${group.term}`.toLowerCase();
         if (search && !hay.includes(search)) return false;
-        if (examCode && !String(group.examCode).toLowerCase().includes(examCode)) return false;
+        if (examCode && !(group.examCodes || []).some(code => String(code || '').toLowerCase().includes(examCode))) return false;
         if (classLevel && !String(group.classLevel).toLowerCase().includes(classLevel)) return false;
         if (scoreValue !== null && scoreMode === 'total' && group.totalScore < scoreValue) return false;
         if (scoreValue !== null && scoreMode === 'percentage' && group.avgPercentage < scoreValue) return false;
@@ -1313,8 +1331,8 @@
           <td>${esc(group.regId)}</td>
           <td>${esc(group.fullName)}<div class="export-mini">${esc(group.category || '')}</div></td>
           <td>${esc(group.classLevel || '—')}</td>
-          <td>${esc(group.examCode)}<div class="export-mini">${esc(group.term || '')} ${group.academicSession ? '• ' + esc(group.academicSession) : ''}</div></td>
-          <td>${esc(group.subjectCount)}<div class="export-mini">${esc(group.rows.map(r => r.subject).slice(0,3).join(', '))}${group.subjectCount > 3 ? '…' : ''}</div></td>
+          <td>All Published<div class="export-mini">${esc((group.examCodes || []).slice(0,3).join(', '))}${(group.examCodes || []).length > 3 ? '…' : ''}</div></td>
+          <td>${esc(group.subjectCount)}<div class="export-mini">${esc(group.rows.map(r => r.subject).slice(0,4).join(', '))}${group.subjectCount > 4 ? '…' : ''}</div></td>
           <td><span class="export-score-pill">${esc(group.totalScore.toFixed(2))}</span></td>
           <td><span class="export-score-pill">${esc(group.avgPercentage.toFixed(2))}%</span></td>
           <td>${group.published ? '<span class="tag">Published</span>' : '<span class="tag">Draft</span>'}<div class="export-mini">${esc(group.publishedAt || '—')}</div></td>
@@ -1329,7 +1347,7 @@
       updateReportSelectionInfo();
       if (currentPreviewReportKey && !findReportGroupByKey(currentPreviewReportKey)) {
         currentPreviewReportKey = '';
-        if ($('reportPreviewMount')) $('reportPreviewMount').innerHTML = 'Click <strong>Preview</strong> on any result row to inspect it here before export.';
+        if ($('reportPreviewMount')) $('reportPreviewMount').innerHTML = 'Click <strong>Preview</strong> on any student row to inspect the full colorful single report card here before export.';
       }
     }
     function renderResultExportManager(){
@@ -1376,9 +1394,7 @@
     function buildAdminReportMarkup(group){
       const settings = bootstrapData.settings || {};
       const student = group.student || {};
-      const first = group.rows[0] || {};
       const assets = getGroupDisplayAssets(group);
-      const signatureRaw = assets.signatureUrl;
       const signatureName = assets.signatureName;
       const studentInfo = [
         ['Full Name', student.fullName], ['Registration ID', student.regId || group.regId], ['Class Level', student.classLevel],
@@ -1388,21 +1404,19 @@
         ['City / LGA', student.cityLGA], ['Address', student.address]
       ];
       const summary = [
-        ['Exam Code', group.examCode], ['Subjects', group.subjectCount], ['Passed', group.passCount],
-        ['Average %', `${group.avgPercentage.toFixed(2)}%`], ['Published', group.publishedAt || '—']
+        ['Report Type', 'Single Report Card'], ['Published Subjects', group.subjectCount], ['Passed Subjects', group.passCount],
+        ['Average %', `${group.avgPercentage.toFixed(2)}%`], ['Latest Publish Date', group.publishedAt || '—']
       ];
-      const examMeta = [
-        ['Exam Code', first.examCode], ['Exam Title', first.examTitle], ['Academic Session', first.academicSession],
-        ['Term', first.term], ['Exam Date', first.examDate], ['Pass Mark Number', first.passMarkNumber],
-        ['Pass Mark Percentage', first.passMarkPercentage ? `${first.passMarkPercentage}%` : '—'], ['Published Date', first.publishedAt]
-      ];
+      const sessionSummary = (group.sessions || []).join(', ') || '—';
+      const termSummary = (group.terms || []).join(', ') || '—';
+      const examCodeSummary = (group.examCodes || []).join(', ') || '—';
       return `
         <div class="pdf-export-surface">
-          <div class="pdf-export-head">
+          <div class="pdf-export-head" style="background:linear-gradient(135deg,rgba(111,99,255,.30),rgba(34,199,255,.24),rgba(255,255,255,.18));">
             <div class="pdf-brand-line">
-              <div class="pdf-passport contain" style="width:72px;height:72px" data-role="brandLogo">LOGO</div>
+              <div class="pdf-passport contain" style="width:76px;height:76px;border-radius:22px" data-role="brandLogo">LOGO</div>
               <div>
-                <div class="pdf-brand-badge">Official Result Sheet</div>
+                <div class="pdf-brand-badge">Single Student Report Card</div>
                 <div class="pdf-brand-name">${esc(settings.BRAND_NAME || 'Genz Edutech Innovations')}</div>
                 <div class="pdf-school-title">${esc(settings.SCHOOL_NAME || 'Result Portal')}</div>
                 <div class="pdf-school-sub">${esc(settings.HEAD_OFFICE_ADDRESS || '')}</div>
@@ -1411,6 +1425,14 @@
             </div>
           </div>
           <div class="pdf-export-body">
+            <div class="selection-spotlight" style="margin-top:0;margin-bottom:18px;background:linear-gradient(135deg,rgba(111,99,255,.14),rgba(34,199,255,.12));border-color:#dce6fb">
+              <div>
+                <strong>All Published Results Included</strong>
+                <div class="big">${esc(group.fullName || group.regId)}</div>
+                <div class="sub">This report card combines every published subject currently available for this student, across exam codes, sessions, and terms.</div>
+              </div>
+              <div class="selection-pill">${esc(group.subjectCount)} Subject(s)</div>
+            </div>
             <div class="pdf-profile-grid">
               <div class="pdf-passport" data-role="passport">No passport</div>
               <div>
@@ -1422,16 +1444,30 @@
             <div class="pdf-summary-strip">
               ${summary.map(([label, value]) => `<div class="pdf-summary-box"><div class="pdf-summary-label">${esc(label)}</div><div class="pdf-summary-value">${esc(value || '—')}</div></div>`).join('')}
             </div>
+            <div class="grid grid-2" style="margin-top:18px">
+              <div class="pdf-lite-card">
+                <strong>Coverage</strong>
+                <div class="pdf-info-grid" style="margin-top:12px">
+                  <div class="pdf-info-item"><div class="pdf-info-label">Exam Codes</div><div class="pdf-info-value">${esc(examCodeSummary)}</div></div>
+                  <div class="pdf-info-item"><div class="pdf-info-label">Academic Sessions</div><div class="pdf-info-value">${esc(sessionSummary)}</div></div>
+                  <div class="pdf-info-item"><div class="pdf-info-label">Terms</div><div class="pdf-info-value">${esc(termSummary)}</div></div>
+                  <div class="pdf-info-item"><div class="pdf-info-label">View Status</div><div class="pdf-info-value">${group.viewActive ? 'Contains active view result(s)' : 'Admin report only'}</div></div>
+                </div>
+              </div>
+              <div class="pdf-inline-note" style="display:flex;align-items:center;justify-content:center;min-height:100%">Brand logo, student passport, and authorized signature appear in both the preview and the exported PDF report card. Long result sets are paginated cleanly in the PDF export.</div>
+            </div>
             <div class="pdf-subject-table-wrap">
               <table>
                 <thead>
-                  <tr><th>Exam Code</th><th>Subject</th><th>Score</th><th>Percentage</th><th>Grade</th><th>Rank</th><th>Status</th><th>Published Date</th></tr>
+                  <tr><th>Exam Code</th><th>Session</th><th>Term</th><th>Subject</th><th>Score</th><th>Percentage</th><th>Grade</th><th>Rank</th><th>Status</th><th>Published</th></tr>
                 </thead>
                 <tbody>
                   ${group.rows.map(r => `
                     <tr>
-                      <td>${esc(r.examCode)}</td>
-                      <td>${esc(r.subject)}</td>
+                      <td>${esc(r.examCode || '—')}</td>
+                      <td>${esc(r.academicSession || '—')}</td>
+                      <td>${esc(r.term || '—')}</td>
+                      <td>${esc(r.subject || '—')}</td>
                       <td>${esc(r.studentScore || '—')} / ${esc(r.maxScore || '—')}</td>
                       <td>${esc(r.percentage || '—')}%</td>
                       <td>${esc(r.grade || '—')}</td>
@@ -1445,28 +1481,24 @@
             </div>
             <div class="grid grid-2" style="margin-top:18px">
               <div class="pdf-lite-card">
-                <strong>Exam details</strong>
-                <div class="pdf-info-grid" style="margin-top:12px">
-                  ${examMeta.map(([label, value]) => `<div class="pdf-info-item"><div class="pdf-info-label">${esc(label)}</div><div class="pdf-info-value">${esc(value || '—')}</div></div>`).join('')}
-                </div>
-              </div>
-              <div class="pdf-lite-card">
                 <strong>Teacher comments / remarks</strong>
                 <div style="margin-top:12px">
                   ${group.rows.map(r => `
                     <div class="pdf-info-item" style="margin-bottom:10px">
-                      <div class="pdf-info-label">${esc(r.subject)}</div>
+                      <div class="pdf-info-label">${esc((r.examCode || '—') + ' • ' + (r.subject || '—'))}</div>
                       <div class="pdf-info-value">${esc(r.remark || '—')}</div>
                       <div style="margin-top:6px;color:#5d728d">${esc(r.teacherComment || 'No teacher comment')}</div>
                     </div>
                   `).join('')}
                 </div>
               </div>
-            </div>
-            <div class="pdf-signature-wrap">
-              <div class="pdf-inline-note">This result was exported from the admin result manager. The exam code, published date, and subject rows shown here reflect the official record currently saved in the portal. Downloaded copy carries the same result profile visible in the portal preview.</div>
-              <div class="pdf-signature-box" data-role="signatureBox">
-                ${signatureRaw ? `<div style="color:#5d728d;margin-bottom:8px">${esc(signatureName)}</div><div class="pdf-passport contain" style="width:160px;height:68px;margin:0 auto;background:transparent;border:none" data-role="signatureImage"></div>` : `<div style="color:#5d728d">No signature added</div><div>${esc(signatureName)}</div>`}
+              <div class="pdf-signature-wrap" style="grid-template-columns:1fr;gap:12px;margin-top:0">
+                <div class="pdf-inline-note">Official single report card preview generated from the admin manager. All currently published subject rows for this student are included below and will also appear in the downloadable PDF.</div>
+                <div class="pdf-signature-box" data-role="signatureBox">
+                  <div class="pdf-passport contain" style="width:170px;height:74px;margin:0 auto;background:transparent;border:none" data-role="signatureImage">No signature</div>
+                  <div style="margin-top:8px;font-weight:900;color:#16304d">${esc(signatureName)}</div>
+                  <div style="margin-top:4px;color:#5d728d">Authorized Signatory</div>
+                </div>
               </div>
             </div>
           </div>
@@ -1524,7 +1556,7 @@
       const status = $('reportPreviewStatus');
       if (status){ status.textContent = 'Rendering preview...'; status.className = 'status'; }
       await renderReportGroupInto(mount, group);
-      if (status){ status.textContent = `Preview ready for ${group.fullName} • ${group.examCode}`; status.className = 'status ok'; }
+      if (status){ status.textContent = `Report card preview ready for ${group.fullName}`; status.className = 'status ok'; }
     }
     window.previewReportGroup = previewReportGroup;
     function downloadBlob(filename, blob){
@@ -1534,46 +1566,183 @@
       a.click();
       setTimeout(() => URL.revokeObjectURL(a.href), 1500);
     }
-    async function createPdfBlobFromGroup(group){
-      const workbench = $('reportWorkbench');
-      if (!workbench) throw new Error('Report workbench is missing.');
-      const holder = document.createElement('div');
-      workbench.innerHTML = '';
-      workbench.appendChild(holder);
-      await renderReportGroupInto(holder, group);
-      const capture = holder.firstElementChild;
-      if (!capture) throw new Error('Failed to prepare the report for export.');
-      const canvas = await html2canvas(capture, {scale: 2.4, useCORS: true, backgroundColor: '#ffffff'});
-      const imgData = canvas.toDataURL('image/png');
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pageW = pdf.internal.pageSize.getWidth();
-      const pageH = pdf.internal.pageSize.getHeight();
-      const imgW = pageW;
-      const imgH = canvas.height * imgW / canvas.width;
-      let heightLeft = imgH;
-      let position = 0;
-      pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH, undefined, 'FAST');
-      heightLeft -= pageH;
-      while (heightLeft > 0) {
-        position = heightLeft - imgH;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgW, imgH, undefined, 'FAST');
-        heightLeft -= pageH;
+
+    async function fetchImageDataUrl(raw){
+      const candidates = buildImageCandidates(raw);
+      if (!candidates.length) return '';
+      for (const candidate of candidates){
+        try{
+          const res = await apiRequest('getImageDataUrl', { url: candidate }, 'POST', 'Preparing report card image...');
+          if (res && res.data && res.data.dataUrl) return String(res.data.dataUrl || '');
+        }catch(_err){}
       }
-      workbench.innerHTML = '';
-      return pdf.output('blob');
+      return '';
     }
+    function detectImageFormatFromDataUrl(dataUrl){
+      const match = String(dataUrl || '').match(/^data:image\/([a-zA-Z0-9+]+);/i);
+      const fmt = match && match[1] ? match[1].toUpperCase() : 'PNG';
+      return fmt === 'JPG' ? 'JPEG' : fmt;
+    }
+    async function getImageDimensions(dataUrl){
+      return await new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => resolve({ width: img.naturalWidth || img.width || 1, height: img.naturalHeight || img.height || 1 });
+        img.onerror = () => resolve({ width: 1, height: 1 });
+        img.src = dataUrl;
+      });
+    }
+    async function addPdfImage(doc, dataUrl, x, y, w, h, fit='contain'){
+      if (!dataUrl) return null;
+      const fmt = detectImageFormatFromDataUrl(dataUrl);
+      const dim = await getImageDimensions(dataUrl);
+      const ratio = Math.max(dim.width, 1) / Math.max(dim.height, 1);
+      let drawW = w, drawH = h;
+      if (fit === 'contain') {
+        if (w / h > ratio) { drawH = h; drawW = h * ratio; } else { drawW = w; drawH = w / ratio; }
+      }
+      const dx = x + (w - drawW) / 2;
+      const dy = y + (h - drawH) / 2;
+      doc.addImage(dataUrl, fmt, dx, dy, drawW, drawH, undefined, 'FAST');
+      return { x: dx, y: dy, w: drawW, h: drawH };
+    }
+    function formatAdminDisplayDate(value){
+      if (!value) return '—';
+      const dt = new Date(value);
+      if (Number.isNaN(dt.getTime())) return String(value);
+      return dt.toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' });
+    }
+    async function createPdfBlobFromGroup(group){
+      if (!window.jspdf || !window.jspdf.jsPDF) throw new Error('PDF engine is unavailable.');
+      const assets = getGroupDisplayAssets(group);
+      const [logoData, passportData, signatureData] = await Promise.all([
+        fetchImageDataUrl(assets.brandLogoUrl || ''),
+        fetchImageDataUrl(assets.passportUrl || ''),
+        fetchImageDataUrl(assets.signatureUrl || '')
+      ]);
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation:'portrait', unit:'pt', format:'a4' });
+      const pageW = doc.internal.pageSize.getWidth();
+      const pageH = doc.internal.pageSize.getHeight();
+      const settings = bootstrapData.settings || {};
+      const student = group.student || {};
+      const brandName = settings.BRAND_NAME || 'Genz Edutech Innovations';
+      const schoolName = settings.SCHOOL_NAME || 'Result Portal';
+      const header = [111,99,255], accent = [34,199,255], line = [216,228,248], light = [244,248,255];
+      doc.setFillColor(...header);
+      doc.rect(0, 0, pageW, 132, 'F');
+      doc.setFillColor(255,255,255);
+      if (doc.setGState && doc.GState) doc.setGState(new doc.GState({ opacity: 0.08 }));
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(64);
+      doc.text('REPORT', pageW - 24, 102, { align:'right', angle:-10 });
+      if (doc.setGState && doc.GState) doc.setGState(new doc.GState({ opacity: 1 }));
+      if (logoData) await addPdfImage(doc, logoData, 30, 24, 64, 64, 'contain');
+      doc.setTextColor(255,255,255);
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(19);
+      doc.text(brandName, 106, 44);
+      doc.setFontSize(15);
+      doc.text(schoolName, 106, 66);
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(10.5);
+      doc.text(String(settings.HEAD_OFFICE_ADDRESS || '').slice(0, 75), 106, 84);
+      doc.text(`${settings.SCHOOL_PHONE || 'Phone not set'}   •   ${settings.SCHOOL_EMAIL || 'Email not set'}`, 106, 100);
+      doc.setFillColor(255,255,255);
+      doc.roundedRect(414, 28, 154, 34, 12, 12, 'F');
+      doc.setTextColor(...header);
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(10);
+      doc.text('SINGLE REPORT CARD', 491, 49, { align:'center' });
+      doc.setFillColor(250,252,255);
+      doc.setDrawColor(...line);
+      doc.roundedRect(26, 148, 543, 126, 18, 18, 'FD');
+      doc.setTextColor(23,38,64);
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(14);
+      doc.text('Student Report Card Summary', 42, 173);
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(10.4);
+      doc.text(`${student.fullName || group.regId} • ${student.regId || group.regId} • ${student.classLevel || 'Class not set'}`, 42, 192);
+      doc.text(`Published subjects: ${group.subjectCount} • Passed: ${group.passCount}/${group.subjectCount || 0} • Average: ${group.avgPercentage.toFixed(2)}%`, 42, 209);
+      doc.text(`Exam codes: ${(group.examCodes || []).join(', ') || '—'}`, 42, 226, { maxWidth: 370 });
+      doc.text(`Sessions: ${(group.sessions || []).join(', ') || '—'} • Terms: ${(group.terms || []).join(', ') || '—'}`, 42, 243, { maxWidth: 370 });
+      doc.setFillColor(...light);
+      doc.roundedRect(42, 248, 292, 22, 10, 10, 'F');
+      doc.setTextColor(...header);
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(9.8);
+      doc.text('This single report card combines every currently published subject for the student.', 51, 263);
+      doc.setDrawColor(...line);
+      doc.roundedRect(446, 168, 94, 84, 14, 14, 'S');
+      if (passportData) await addPdfImage(doc, passportData, 452, 174, 82, 72, 'contain');
+      else { doc.setTextColor(103,120,146); doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.text('No Passport', 493, 212, { align:'center' }); }
+      const cardY = 304, cardW = 122, cardGap = 11;
+      [
+        ['Student ID', student.regId || group.regId],
+        ['Class / Level', student.classLevel || '—'],
+        ['Subjects', String(group.subjectCount || 0)],
+        ['Latest Publish', formatAdminDisplayDate(group.publishedAt || '')]
+      ].forEach((card, idx2) => {
+        const x = 26 + idx2 * (cardW + cardGap);
+        doc.setFillColor(...light); doc.setDrawColor(...line); doc.roundedRect(x, cardY, cardW, 64, 16, 16, 'FD');
+        doc.setTextColor(95,116,146); doc.setFont('helvetica','bold'); doc.setFontSize(9.4); doc.text(card[0].toUpperCase(), x + 12, cardY + 18);
+        doc.setTextColor(24,48,80); doc.setFontSize(13.5); const lines = doc.splitTextToSize(String(card[1] || '—'), cardW - 20); doc.text(lines, x + 12, cardY + 40);
+      });
+      doc.autoTable({
+        startY: 390,
+        margin: { left: 26, right: 26 },
+        head: [['Exam Code','Session','Term','Subject','Score','%','Grade','Rank','Status','Published']],
+        body: (group.rows || []).map(r => [
+          r.examCode || '—', r.academicSession || '—', r.term || '—', r.subject || '—',
+          `${r.studentScore || '—'} / ${r.maxScore || '—'}`, `${r.percentage || '—'}%`, r.grade || '—', r.positionText || '—', r.resultStatus || 'PENDING', formatAdminDisplayDate(r.publishedAt || '')
+        ]),
+        theme: 'grid',
+        styles: { fontSize: 8.8, cellPadding: 6.4, lineColor: line, lineWidth: 0.7, textColor:[23,38,64], overflow:'linebreak', valign:'middle' },
+        headStyles: { fillColor: header, textColor:[255,255,255], fontStyle:'bold' },
+        alternateRowStyles: { fillColor: [250,252,255] }
+      });
+      let y = doc.lastAutoTable.finalY + 18;
+      doc.autoTable({
+        startY: y,
+        margin: { left: 26, right: 26 },
+        head: [['Exam / Subject','Remark','Teacher Comment']],
+        body: (group.rows || []).map(r => [`${r.examCode || '—'} • ${r.subject || '—'}`, r.remark || '—', r.teacherComment || 'No teacher comment']),
+        theme: 'grid',
+        styles: { fontSize: 8.7, cellPadding: 6.2, lineColor: line, lineWidth: 0.7, textColor:[23,38,64], overflow:'linebreak' },
+        headStyles: { fillColor: accent, textColor:[255,255,255], fontStyle:'bold' },
+        alternateRowStyles: { fillColor: [252,254,255] }
+      });
+      let y2 = doc.lastAutoTable.finalY + 18;
+      if (y2 > pageH - 130) { doc.addPage(); y2 = 56; }
+      doc.setFillColor(...light); doc.setDrawColor(...line); doc.roundedRect(26, y2, 320, 84, 18, 18, 'FD');
+      doc.setTextColor(...header); doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.text('Verification Note', 42, y2 + 22);
+      doc.setTextColor(83,102,129); doc.setFont('helvetica','normal'); doc.setFontSize(9.8);
+      const noteLines = doc.splitTextToSize(`This single report card was generated from the official admin result manager on ${formatAdminDisplayDate(new Date())}. It contains every currently published subject row for ${student.fullName || group.regId}. Brand logo, student passport, and authorized signature are included as part of this verified academic record.`, 286);
+      doc.text(noteLines, 42, y2 + 42);
+      doc.setDrawColor(...line); doc.line(392, y2 + 58, 548, y2 + 58);
+      if (signatureData) await addPdfImage(doc, signatureData, 402, y2 + 4, 136, 42, 'contain');
+      doc.setTextColor(...header); doc.setFont('helvetica','bold'); doc.setFontSize(10.4); doc.text(assets.signatureName || 'Authorized Signatory', 470, y2 + 74, { align:'center' });
+      doc.setTextColor(98,115,139); doc.setFont('helvetica','normal'); doc.setFontSize(8.9); doc.text('Authorized Signature', 470, y2 + 88, { align:'center' });
+      const totalPages = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++){
+        doc.setPage(i); doc.setDrawColor(...line); doc.line(26, pageH - 28, pageW - 26, pageH - 28);
+        doc.setTextColor(114,128,149); doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
+        doc.text(`${brandName} • Single Report Card`, 26, pageH - 12);
+        doc.text(`Page ${i} of ${totalPages}`, pageW - 26, pageH - 12, { align:'right' });
+      }
+      return doc.output('blob');
+    }
+
     async function downloadSingleReportPdfByKey(key){
       const group = findReportGroupByKey(key);
       if (!group) {
         showToast('Result report not found for PDF export.', 'error');
         return;
       }
-      showLoading(`Exporting PDF for ${group.fullName}...`);
+      showLoading(`Exporting report card PDF for ${group.fullName}...`);
       try{
         const blob = await createPdfBlobFromGroup(group);
-        const fileName = `${slugifyText(group.fullName)}_${slugifyText(group.examCode)}_result.pdf`;
+        const fileName = `${slugifyText(group.fullName)}_single_report_card.pdf`;
         downloadBlob(fileName, blob);
         showToast('PDF exported successfully.');
       }catch(err){
@@ -1591,7 +1760,7 @@
         const group = groups[i];
         showLoading(`Preparing PDF ${i + 1} of ${groups.length}...`);
         const blob = await createPdfBlobFromGroup(group);
-        zip.file(`${slugifyText(group.fullName)}_${slugifyText(group.examCode)}_result.pdf`, blob);
+        zip.file(`${slugifyText(group.fullName)}_single_report_card.pdf`, blob);
       }
       showLoading('Building ZIP file...');
       const zipBlob = await zip.generateAsync({type:'blob'});
@@ -2209,14 +2378,14 @@
     bindClick('exportSelectedZipBtn', async () => {
       try{
         const groups = getResultReportGroups().filter(group => selectedReportKeys.has(group.key));
-        await downloadReportsZip(groups, 'selected_result_pdfs.zip');
+        await downloadReportsZip(groups, 'selected_report_cards.zip');
         showToast('Selected result PDFs exported successfully.');
       }catch(err){ showToast(err.message, 'error'); }
       finally{ hideLoading(); }
     });
     bindClick('exportVisibleZipBtn', async () => {
       try{
-        await downloadReportsZip(getFilteredReportGroups(), 'filtered_result_pdfs.zip');
+        await downloadReportsZip(getFilteredReportGroups(), 'filtered_report_cards.zip');
         showToast('Visible result PDFs exported successfully.');
       }catch(err){ showToast(err.message, 'error'); }
       finally{ hideLoading(); }
@@ -2229,14 +2398,14 @@
       }
       try{
         const groups = getFilteredReportGroups().filter(group => String(group.classLevel || '').toLowerCase() === selectedClass.toLowerCase());
-        await downloadReportsZip(groups, `${slugifyText(selectedClass)}_class_result_pdfs.zip`);
+        await downloadReportsZip(groups, `${slugifyText(selectedClass)}_class_report_cards.zip`);
         showToast('Class result PDFs exported successfully.');
       }catch(err){ showToast(err.message, 'error'); }
       finally{ hideLoading(); }
     });
     bindClick('exportAllZipBtn', async () => {
       try{
-        await downloadReportsZip(getResultReportGroups(), 'all_result_pdfs.zip');
+        await downloadReportsZip(getResultReportGroups(), 'all_report_cards.zip');
         showToast('All result PDFs exported successfully.');
       }catch(err){ showToast(err.message, 'error'); }
       finally{ hideLoading(); }

@@ -1,0 +1,17 @@
+RESULT CHECKER PATCH NOTES
+
+Files updated:
+- Code.gs
+- student.html
+- admin.html
+
+Main improvements:
+- Added cache for settings/public bootstrap/remark bands to reduce repeated sheet reads.
+- Reworked student CSV import into batch in-memory writeback.
+- Reworked passport bulk update and passport CSV import into batch writeback.
+- Reworked result save/import into indexed in-memory updates plus single writeback.
+- Reworked ranking recalculation into batch in-memory processing instead of row-by-row writes.
+- Reworked bulk result state updates into single writeback.
+- Improved student on-screen result asset fallback so logo, passport, and signature appear more reliably.
+- Improved admin report-card export asset fallback so signature uses the first available published signature or settings signature.
+- Added stronger on-screen verification/seal messaging to better match the PDF feel.
