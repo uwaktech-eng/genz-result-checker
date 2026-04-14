@@ -1333,7 +1333,8 @@
         examCode: $('examCodeInput').value.trim(),
         academicSession: $('sessionFilter').value,
         term: $('termFilter').value,
-        selectedSubjects: []
+        selectedSubjects: [],
+        resultDesign: currentDesign
       }, 'POST', loadingText || 'Preparing server PDF...');
       const base64 = res && res.data && res.data.pdfBase64 ? res.data.pdfBase64 : '';
       if (!base64) throw new Error('The server did not return the PDF file.');

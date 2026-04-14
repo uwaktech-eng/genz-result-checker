@@ -1167,21 +1167,107 @@ function appendStyledParagraph_(body, text, options) {
   if (options.spacingAfter != null) p.setSpacingAfter(options.spacingAfter);
   if (options.fontSize) p.setFontSize(options.fontSize);
   if (options.foregroundColor) p.setForegroundColor(options.foregroundColor);
+  if (options.backgroundColor) p.setBackgroundColor(options.backgroundColor);
   return p;
 }
 
-function setTableHeaderStyle_(row) {
+function setTableHeaderStyle_(row, palette) {
   if (!row) return;
+  palette = palette || getPdfThemePalette_('royal');
   for (var i = 0; i < row.getNumCells(); i += 1) {
     var cell = row.getCell(i);
-    try { cell.setBackgroundColor('#dce8ff'); } catch (err) {}
-    try { cell.editAsText().setBold(true); } catch (err2) {}
+    try { cell.setBackgroundColor(palette.header); } catch (err) {}
+    try {
+      var text = cell.editAsText();
+      text.setBold(true);
+      text.setForegroundColor(palette.headerText);
+    } catch (err2) {}
   }
 }
 
-function createTableWithRows_(body, rows) {
+function styleTableBodyRows_(table, palette) {
+  if (!table) return;
+  palette = palette || getPdfThemePalette_('royal');
+  for (var r = 1; r < table.getNumRows(); r += 1) {
+    var row = table.getRow(r);
+    for (var c = 0; c < row.getNumCells(); c += 1) {
+      var cell = row.getCell(c);
+      try { cell.setBackgroundColor(r % 2 ? '#ffffff' : palette.light); } catch (err) {}
+      try { cell.editAsText().setForegroundColor(palette.text); } catch (err2) {}
+    }
+  }
+}
+
+function createTableWithRows_(body, rows, palette) {
   var table = body.appendTable(rows);
-  if (rows && rows.length) setTableHeaderStyle_(table.getRow(0));
+  if (rows && rows.length) setTableHeaderStyle_(table.getRow(0), palette);
+  styleTableBodyRows_(table, palette);
+  return table;
+}
+
+function getPdfThemePalette_(designName) {
+  var name = sanitizeValue_(designName || 'royal').toLowerCase();
+  var base = name.split('-')[0] || 'royal';
+  var isAlt = /-2$/.test(name);
+  var map = {
+    royal:   { header:'#2648c4', accent:'#12a2ff', light:'#f1f6ff', line:'#ccdafa', text:'#172640', sub:'#56708c', headerText:'#ffffff', lightAlt:'#fbfdff', lineAlt:'#d9e5ff' },
+    emerald: { header:'#10815b', accent:'#1fc98c', light:'#effcf6', line:'#c7ead8', text:'#173428', sub:'#4f6d60', headerText:'#ffffff', lightAlt:'#fbfffd', lineAlt:'#d7efe2' },
+    sunset:  { header:'#cf611a', accent:'#ff944d', light:'#fff5ec', line:'#f5d6bc', text:'#442519', sub:'#7f5a4c', headerText:'#ffffff', lightAlt:'#fffaf5', lineAlt:'#f6dfc9' },
+    violet:  { header:'#6549be', accent:'#bc75ff', light:'#f7f2ff', line:'#dcd2f4', text:'#251c45', sub:'#6f6490', headerText:'#ffffff', lightAlt:'#fcf9ff', lineAlt:'#e6dcf8' },
+    carbon:  { header:'#26344d', accent:'#6884ab', light:'#f4f7fc', line:'#ced6e4', text:'#1b2331', sub:'#5f6d81', headerText:'#ffffff', lightAlt:'#fafcff', lineAlt:'#d8e0ee' },
+    rose:    { header:'#c03e61', accent:'#ff7ea8', light:'#fff2f7', line:'#f5cddd', text:'#441d2a', sub:'#866271', headerText:'#ffffff', lightAlt:'#fff8fb', lineAlt:'#f6dbe8' },
+    ocean:   { header:'#0a74b8', accent:'#45c6e9', light:'#eef9ff', line:'#c7e6f2', text:'#153042', sub:'#567286', headerText:'#ffffff', lightAlt:'#f9fdff', lineAlt:'#d5eef6' },
+    gold:    { header:'#a37314', accent:'#f2b12b', light:'#fff8ea', line:'#f1dfb2', text:'#4a3815', sub:'#7a6841', headerText:'#ffffff', lightAlt:'#fffdf7', lineAlt:'#f3e7c4' },
+    forest:  { header:'#2a723a', accent:'#5aba6e', light:'#f1fcf3', line:'#cce5d1', text:'#18311f', sub:'#57705c', headerText:'#ffffff', lightAlt:'#fbfffc', lineAlt:'#d9ecdd' },
+    candy:   { header:'#bf3f84', accent:'#568bff', light:'#fff3fa', line:'#ecd0e0', text:'#421c32', sub:'#7f6580', headerText:'#ffffff', lightAlt:'#fff9fc', lineAlt:'#f1dce8' }
+  };
+  var palette = map[base] || map.royal;
+  if (!isAlt) return palette;
+  return {
+    header: palette.accent,
+    accent: palette.header,
+    light: palette.lightAlt || palette.light,
+    line: palette.lineAlt || palette.line,
+    text: palette.text,
+    sub: palette.sub,
+    headerText: '#ffffff'
+  };
+}
+
+function setCellTextStyle_(cell, options) {
+  if (!cell) return;
+  options = options || {};
+  try {
+    var text = cell.editAsText();
+    if (options.foregroundColor) text.setForegroundColor(options.foregroundColor);
+    if (options.bold) text.setBold(true);
+    if (options.fontSize) text.setFontSize(options.fontSize);
+  } catch (err) {}
+}
+
+function appendParagraphInCell_(cell, text, options) {
+  var p = cell.appendParagraph(sanitizeValue_(text));
+  options = options || {};
+  if (options.alignment) p.setAlignment(options.alignment);
+  if (options.bold) p.setBold(true);
+  if (options.fontSize) p.setFontSize(options.fontSize);
+  if (options.foregroundColor) p.setForegroundColor(options.foregroundColor);
+  if (options.backgroundColor) p.setBackgroundColor(options.backgroundColor);
+  if (options.spacingAfter != null) p.setSpacingAfter(options.spacingAfter);
+  if (options.spacingBefore != null) p.setSpacingBefore(options.spacingBefore);
+  return p;
+}
+
+function createSummaryCardsTable_(body, cards, palette) {
+  var table = body.appendTable([cards.map(function(card) { return sanitizeValue_(card.label || ''); })]);
+  var row = table.getRow(0);
+  for (var i = 0; i < cards.length; i += 1) {
+    var cell = row.getCell(i);
+    try { cell.clear(); } catch (err) {}
+    try { cell.setBackgroundColor(palette.light); } catch (err2) {}
+    appendParagraphInCell_(cell, sanitizeValue_(cards[i].label || ''), { bold: true, fontSize: 9, foregroundColor: palette.sub, spacingAfter: 4 });
+    appendParagraphInCell_(cell, sanitizeValue_(cards[i].value || ''), { bold: true, fontSize: 12, foregroundColor: palette.text });
+  }
   return table;
 }
 
@@ -1195,53 +1281,86 @@ function createStudentPdfBlob_(bundle) {
   var passed = rows.filter(function(row) { return sanitizeValue_(row.resultStatus).toUpperCase() === 'PASS'; }).length;
   var total = rows.length;
   var status = passed === total ? 'PASS' : (passed > 0 ? 'PARTIAL PASS' : 'NEEDS IMPROVEMENT');
+  var palette = getPdfThemePalette_(bundle.resultDesign || settings.RESULT_DESIGN || 'royal');
   var signatureUrl = sanitizeValue_(first.signatureUrl || settings.SIGNATURE_URL || '');
   var logoAsset = safeLoadImageBlob_(settings.BRAND_LOGO_URL || '');
   var passportAsset = safeLoadImageBlob_(student.passportUrl || '');
   var signatureAsset = safeLoadImageBlob_(signatureUrl);
   var fileName = makeResultPdfFileName_(student, rows, bundle.examCode);
+  var statusColor = status === 'PASS' ? '#1b7f39' : (status === 'PARTIAL PASS' ? '#9b6a00' : '#b23a48');
 
   var doc = DocumentApp.create(fileName.replace(/\.pdf$/i, ''));
   var file = DriveApp.getFileById(doc.getId());
   try {
     var body = doc.getBody();
     body.clear();
+    try { body.setMarginTop(28).setMarginBottom(28).setMarginLeft(28).setMarginRight(28); } catch (marginErr) {}
+
+    var header = body.appendTable([['', '']]);
+    var headerRow = header.getRow(0);
+    var leftCell = headerRow.getCell(0);
+    var rightCell = headerRow.getCell(1);
+    try { leftCell.setBackgroundColor(palette.header); rightCell.setBackgroundColor(palette.header); } catch (err) {}
+
+    try { leftCell.clear(); rightCell.clear(); } catch (clearErr) {}
+
+    var leftInner = leftCell.appendTable([['', '']]);
+    var leftInnerRow = leftInner.getRow(0);
+    var logoCell = leftInnerRow.getCell(0);
+    var textCell = leftInnerRow.getCell(1);
+    try { logoCell.setBackgroundColor(palette.header); textCell.setBackgroundColor(palette.header); } catch (innerBgErr) {}
+    try { logoCell.clear(); textCell.clear(); } catch (innerClearErr) {}
 
     if (logoAsset && logoAsset.blob) {
-      var logo = body.appendImage(logoAsset.blob);
-      try { logo.setWidth(72); logo.setHeight(72); } catch (err) {}
-    }
-    appendStyledParagraph_(body, settings.BRAND_NAME || 'Genz Edutech Innovations', { alignment: DocumentApp.HorizontalAlignment.CENTER, bold: true, fontSize: 18, spacingAfter: 2, foregroundColor: '#173f7a' });
-    appendStyledParagraph_(body, settings.SCHOOL_NAME || student.schoolName || 'Genz Result Portal', { alignment: DocumentApp.HorizontalAlignment.CENTER, bold: true, fontSize: 15, spacingAfter: 2 });
-    var addressBits = [settings.HEAD_OFFICE_ADDRESS, settings.SCHOOL_PHONE, settings.SCHOOL_EMAIL].filter(function(v) { return sanitizeValue_(v); });
-    if (addressBits.length) appendStyledParagraph_(body, addressBits.join(' • '), { alignment: DocumentApp.HorizontalAlignment.CENTER, fontSize: 10, foregroundColor: '#54657a', spacingAfter: 8 });
-    appendStyledParagraph_(body, 'RESULT', { alignment: DocumentApp.HorizontalAlignment.CENTER, bold: true, fontSize: 20, spacingBefore: 6, spacingAfter: 2 });
-    appendStyledParagraph_(body, status, { alignment: DocumentApp.HorizontalAlignment.CENTER, bold: true, fontSize: 13, foregroundColor: status === 'PASS' ? '#1b7f39' : '#9b6a00', spacingAfter: 12 });
-
-    if (passportAsset && passportAsset.blob) {
-      var passport = body.appendImage(passportAsset.blob);
-      try { passport.setWidth(96); passport.setHeight(112); } catch (err) {}
-      appendStyledParagraph_(body, 'Student Passport', { alignment: DocumentApp.HorizontalAlignment.CENTER, fontSize: 9, foregroundColor: '#6c7b90', spacingAfter: 8 });
+      var logo = logoCell.appendImage(logoAsset.blob);
+      try { logo.setWidth(64); logo.setHeight(64); } catch (logoErr) {}
     } else {
-      appendStyledParagraph_(body, 'No Passport', { alignment: DocumentApp.HorizontalAlignment.CENTER, fontSize: 10, foregroundColor: '#6c7b90', spacingAfter: 8 });
+      appendParagraphInCell_(logoCell, 'LOGO', { bold: true, fontSize: 12, foregroundColor: palette.headerText, alignment: DocumentApp.HorizontalAlignment.CENTER });
     }
+    appendParagraphInCell_(textCell, settings.BRAND_NAME || 'Genz Edutech Innovations', { bold: true, fontSize: 16, foregroundColor: palette.headerText, spacingAfter: 2 });
+    appendParagraphInCell_(textCell, settings.SCHOOL_NAME || student.schoolName || 'Genz Result Portal', { bold: true, fontSize: 20, foregroundColor: palette.headerText, spacingAfter: 2 });
+    if (sanitizeValue_(settings.HEAD_OFFICE_ADDRESS)) appendParagraphInCell_(textCell, settings.HEAD_OFFICE_ADDRESS, { fontSize: 9, foregroundColor: '#eef5ff', spacingAfter: 1 });
+    var headerContact = [settings.SCHOOL_PHONE, settings.SCHOOL_EMAIL].filter(function(v) { return sanitizeValue_(v); }).join(' • ');
+    if (headerContact) appendParagraphInCell_(textCell, headerContact, { fontSize: 9, foregroundColor: '#eef5ff' });
 
-    appendStyledParagraph_(body, 'Student Performance Summary', { bold: true, fontSize: 14, spacingBefore: 4, spacingAfter: 6, foregroundColor: '#173f7a' });
-    var summaryRows = [
-      ['Student', sanitizeValue_(student.fullName || '—')],
-      ['Student Reg ID', sanitizeValue_(student.regId || '—')],
-      ['Class Level', sanitizeValue_(student.classLevel || '—')],
-      ['Exam', sanitizeValue_(first.examTitle || first.examCode || '—')],
-      ['Session / Term', [sanitizeValue_(first.academicSession), sanitizeValue_(first.term)].filter(Boolean).join(' / ') || '—'],
-      ['Published', formatDisplayDate_(first.publishedAt)],
-      ['Subjects', String(total)],
-      ['Average %', formatNumberLikeStudent_(average)],
-      ['Passed', passed + '/' + total]
-    ];
-    createTableWithRows_(body, [['Field', 'Value']].concat(summaryRows));
+    appendParagraphInCell_(rightCell, status, { bold: true, fontSize: 11, foregroundColor: palette.header, alignment: DocumentApp.HorizontalAlignment.CENTER, backgroundColor: '#ffffff' });
+    var statusBadge = rightCell.getChild(0);
+    try { statusBadge.asParagraph().setBackgroundColor('#ffffff'); } catch (badgeErr) {}
+    if (passportAsset && passportAsset.blob) {
+      var passport = rightCell.appendImage(passportAsset.blob);
+      try { passport.setWidth(88); passport.setHeight(104); } catch (passErr) {}
+    } else {
+      appendParagraphInCell_(rightCell, 'No Passport', { fontSize: 9, foregroundColor: '#eef5ff', alignment: DocumentApp.HorizontalAlignment.CENTER, spacingBefore: 8 });
+    }
+    appendParagraphInCell_(rightCell, 'Student Passport', { fontSize: 8, foregroundColor: '#eef5ff', alignment: DocumentApp.HorizontalAlignment.CENTER });
 
-    appendStyledParagraph_(body, 'This PDF includes the official brand logo, student passport, and admin signature.', { fontSize: 10, foregroundColor: '#54657a', spacingBefore: 10, spacingAfter: 8 });
+    appendStyledParagraph_(body, 'RESULT', { alignment: DocumentApp.HorizontalAlignment.CENTER, bold: true, fontSize: 19, spacingBefore: 8, spacingAfter: 1, foregroundColor: palette.header });
+    appendStyledParagraph_(body, status, { alignment: DocumentApp.HorizontalAlignment.CENTER, bold: true, fontSize: 11, spacingAfter: 8, foregroundColor: statusColor });
 
+    var summaryTable = body.appendTable([['', '']]);
+    var summaryRow = summaryTable.getRow(0);
+    var summaryLeft = summaryRow.getCell(0);
+    var summaryRight = summaryRow.getCell(1);
+    try { summaryLeft.setBackgroundColor('#ffffff'); summaryRight.setBackgroundColor(palette.light); } catch (sumBgErr) {}
+    try { summaryLeft.clear(); summaryRight.clear(); } catch (sumClearErr) {}
+    appendParagraphInCell_(summaryLeft, 'Student Performance Summary', { bold: true, fontSize: 13, foregroundColor: palette.header, spacingAfter: 4 });
+    appendParagraphInCell_(summaryLeft, [sanitizeValue_(student.fullName || 'Student'), sanitizeValue_(student.regId || '—'), sanitizeValue_(student.classLevel || '—')].filter(Boolean).join(' • '), { fontSize: 10, foregroundColor: palette.text, spacingAfter: 2 });
+    appendParagraphInCell_(summaryLeft, 'Exam: ' + (sanitizeValue_(first.examTitle || first.examCode || '—')) + ' • Session: ' + ([sanitizeValue_(first.academicSession), sanitizeValue_(first.term)].filter(Boolean).join(' / ') || '—'), { fontSize: 10, foregroundColor: palette.text, spacingAfter: 2 });
+    appendParagraphInCell_(summaryLeft, 'Published: ' + formatDisplayDate_(first.publishedAt) + ' • Average: ' + formatNumberLikeStudent_(average) + '% • Passed: ' + passed + '/' + total, { fontSize: 10, foregroundColor: palette.text, spacingAfter: 4 });
+    appendParagraphInCell_(summaryLeft, 'Selection: ' + total + '/' + total + ' subject(s) included in this bulk report card', { fontSize: 9, foregroundColor: palette.sub });
+    appendParagraphInCell_(summaryRight, 'Verified Academic Record', { bold: true, fontSize: 10, foregroundColor: palette.header, alignment: DocumentApp.HorizontalAlignment.CENTER, spacingAfter: 4 });
+    appendParagraphInCell_(summaryRight, 'This PDF includes the official brand logo, student passport, and admin signature.', { fontSize: 9, foregroundColor: palette.sub, alignment: DocumentApp.HorizontalAlignment.CENTER, spacingAfter: 4 });
+    appendParagraphInCell_(summaryRight, 'Student Reg ID', { bold: true, fontSize: 9, foregroundColor: palette.sub, alignment: DocumentApp.HorizontalAlignment.CENTER, spacingAfter: 2 });
+    appendParagraphInCell_(summaryRight, sanitizeValue_(student.regId || '—'), { bold: true, fontSize: 13, foregroundColor: palette.text, alignment: DocumentApp.HorizontalAlignment.CENTER });
+
+    createSummaryCardsTable_(body, [
+      { label: 'Student Reg ID', value: sanitizeValue_(student.regId || '—') },
+      { label: 'Subjects', value: String(total) },
+      { label: 'Average %', value: formatNumberLikeStudent_(average) + '%' },
+      { label: 'Published', value: formatDisplayDate_(first.publishedAt) }
+    ], palette);
+
+    appendStyledParagraph_(body, 'Published Subject Results', { bold: true, fontSize: 13, spacingBefore: 10, spacingAfter: 5, foregroundColor: palette.header });
     var resultTableRows = [['Exam Code', 'Session', 'Term', 'Subject', 'Score', 'Percent', 'Grade', 'Rank', 'Status']];
     rows.forEach(function(row) {
       resultTableRows.push([
@@ -1256,9 +1375,9 @@ function createStudentPdfBlob_(bundle) {
         sanitizeValue_(row.resultStatus || '—')
       ]);
     });
-    appendStyledParagraph_(body, 'Published Subject Results', { bold: true, fontSize: 13, spacingBefore: 12, spacingAfter: 6, foregroundColor: '#173f7a' });
-    createTableWithRows_(body, resultTableRows);
+    createTableWithRows_(body, resultTableRows, palette);
 
+    appendStyledParagraph_(body, 'Remarks and Teacher Comments', { bold: true, fontSize: 13, spacingBefore: 10, spacingAfter: 5, foregroundColor: palette.accent });
     var remarkRows = [['Exam / Subject', 'Remark', 'Teacher Comment']];
     rows.forEach(function(row) {
       remarkRows.push([
@@ -1267,21 +1386,25 @@ function createStudentPdfBlob_(bundle) {
         sanitizeValue_(row.teacherComment || 'No teacher comment')
       ]);
     });
-    appendStyledParagraph_(body, 'Remarks and Teacher Comments', { bold: true, fontSize: 13, spacingBefore: 12, spacingAfter: 6, foregroundColor: '#173f7a' });
-    createTableWithRows_(body, remarkRows);
+    createTableWithRows_(body, remarkRows, { header: palette.accent, light: palette.light, text: palette.text, headerText: '#ffffff' });
 
-    appendStyledParagraph_(body, 'Official Verification Note', { bold: true, fontSize: 13, spacingBefore: 12, spacingAfter: 6, foregroundColor: '#173f7a' });
-    appendStyledParagraph_(body, 'This result was generated from the official student result portal on ' + formatDisplayDate_(new Date()) + '. ' + total + ' selected subject(s) were included in this bulk report card. The brand logo, student passport, published result rows, and admin signature form part of this verified academic record.', { fontSize: 10, foregroundColor: '#49586b', spacingAfter: 10 });
-
-    appendStyledParagraph_(body, 'Authorized Signatory', { bold: true, fontSize: 12, spacingBefore: 8, spacingAfter: 4, alignment: DocumentApp.HorizontalAlignment.CENTER });
+    var footerTable = body.appendTable([['', '']]);
+    var footerRow = footerTable.getRow(0);
+    var noteCell = footerRow.getCell(0);
+    var signCell = footerRow.getCell(1);
+    try { noteCell.clear(); signCell.clear(); } catch (footErr) {}
+    try { noteCell.setBackgroundColor(palette.light); signCell.setBackgroundColor('#ffffff'); } catch (footBgErr) {}
+    appendParagraphInCell_(noteCell, 'Official Verification Note', { bold: true, fontSize: 12, foregroundColor: palette.header, spacingAfter: 4 });
+    appendParagraphInCell_(noteCell, 'This result was generated from the official student result portal on ' + formatDisplayDate_(new Date()) + '. ' + total + ' selected subject(s) were included in this bulk report card. The brand logo, student passport, published result rows, and admin signature form part of this verified academic record.', { fontSize: 9, foregroundColor: palette.sub });
+    appendParagraphInCell_(signCell, 'Authorized Signatory', { bold: true, fontSize: 11, foregroundColor: palette.header, alignment: DocumentApp.HorizontalAlignment.CENTER, spacingAfter: 4 });
     if (signatureAsset && signatureAsset.blob) {
-      var sign = body.appendImage(signatureAsset.blob);
-      try { sign.setWidth(150); sign.setHeight(48); } catch (err) {}
+      var sign = signCell.appendImage(signatureAsset.blob);
+      try { sign.setWidth(140); sign.setHeight(46); } catch (signErr) {}
     } else {
-      appendStyledParagraph_(body, 'No signature added', { alignment: DocumentApp.HorizontalAlignment.CENTER, fontSize: 10, foregroundColor: '#6c7b90', spacingAfter: 2 });
+      appendParagraphInCell_(signCell, 'No signature added', { alignment: DocumentApp.HorizontalAlignment.CENTER, fontSize: 10, foregroundColor: palette.sub, spacingAfter: 2 });
     }
-    appendStyledParagraph_(body, settings.SIGNATURE_NAME || settings.PRINCIPAL_NAME || 'Authorized Admin', { alignment: DocumentApp.HorizontalAlignment.CENTER, bold: true, fontSize: 11, spacingAfter: 2 });
-    appendStyledParagraph_(body, 'Authorized Admin Signature', { alignment: DocumentApp.HorizontalAlignment.CENTER, fontSize: 9, foregroundColor: '#6c7b90' });
+    appendParagraphInCell_(signCell, settings.SIGNATURE_NAME || settings.PRINCIPAL_NAME || 'Authorized Admin', { alignment: DocumentApp.HorizontalAlignment.CENTER, bold: true, fontSize: 11, foregroundColor: palette.text, spacingAfter: 2 });
+    appendParagraphInCell_(signCell, 'Authorized Admin Signature', { alignment: DocumentApp.HorizontalAlignment.CENTER, fontSize: 9, foregroundColor: palette.sub });
 
     doc.saveAndClose();
     var pdfBlob = file.getAs(MimeType.PDF).setName(fileName);
@@ -1296,6 +1419,7 @@ function generateStudentPdf_(payload) {
   var session = requireSession_(payload.token, 'student', sanitizeValue_(payload.clientId));
   var bundle = getStudentResultBundle_(session, payload);
   bundle.selectedSubjects = Array.isArray(payload.selectedSubjects) ? payload.selectedSubjects : [];
+  bundle.resultDesign = sanitizeValue_(payload.resultDesign || bundle.resultDesign || 'royal');
   var generated = createStudentPdfBlob_(bundle);
   var bytes = generated.blob.getBytes();
   return ok_('Student PDF generated successfully.', {
