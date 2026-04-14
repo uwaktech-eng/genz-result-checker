@@ -1327,29 +1327,30 @@ function createStudentPdfBlob_(bundle) {
     var logoCell = headerRow.getCell(0);
     var textCell = headerRow.getCell(1);
     var passportCell = headerRow.getCell(2);
-    try { header.setColumnWidth(0, 88); header.setColumnWidth(1, 340); header.setColumnWidth(2, 96); } catch (widthErr) {}
+    try { header.setColumnWidth(0, 92); header.setColumnWidth(1, 350); header.setColumnWidth(2, 92); } catch (widthErr) {}
+    try { header.setBorderColor('#d9e3f2').setBorderWidth(1); } catch (borderErr) {}
     try { logoCell.setBackgroundColor(palette.header); textCell.setBackgroundColor(palette.header); passportCell.setBackgroundColor(palette.header); } catch (err) {}
     try { logoCell.clear(); textCell.clear(); passportCell.clear(); } catch (clearErr) {}
 
-    appendParagraphInCell_(logoCell, '', { spacingAfter: 1, spacingBefore: 2 });
+    appendParagraphInCell_(logoCell, '', { spacingAfter: 0, spacingBefore: 4 });
     if (logoAsset && logoAsset.blob) {
-      appendCenteredImageInCell_(logoCell, logoAsset.blob, 54, 54, 3, 1);
+      appendCenteredImageInCell_(logoCell, logoAsset.blob, 56, 56, 5, 2);
     } else {
-      appendParagraphInCell_(logoCell, 'LOGO', { bold: true, fontSize: 11, foregroundColor: palette.headerText, alignment: DocumentApp.HorizontalAlignment.CENTER, spacingAfter: 2, spacingBefore: 10 });
+      appendParagraphInCell_(logoCell, 'LOGO', { bold: true, fontSize: 11, foregroundColor: palette.headerText, alignment: DocumentApp.HorizontalAlignment.CENTER, spacingAfter: 2, spacingBefore: 12 });
     }
 
-    appendParagraphInCell_(textCell, settings.BRAND_NAME || 'Genz Edutech Innovations', { bold: true, fontSize: 17, foregroundColor: palette.headerText, alignment: DocumentApp.HorizontalAlignment.CENTER, spacingAfter: 2, spacingBefore: 5 });
-    appendParagraphInCell_(textCell, settings.SCHOOL_NAME || student.schoolName || 'Genz Result Portal', { bold: true, fontSize: 21, foregroundColor: palette.headerText, alignment: DocumentApp.HorizontalAlignment.CENTER, spacingAfter: 3 });
-    if (sanitizeValue_(settings.HEAD_OFFICE_ADDRESS)) appendParagraphInCell_(textCell, settings.HEAD_OFFICE_ADDRESS, { bold: true, fontSize: 10, foregroundColor: '#eef5ff', alignment: DocumentApp.HorizontalAlignment.CENTER, spacingAfter: 1 });
+    appendParagraphInCell_(textCell, settings.BRAND_NAME || 'Genz Edutech Innovations', { bold: true, fontSize: 17, foregroundColor: palette.headerText, alignment: DocumentApp.HorizontalAlignment.CENTER, spacingAfter: 2, spacingBefore: 8 });
+    appendParagraphInCell_(textCell, settings.SCHOOL_NAME || student.schoolName || 'Genz Result Portal', { bold: true, fontSize: 22, foregroundColor: palette.headerText, alignment: DocumentApp.HorizontalAlignment.CENTER, spacingAfter: 4 });
+    if (sanitizeValue_(settings.HEAD_OFFICE_ADDRESS)) appendParagraphInCell_(textCell, settings.HEAD_OFFICE_ADDRESS, { bold: true, fontSize: 10, foregroundColor: '#eef5ff', alignment: DocumentApp.HorizontalAlignment.CENTER, spacingAfter: 2 });
     var headerContact = [settings.SCHOOL_PHONE, settings.SCHOOL_EMAIL].filter(function(v) { return sanitizeValue_(v); }).join(' • ');
     if (headerContact) appendParagraphInCell_(textCell, headerContact, { bold: true, fontSize: 9, foregroundColor: '#eef5ff', alignment: DocumentApp.HorizontalAlignment.CENTER, spacingAfter: 2 });
-    appendParagraphInCell_(textCell, 'Official Student Result Portal', { bold: true, fontSize: 9, foregroundColor: '#eef5ff', alignment: DocumentApp.HorizontalAlignment.CENTER, spacingAfter: 2 });
+    appendParagraphInCell_(textCell, 'Official Student Result Portal', { bold: true, fontSize: 9, foregroundColor: '#eef5ff', alignment: DocumentApp.HorizontalAlignment.CENTER, spacingAfter: 5 });
 
-    appendParagraphInCell_(passportCell, '', { spacingAfter: 1, spacingBefore: 2 });
+    appendParagraphInCell_(passportCell, '', { spacingAfter: 0, spacingBefore: 4 });
     if (passportAsset && passportAsset.blob) {
-      appendCenteredImageInCell_(passportCell, passportAsset.blob, 74, 92, 3, 1);
+      appendCenteredImageInCell_(passportCell, passportAsset.blob, 76, 96, 4, 2);
     } else {
-      appendParagraphInCell_(passportCell, 'No Passport', { fontSize: 9, foregroundColor: '#eef5ff', alignment: DocumentApp.HorizontalAlignment.CENTER, spacingBefore: 14, spacingAfter: 5 });
+      appendParagraphInCell_(passportCell, 'No Passport', { fontSize: 9, foregroundColor: '#eef5ff', alignment: DocumentApp.HorizontalAlignment.CENTER, spacingBefore: 16, spacingAfter: 6 });
     }
 
     appendStyledParagraph_(body, 'RESULT', { alignment: DocumentApp.HorizontalAlignment.CENTER, bold: true, fontSize: 19, spacingBefore: 8, spacingAfter: 1, foregroundColor: palette.header });
@@ -1414,15 +1415,15 @@ function createStudentPdfBlob_(bundle) {
     try { noteCell.setBackgroundColor(palette.light); signCell.setBackgroundColor('#ffffff'); } catch (footBgErr) {}
     appendParagraphInCell_(noteCell, 'Official Verification Note', { bold: true, fontSize: 12, foregroundColor: palette.header, spacingAfter: 4 });
     appendParagraphInCell_(noteCell, 'This result was generated from the official student result portal on ' + formatDisplayDate_(new Date()) + '. ' + total + ' selected subject(s) were included in this bulk report card. The brand logo, student passport, published result rows, and admin signature form part of this verified academic record.', { fontSize: 9, foregroundColor: palette.sub });
-    appendParagraphInCell_(signCell, 'Authorized Signatory', { bold: true, fontSize: 11, foregroundColor: palette.header, alignment: DocumentApp.HorizontalAlignment.CENTER, spacingAfter: 2, spacingBefore: 2 });
+    appendParagraphInCell_(signCell, '', { spacingAfter: 2, spacingBefore: 4 });
+    appendParagraphInCell_(signCell, 'Authorized Signatory', { bold: true, fontSize: 11, foregroundColor: palette.header, alignment: DocumentApp.HorizontalAlignment.CENTER, spacingAfter: 3, spacingBefore: 8 });
     appendParagraphInCell_(signCell, '', { spacingAfter: 1 });
     if (signatureAsset && signatureAsset.blob) {
-      appendCenteredImageInCell_(signCell, signatureAsset.blob, 150, 42, 2, 2);
+      appendCenteredImageInCell_(signCell, signatureAsset.blob, 165, 54, 3, 3);
     } else {
-      appendParagraphInCell_(signCell, 'No signature added', { alignment: DocumentApp.HorizontalAlignment.CENTER, fontSize: 10, foregroundColor: palette.sub, spacingAfter: 2, spacingBefore: 8 });
+      appendParagraphInCell_(signCell, 'No signature added', { alignment: DocumentApp.HorizontalAlignment.CENTER, fontSize: 10, foregroundColor: palette.sub, spacingAfter: 2, spacingBefore: 10 });
     }
-    appendParagraphInCell_(signCell, settings.SIGNATURE_NAME || settings.PRINCIPAL_NAME || 'Authorized Admin', { alignment: DocumentApp.HorizontalAlignment.CENTER, bold: true, fontSize: 11, foregroundColor: palette.text, spacingAfter: 1 });
-    appendParagraphInCell_(signCell, 'Authorized Admin Signature', { alignment: DocumentApp.HorizontalAlignment.CENTER, fontSize: 9, foregroundColor: palette.sub });
+    appendParagraphInCell_(signCell, settings.SIGNATURE_NAME || settings.PRINCIPAL_NAME || 'Authorized Admin', { alignment: DocumentApp.HorizontalAlignment.CENTER, bold: true, fontSize: 11, foregroundColor: palette.text, spacingAfter: 1, spacingBefore: 1 });
 
     doc.saveAndClose();
     var pdfBlob = file.getAs(MimeType.PDF).setName(fileName);
