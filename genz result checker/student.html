@@ -150,16 +150,6 @@
     .selection-spotlight .sub{margin-top:6px;color:#5b718f;font-size:13px}
     .selection-pill{display:inline-flex;align-items:center;gap:8px;padding:11px 15px;border-radius:999px;background:rgba(255,255,255,.88);border:1px solid rgba(255,255,255,.98);color:#173459;font-weight:900;box-shadow:0 10px 22px rgba(44,71,120,.08)}
     .subject-empty{padding:18px;border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.88),rgba(246,249,255,.96));border:1px dashed rgba(170,188,218,.9);color:#58708f;text-align:center}
-
-    .offstage-render{position:absolute;left:-100000px;top:0;width:980px;opacity:0;pointer-events:none;z-index:-1}
-    .preview-modal{position:fixed;inset:0;background:rgba(6,14,28,.64);display:none;align-items:center;justify-content:center;z-index:1002;backdrop-filter:blur(10px)}
-    .preview-modal.show{display:flex}
-    .preview-dialog{width:min(96vw,1120px);max-height:92vh;overflow:hidden;border-radius:28px;background:rgba(244,248,255,.96);border:1px solid rgba(255,255,255,.82);box-shadow:0 28px 70px rgba(29,49,90,.28);display:flex;flex-direction:column}
-    .preview-toolbar{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;padding:16px 18px;border-bottom:1px solid rgba(211,223,244,.85);background:linear-gradient(135deg,rgba(77,91,255,.14),rgba(33,184,255,.12))}
-    .preview-toolbar h3{margin:0;font-size:1.05rem;color:#16304d}
-    .preview-toolbar .muted{font-size:13px}
-    .preview-body{padding:18px;overflow:auto;background:linear-gradient(180deg,rgba(248,251,255,.98),rgba(238,245,255,.98))}
-    .preview-body .report-card{margin:0;background:linear-gradient(180deg, rgba(255,255,255,.96), rgba(242,247,255,.99));}
     .overlay{position:fixed;inset:0;background:rgba(7,16,29,.58);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(8px)}
     .overlay.show{display:flex}
     .loader-box{padding:24px;width:min(90vw,360px);text-align:center}
@@ -172,8 +162,6 @@
       .subject-pick-toolbar,.selection-spotlight{flex-direction:column;align-items:stretch}
       .wrap{padding:16px}
       table{min-width:560px}
-      .preview-dialog{width:min(98vw,1120px);max-height:96vh}
-      .preview-body{padding:12px}
     }
     @media print{
       body{background:#fff}
@@ -185,20 +173,6 @@
 <body>
   <div class="overlay" id="overlay"><div class="glass loader-box"><div class="spinner"></div><div id="overlayText">Loading...</div></div></div>
   <div id="toast"></div>
-  <div class="preview-modal" id="previewModal">
-    <div class="preview-dialog">
-      <div class="preview-toolbar">
-        <div>
-          <h3 id="previewTitle">Result Design Preview</h3>
-          <div class="muted" id="previewSubtitle">Preview the exact colorful design before downloading the PDF.</div>
-        </div>
-        <div class="actions">
-          <button class="btn btn-soft" id="closePreviewBtn" type="button">Close Preview</button>
-        </div>
-      </div>
-      <div class="preview-body" id="previewModalBody"></div>
-    </div>
-  </div>
 
   <div class="wrap">
     <div class="glass topbar">
@@ -222,7 +196,7 @@
 
         <form id="loginForm">
           <h2 style="margin:0 0 10px">Sign in</h2>
-          <p class="muted">Log in first, then choose whether you want a <strong>single subject design</strong> or your <strong>full report card design</strong>. Preview it first, then download the PDF. Your Registration ID is used automatically for your account.</p>
+          <p class="muted">Log in first, then optionally enter one or more <strong>exam codes</strong> separated with commas. Leave it blank to view and download <strong>all published results</strong> available to your account.</p>
           <div class="grid grid-2">
             <div class="field"><label>Registration ID</label><input name="regId" required /></div>
             <div class="field"><label>Password</label><input type="password" name="password" required /></div>
@@ -280,11 +254,11 @@
 
       <div class="glass card">
         <h2 style="margin:0 0 10px">How result access works</h2>
-        <div class="inline-note" id="portalNote">After login, your Registration ID is used to load every result that is both <strong>published</strong> and <strong>activated for view</strong> for your account. Then use the subject selector to choose a <strong>single subject design</strong> or your <strong>full report card design</strong>, preview it, and download the PDF.</div>
+        <div class="inline-note" id="portalNote">After login, you may enter one or more exam codes separated with commas to load only those results. Leave the exam code blank to load every result that is both <strong>published</strong> and <strong>activated for view</strong> for your account.</div>
         <div class="grid" style="margin-top:16px">
           <div class="glass card" style="padding:16px">
-            <strong>Preview then download</strong>
-            <p class="muted">Use the design preview window to inspect the exact colorful layout first, then download the PDF version you need.</p>
+            <strong>Download as PDF</strong>
+            <p class="muted">The student portal exports the report as a real PDF file using high-quality canvas rendering.</p>
           </div>
           <div class="glass card" style="padding:16px">
             <strong>History filters</strong>
@@ -292,14 +266,13 @@
           </div>
         </div>
       </div>
-      </div>
     </section>
 
     <section id="appView" class="hidden report-shell">
       <div class="glass card print-hide">
         <div class="result-design-row">
           <div class="grid grid-3">
-            <div class="field"><label>Student Registration ID</label><input id="examCodeInput" placeholder="Your registered ID will appear here after login" readonly /></div>
+            <div class="field"><label>Exam Code <span class="muted">(optional, comma separated)</span></label><input id="examCodeInput" placeholder="Leave blank to load all published results, or enter exam codes like EXAM001, EXAM002" /></div>
             <div class="field"><label>Academic Session Filter</label><select id="sessionFilter"><option value="">All sessions</option></select></div>
             <div class="field"><label>Term Filter</label><select id="termFilter"><option value="">All terms</option></select></div>
           </div>
@@ -307,7 +280,6 @@
         </div>
         <div class="actions">
           <button class="btn btn-primary" id="loadResultBtn" type="button">Load Result</button>
-          <button class="btn btn-soft" id="previewDesignBtn" type="button">Preview Design</button>
           <button class="btn btn-soft" id="downloadPdfBtn" type="button">Download PDF</button>
         </div>
         <div class="status" id="resultLoadStatus"></div>
@@ -318,11 +290,11 @@
           <div class="subject-pick-toolbar">
             <div>
               <h2 style="margin:0 0 8px">Published subjects load automatically</h2>
-              <div class="muted">All published subjects for this student load automatically. Select one subject for a single-subject design, or keep many/all selected for the full report card design.</div>
+              <div class="muted">Leave exam code blank to load every published subject for this student automatically. Enter one or more exam codes separated with commas only when you want to load those particular results.</div>
             </div>
             <div class="subject-pick-actions">
-              <button class="btn btn-soft" id="selectAllSubjectsBtn" type="button">Select All Subjects</button>
-              <button class="btn btn-soft" id="clearSelectedSubjectsBtn" type="button">Clear Selection</button>
+              <button class="btn btn-soft" id="selectAllSubjectsBtn" type="button">Refresh</button>
+              <button class="btn btn-soft" id="clearSelectedSubjectsBtn" type="button">Refresh</button>
               <div class="subject-pill-count" id="selectedSubjectCount">All loaded published subjects will be used automatically</div>
             </div>
           </div>
@@ -331,7 +303,6 @@
       </div>
 
 
-      <div class="offstage-render" aria-hidden="true">
       <div class="glass card report-card" id="reportCapture">
         <div class="report-head">
           <div class="report-badges">
@@ -346,7 +317,7 @@
               <div class="report-sub" id="schoolAddress"></div>
               <div class="report-sub"><span id="schoolPhone"></span> • <span id="schoolEmail"></span></div>
               <div class="report-meta-stack">
-                <span class="report-meta-chip" id="metaExamCode">Registration ID • —</span>
+                <span class="report-meta-chip" id="metaExamCode">Exam Code • —</span>
                 <span class="report-meta-chip" id="metaSessionTerm">Session • —</span>
                 <span class="report-meta-chip" id="metaGeneratedOn">Generated • —</span>
               </div>
@@ -365,7 +336,7 @@
             <div class="student-headline">
               <div>
                 <div class="student-title">Student Performance Summary</div>
-                <div class="student-sub" id="studentHeadlineSub">Official result design preview carrying every selected published subject for the student.</div>
+                <div class="student-sub" id="studentHeadlineSub">Official academic result breakdown for the selected exam code.</div>
               </div>
               <div class="report-badge" id="studentStatusBadge">Active Record</div>
             </div>
@@ -385,15 +356,14 @@
             <div class="table-card-title" style="padding:16px 16px 0">
               <div>
                 <div class="table-title">Detailed Subject Breakdown</div>
-                <div class="table-subtitle">Every published subject for the loaded student report card, including session, term, score, grade, ranking, and status.</div>
+                <div class="table-subtitle">Scores, grades, ranking, and publication status for each subject entry.</div>
               </div>
             </div>
             <table>
               <thead>
                 <tr>
                   <th>Exam Code</th>
-                  <th>Session</th>
-                  <th>Term</th>
+                  <th>Class</th>
                   <th>Subject</th>
                   <th>Score</th>
                   <th>Percentage</th>
@@ -422,7 +392,7 @@
 
           <div class="signature-wrap">
             <div class="inline-note">
-              This result was generated from the official Genz Edutech Innovations result portal. The published date, registration ID, and subject details shown above are part of the official record for this report.
+              This result was generated from the official Genz Edutech Innovations result portal. The published date and exam code shown above are part of the official record for this report.
             </div>
             <div class="signature-box" id="signatureBox">
               <div class="muted">No signature added</div>
@@ -430,13 +400,12 @@
           </div>
         </div>
       </div>
-      </div>
     </section>
   </div>
 
   <script>
     try{ if(window.top !== window.self){ window.top.location = window.self.location.href; } }catch(_err){}
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwukgxYJK2gblh7cpEcRQ_tb8-q2PYA8zU3Ujbap2PJUYDoWCeLt8FKpFCAetYghWQd/exec';
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxkqab1CGlVVZ1No0Q5XF3vg6QMgDF7avYLAvaV5DhW_fR8AASqhn_O8lx3nAgXDG_NtQ/exec';
     const STUDENT_TOKEN_KEY = 'gei_student_token_v3';
     const STUDENT_CLIENT_KEY = 'gei_student_client_v1';
 
@@ -590,7 +559,7 @@
       publicData = res.data;
       currentSettings = res.data.settings || {};
       $('brandHeader').textContent = currentSettings.BRAND_NAME || 'Genz Edutech Innovations';
-      $('portalNote').innerHTML = currentSettings.PORTAL_NOTICE || 'Your Registration ID is used to load your published results automatically after login. Use the subject selector below to choose either a single-subject design or your full report card design, preview it, and then download the PDF.';
+      $('portalNote').innerHTML = currentSettings.PORTAL_NOTICE || 'Leave exam code blank to automatically load all published results for your account after login. Enter one or more exam codes separated with commas only when you want to check those particular results.';
       applyFavicon(currentSettings.FAVICON_URL || currentSettings.BRAND_LOGO_URL || '');
       if ($('signupClassLevel')) $('signupClassLevel').placeholder = 'e.g. Year 5 / JSS 1 / Undergraduate';
       if ($('signupCategory') && (publicData.categoryOptions || []).length){ fillOptions($('signupCategory'), publicData.categoryOptions || [], 'Select category'); }
@@ -612,6 +581,9 @@
     }
 
     function renderStudentProfile(student){
+      const passportBox = $('passportBox');
+      if (student.passportUrl) passportBox.innerHTML = `<img src="${esc(normalizeImageUrl(student.passportUrl))}" alt="Passport" crossorigin="anonymous" referrerpolicy="no-referrer" />`;
+      else passportBox.textContent = 'No passport';
 
       const fieldValues = {
         fullName: student.fullName, regId: student.regId, classLevel: student.classLevel, category: student.category, schoolName: student.schoolName,
@@ -676,29 +648,23 @@
 
     function getSelectedRows(baseRows){
       const rows = Array.isArray(baseRows) ? baseRows : getBaseFilteredResults();
-      if (!subjectSelectionTouched) return rows.slice();
-      if (!selectedSubjects.length) return [];
-      const selectedSet = new Set((selectedSubjects || []).map(normalizeSubjectKey));
-      return rows.filter(row => selectedSet.has(normalizeSubjectKey(row.subject)));
+      return rows.slice();
     }
 
     function renderSubjectSelection(rows){
       const list = $('subjectSelectionList');
       const countBox = $('selectedSubjectCount');
       const options = getSubjectOptions(rows);
-      syncSelectedSubjects(options);
       if (!options.length){
         list.innerHTML = `<div class="subject-empty">No published subject is currently available for this account.</div>`;
         countBox.textContent = 'No subject loaded yet';
         return;
       }
-      const selectedSet = new Set((selectedSubjects || []).map(normalizeSubjectKey));
-      countBox.textContent = `${selectedSet.size || options.length} of ${options.length} subject(s) currently selected for preview/PDF`;
+      countBox.textContent = `${rows.length} published subject row(s) loaded automatically`;
       list.innerHTML = options.map(item => `
-        <label class="subject-pill ${selectedSet.has(item.key) ? 'active' : ''}">
-          <input type="checkbox" value="${esc(item.key)}" ${selectedSet.has(item.key) ? 'checked' : ''} style="margin-right:8px" />
+        <div class="subject-pill active">
           <span>${esc(item.label)} <small>${esc(item.count)}</small></span>
-        </label>
+        </div>
       `).join('');
     }
 
@@ -708,26 +674,6 @@
 
     function initialsFromText(text){
       return String(text || '').trim().split(/\s+/).slice(0,2).map(v => v.charAt(0).toUpperCase()).join('') || 'LG';
-    }
-
-    function firstNonEmptyValue(list){
-      for (const value of (list || [])){
-        const clean = String(value || '').trim();
-        if (clean) return clean;
-      }
-      return '';
-    }
-
-    function getDisplayAssets(resultData){
-      const rows = (resultData && resultData.results) || currentResults || [];
-      const student = (resultData && resultData.student) || currentStudent || {};
-      const settings = currentSettings || {};
-      return {
-        brandLogoUrl: normalizeImageUrl(settings.BRAND_LOGO_URL || ''),
-        passportUrl: normalizeImageUrl(student.passportUrl || ''),
-        signatureUrl: normalizeImageUrl(firstNonEmptyValue(rows.map(r => r && r.signatureUrl)) || settings.SIGNATURE_URL || ''),
-        signatureName: settings.SIGNATURE_NAME || settings.PRINCIPAL_NAME || 'Authorized Signatory'
-      };
     }
 
     function getPdfPalette(name){
@@ -883,32 +829,6 @@
       return fmt === 'JPG' ? 'JPEG' : fmt;
     }
 
-
-    async function loadImageIntoElement(box, raw, alt='Image', contain=false, emptyText='No image'){
-      if (!box) return false;
-      const candidates = publicImageCandidates(raw);
-      if (!candidates.length){ box.textContent = emptyText; return false; }
-      const trySrc = (src) => new Promise(resolve => {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.referrerPolicy = 'no-referrer';
-        img.alt = alt;
-        img.style.width = '100%';
-        img.style.height = '100%';
-        img.style.objectFit = contain ? 'contain' : 'cover';
-        img.onload = () => { box.innerHTML = ''; box.appendChild(img); resolve(true); };
-        img.onerror = () => resolve(false);
-        img.src = src;
-      });
-      for (const src of candidates){
-        if (await trySrc(src)) return true;
-      }
-      const backendDataUrl = await fetchImageDataUrlFromBackend(raw);
-      if (backendDataUrl && await trySrc(backendDataUrl)) return true;
-      box.textContent = emptyText;
-      return false;
-    }
-
     async function getImageDimensions(dataUrl){
       return await new Promise(resolve => {
         const img = new Image();
@@ -933,7 +853,7 @@
       return { x: dx, y: dy, w: drawW, h: drawH };
     }
 
-    async function renderReport(resultData){
+    function renderReport(resultData){
       currentStudent = resultData.student;
       currentResults = resultData.results || [];
       currentSettings = resultData.settings || currentSettings;
@@ -945,8 +865,8 @@
       $('schoolAddress').textContent = currentSettings.HEAD_OFFICE_ADDRESS || '';
       $('schoolPhone').textContent = currentSettings.SCHOOL_PHONE || '';
       $('schoolEmail').textContent = currentSettings.SCHOOL_EMAIL || '';
-      const assets = getDisplayAssets(resultData);
-      await loadImageIntoElement($('brandLogoBox'), assets.brandLogoUrl || '', 'Brand Logo', true, initialsFromText(currentSettings.BRAND_NAME || 'Logo'));
+      const logoUrl = normalizeImageUrl(currentSettings.BRAND_LOGO_URL || '');
+      $('brandLogoBox').innerHTML = logoUrl ? `<img src="${esc(logoUrl)}" alt="Logo" crossorigin="anonymous" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:contain" />` : initialsFromText(currentSettings.BRAND_NAME || 'Logo');
 
       renderStudentProfile(resultData.student);
 
@@ -972,10 +892,10 @@
       const publishedDate = first?.publishedAt || '—';
       const statusText = resultData.student.deleted ? 'Deleted Record' : resultData.student.archived ? 'Archived Record' : (resultData.student.active ? 'Active Record' : 'Inactive Record');
       const badgeTerm = (first?.term || currentResults[0]?.term || 'Result');
-      const selectionSummary = totalAvailable ? `${totalSubjects} published subject(s) selected for this preview` : 'No subject loaded yet';
+      const selectionSummary = totalAvailable ? `${totalSubjects} published subject(s) loaded${resultData.examCode ? ' for the supplied exam code filter' : ' automatically'}` : 'No subject loaded yet';
 
       $('summaryStrip').innerHTML = [
-        ['Registration ID', (resultData.student && resultData.student.regId) || $('examCodeInput').value.trim() || '—'],
+        ['Exam Code Filter', resultData.examCode || 'All Published Results'],
         ['Class', resultData.student.classLevel || '—'],
         ['Selected Subjects', totalSubjects],
         ['Loaded Subjects', totalAvailable],
@@ -993,27 +913,25 @@
           <strong>Bulk Report Card Preview</strong>
           <div class="big">${esc(selectionSummary)}</div>
           <div class="sub">Your generated result and downloaded PDF now carry every loaded published subject together with the brand logo, student passport, and admin signature.</div>
-          <div class="result-seal">Verified academic record • Logo • Passport • Signature</div>
         </div>
-        <div class="selection-pill">${esc((resultData.student && resultData.student.regId) || $('examCodeInput').value.trim() || '—')} • ${esc(first.term || 'All Terms')}</div>
+        <div class="selection-pill">${esc(resultData.examCode || first.examCode || 'All Published Results')} • ${esc(first.term || 'All Terms')}</div>
       `;
 
       $('studentStatusBadge').textContent = statusText;
       $('studentHeadlineSub').textContent = `${resultData.student.fullName || 'Student'} • ${resultData.student.regId || 'No Registration ID'} • ${resultData.student.classLevel || 'Class not set'}`;
-      $('resultBadgeLeft').textContent = `SINGLE REPORT CARD`;
-      $('resultBadgeRight').textContent = `${totalSubjects} PUBLISHED SUBJECT(S)`;
-      $('metaExamCode').textContent = `Registration ID • ${(resultData.student && resultData.student.regId) || $('examCodeInput').value.trim() || '—'}`;
+      $('resultBadgeLeft').textContent = `${String(badgeTerm).toUpperCase()} RESULT SHEET`;
+      $('resultBadgeRight').textContent = `${(first?.academicSession || currentResults[0]?.academicSession || 'Verified Record')}`;
+      $('metaExamCode').textContent = `Exam Code Filter • ${resultData.examCode || 'All Published Results'}`;
       $('metaSessionTerm').textContent = `Session • ${first?.academicSession || '—'}${first?.term ? ' / ' + first.term : ''}`;
       $('metaGeneratedOn').textContent = `Generated • ${formatDisplayDate(new Date())}`;
       $('heroVerificationText').textContent = `${statusText}. ${selectionSummary} prepared for bulk report card download.`;
-      $('heroGeneratedText').textContent = `The preview design and downloaded PDF both include the brand logo, student passport, and admin signature.`;
+      $('heroGeneratedText').textContent = `The on-screen result mirrors the PDF design and includes the brand logo, student passport, and admin signature.`;
 
       $('resultTableBody').innerHTML = filtered.length ? filtered.map(r => `
         <tr>
-          <td>${esc(r.examCode || '—')}</td>
-          <td>${esc(r.academicSession || '—')}</td>
-          <td>${esc(r.term || '—')}</td>
-          <td>${esc(r.subject || '—')}</td>
+          <td>${esc(r.examCode)}</td>
+          <td>${esc(r.classLevel || resultData.student.classLevel || '—')}</td>
+          <td>${esc(r.subject)}</td>
           <td>${esc(r.studentScore || '—')} / ${esc(r.maxScore || '—')}</td>
           <td>${esc(r.percentage || '—')}%</td>
           <td>${esc(r.grade || '—')}</td>
@@ -1021,10 +939,10 @@
           <td><span class="tag ${String(r.resultStatus).toUpperCase()==='PASS'?'tag-pass':String(r.resultStatus).toUpperCase()==='FAIL'?'tag-fail':'tag-pending'}">${esc(r.resultStatus || 'PENDING')}</span></td>
           <td>${esc(formatDisplayDate(r.publishedAt || '—'))}</td>
         </tr>
-      `).join('') : `<tr><td colspan="10" class="muted">No published subject is available under the current filters.</td></tr>`;
+      `).join('') : `<tr><td colspan="9" class="muted">No published subject is available under the current filters.</td></tr>`;
 
       $('examMetaGrid').innerHTML = [
-        ['Registration ID', $('examCodeInput').value.trim() || (currentStudent && currentStudent.regId) || '—'], ['Exam Title', first.examTitle], ['Academic Session', first.academicSession],
+        ['Exam Code Filter', resultData.examCode || first.examCode || 'All Published Results'], ['Exam Title', first.examTitle], ['Academic Session', first.academicSession],
         ['Term', first.term], ['Exam Date', first.examDate], ['Account Status', statusText], ['Pass Mark Number', first.passMarkNumber],
         ['Pass Mark Percentage', first.passMarkPercentage ? first.passMarkPercentage + '%' : '—'], ['Published Date', formatDisplayDate(first.publishedAt)], ['Selection', selectionSummary]
       ].map(([label,value]) => `<div class="info-item"><div class="info-label">${esc(label)}</div><div class="info-value">${esc(value || '—')}</div></div>`).join('');
@@ -1044,10 +962,11 @@
         </div>
       `).join('') : `<div class="muted">No remarks are available for the currently loaded published subjects.</div>`;
 
-      const signatureName = assets.signatureName;
-      $('signatureBox').innerHTML = `<div data-role="signatureImage" style="min-height:74px;display:flex;align-items:center;justify-content:center">${assets.signatureUrl ? 'Loading signature...' : 'No signature added'}</div><div class="signature-role">Signed by Admin</div><div class="signature-name">${esc(signatureName)}</div><div class="signature-caption">Official approval signature appears on both this generated result and the downloaded PDF report card.</div>`;
-      await loadImageIntoElement($('passportBox'), resultData.student && resultData.student.passportUrl || '', 'Passport', false, 'No passport');
-      await loadImageIntoElement($('signatureBox').querySelector('[data-role="signatureImage"]'), assets.signatureUrl || '', 'Signature', true, 'No signature added');
+      const signatureUrl = normalizeImageUrl(first.signatureUrl || currentSettings.SIGNATURE_URL || '');
+      const signatureName = currentSettings.SIGNATURE_NAME || currentSettings.PRINCIPAL_NAME || 'Authorized Signatory';
+      $('signatureBox').innerHTML = signatureUrl
+        ? `<img src="${esc(signatureUrl)}" alt="Signature" crossorigin="anonymous" referrerpolicy="no-referrer" /><div class="signature-role">Signed by Admin</div><div class="signature-name">${esc(signatureName)}</div><div class="signature-caption">Official approval signature appears on both this generated result and the downloaded PDF.</div>`
+        : `<div class="muted">No signature added</div><div class="signature-role">Signatory</div><div class="signature-name">${esc(signatureName)}</div><div class="signature-caption">Add admin signature in settings so it shows on both generated and downloaded result.</div>`;
     }
 
     async function ensureImagesReady(root){
@@ -1068,16 +987,16 @@
       try{
         const examCode = $('examCodeInput').value.trim();
         const res = await apiRequest('loadStudentResults', {
-          regId: examCode,
+          examCode: examCode,
           academicSession: $('sessionFilter').value,
           term: $('termFilter').value
-        }, 'POST', 'Loading published results...');
+        }, 'POST', examCode ? 'Loading selected exam code result(s)...' : 'Loading all published results...');
         selectedSubjects = [];
         subjectSelectionTouched = false;
-        await renderReport(res.data);
+        renderReport(res.data);
         $('resultLoadStatus').textContent = res.message + (examCode ? ' (' + examCode + ')' : '');
         $('resultLoadStatus').className = 'status ok';
-showToast(res.message);
+        showToast(res.message + (examCode ? ' (' + examCode + ')' : ''));
       }catch(err){
         $('resultLoadStatus').textContent = err.message;
         $('resultLoadStatus').className = 'status error';
@@ -1094,7 +1013,7 @@ showToast(res.message);
         showToast('PDF library did not load completely. Refresh the page and try again.', 'error');
         return;
       }
-      showLoading('Preparing colorful report card PDF...');
+      showLoading('Preparing designed PDF result...');
       try{
         const baseRows = getBaseFilteredResults();
         const rows = getSelectedRows(baseRows);
@@ -1107,8 +1026,7 @@ showToast(res.message);
         const pageH = doc.internal.pageSize.getHeight();
         const brandName = currentSettings.BRAND_NAME || 'Genz Edutech Innovations';
         const schoolName = currentSettings.SCHOOL_NAME || 'Result Portal';
-        const assets = getDisplayAssets({ results: rows, student: currentStudent });
-        const signatureName = assets.signatureName;
+        const signatureName = currentSettings.SIGNATURE_NAME || currentSettings.PRINCIPAL_NAME || 'Authorized Signatory';
         const publishedDate = formatDisplayDate(first.publishedAt || '—');
         const totalSubjects = rows.length;
         const totalAvailable = baseRows.length;
@@ -1121,9 +1039,9 @@ showToast(res.message);
           getRenderedImageDataUrl('signatureBox')
         ]);
         const [logoData, passportData, signatureData] = await Promise.all([
-          Promise.resolve(logoRendered || '').then(v => v || preparePdfImage(assets.brandLogoUrl || '')),
-          Promise.resolve(passportRendered || '').then(v => v || preparePdfImage(assets.passportUrl || '')),
-          Promise.resolve(signatureRendered || '').then(v => v || preparePdfImage(assets.signatureUrl || ''))
+          Promise.resolve(logoRendered || '').then(v => v || preparePdfImage(currentSettings.BRAND_LOGO_URL || '')),
+          Promise.resolve(passportRendered || '').then(v => v || preparePdfImage(currentStudent.passportUrl || '')),
+          Promise.resolve(signatureRendered || '').then(v => v || preparePdfImage(first.signatureUrl || currentSettings.SIGNATURE_URL || ''))
         ]);
 
         doc.setFillColor(...palette.header);
@@ -1189,7 +1107,7 @@ showToast(res.message);
         const cardW = 122;
         const cardGap = 11;
         const cards = [
-          ['Registration ID', $('examCodeInput').value.trim() || (resultData.student && resultData.student.regId) || '—'],
+          ['Exam Code Filter', resultData.examCode || first.examCode || 'All Published Results'],
           ['Subjects', String(totalSubjects || 0)],
           ['Average %', `${avg}%`],
           ['Published', publishedDate]
@@ -1212,11 +1130,8 @@ showToast(res.message);
         doc.autoTable({
           startY: 378,
           margin: { left: 26, right: 26 },
-          head: [['Exam Code','Session','Term','Subject', 'Score', 'Percent', 'Grade', 'Rank', 'Status']],
+          head: [['Subject', 'Score', 'Percent', 'Grade', 'Rank', 'Status']],
           body: rows.map(r => [
-            r.examCode || '—',
-            r.academicSession || '—',
-            r.term || '—',
             r.subject || '—',
             `${r.studentScore || '—'} / ${r.maxScore || '—'}`,
             `${r.percentage || '—'}%`,
@@ -1235,8 +1150,8 @@ showToast(res.message);
         doc.autoTable({
           startY: y,
           margin: { left: 26, right: 26 },
-          head: [['Exam / Subject', 'Remark', 'Teacher Comment']],
-          body: rows.map(r => [`${r.examCode || '—'} • ${r.subject || '—'}`, r.remark || '—', r.teacherComment || 'No teacher comment']),
+          head: [['Subject', 'Remark', 'Teacher Comment']],
+          body: rows.map(r => [r.subject || '—', r.remark || '—', r.teacherComment || 'No teacher comment']),
           theme: 'grid',
           styles: { fontSize: 9.2, cellPadding: 7, lineColor: palette.line, lineWidth: 0.8, textColor:[23,38,64], overflow:'linebreak' },
           headStyles: { fillColor: palette.accent, textColor:[255,255,255], fontStyle:'bold' },
@@ -1284,7 +1199,7 @@ showToast(res.message);
         }
 
         const code = (resultDataExamCodeForFileName() || first?.examCode || currentResults[0]?.examCode || 'result');
-        const safeName = `${currentStudent.fullName || 'student'}_${code}_${totalSubjects}_published_subjects_report_card.pdf`.replace(/[^a-z0-9_\-.]+/gi,'_');
+        const safeName = `${currentStudent.fullName || 'student'}_${code}_${totalSubjects}_published_subjects_result.pdf`.replace(/[^a-z0-9_\-.]+/gi,'_');
         doc.save(safeName);
         showToast('Designed PDF downloaded successfully.');
       }catch(err){
@@ -1301,91 +1216,23 @@ showToast(res.message);
       return raw.replace(/\s+/g,'').replace(/,+/g,'-');
     }
 
-    async function rerenderCurrentResults(){
+    function rerenderCurrentResults(){
       if (!currentResults.length) return;
-      await renderReport({
+      renderReport({
         student: currentStudent,
         results: currentResults,
         settings: currentSettings,
-        regId: $('examCodeInput').value.trim(),
+        examCode: $('examCodeInput').value.trim(),
         sessions: [...new Set(currentResults.map(r => r.academicSession))],
         terms: [...new Set(currentResults.map(r => r.term))]
       });
     }
 
-    function getCurrentSelectionMode(){
-      const baseRows = getBaseFilteredResults();
-      const rows = getSelectedRows(baseRows);
-      const totalSubjects = rows.length;
-      const totalAvailable = baseRows.length;
-      return {
-        baseRows,
-        rows,
-        totalSubjects,
-        totalAvailable,
-        isSingle: totalSubjects === 1,
-        selectionLabel: totalSubjects === 1 ? 'Single Subject Result Design' : 'Full Report Card Design'
-      };
-    }
-
-    async function openPreviewModal(){
-      if (!currentStudent || !currentResults.length) {
-        showToast('Load published results first before previewing the design.', 'error');
-        return;
-      }
-      const mode = getCurrentSelectionMode();
-      if (!mode.rows.length) {
-        showToast('Select at least one published subject before previewing the design.', 'error');
-        return;
-      }
-      showLoading('Preparing result design preview...');
-      try{
-        await rerenderCurrentResults();
-        const mount = $('previewModalBody');
-        const source = $('reportCapture');
-        mount.innerHTML = '';
-        const clone = source.cloneNode(true);
-        clone.id = 'reportCapturePreview';
-        mount.appendChild(clone);
-        $('previewTitle').textContent = mode.selectionLabel;
-        $('previewSubtitle').textContent = mode.isSingle ? 'This preview shows the exact colorful single-subject design that will be downloaded as PDF.' : 'This preview shows the exact colorful full report card design that will be downloaded as PDF.';
-        $('previewModal').classList.add('show');
-      }catch(err){
-        console.error(err);
-        showToast(err.message || 'Failed to prepare the design preview.', 'error');
-      }finally{
-        hideLoading();
-      }
-    }
-
-    function closePreviewModal(){
-      $('previewModal').classList.remove('show');
-      $('previewModalBody').innerHTML = '';
-    }
-
     $('loadResultBtn').addEventListener('click', loadResult);
-    $('previewDesignBtn').addEventListener('click', openPreviewModal);
     $('downloadPdfBtn').addEventListener('click', downloadPdf);
-    $('selectAllSubjectsBtn').addEventListener('click', () => {
-      const options = getSubjectOptions(getBaseFilteredResults());
-      subjectSelectionTouched = true;
-      selectedSubjects = options.map(item => item.key);
-      void rerenderCurrentResults();
-    });
-    $('clearSelectedSubjectsBtn').addEventListener('click', () => {
-      subjectSelectionTouched = true;
-      selectedSubjects = [];
-      void rerenderCurrentResults();
-    });
-    $('subjectSelectionList').addEventListener('change', e => {
-      if (!e.target || e.target.type !== 'checkbox') return;
-      subjectSelectionTouched = true;
-      const key = normalizeSubjectKey(e.target.value);
-      const set = new Set((selectedSubjects || []).map(normalizeSubjectKey));
-      if (e.target.checked) set.add(key); else set.delete(key);
-      selectedSubjects = [...set];
-      void rerenderCurrentResults();
-    });
+    $('selectAllSubjectsBtn').addEventListener('click', rerenderCurrentResults);
+    $('clearSelectedSubjectsBtn').addEventListener('click', rerenderCurrentResults);
+    $('subjectSelectionList').addEventListener('change', rerenderCurrentResults);
     $('resultDesignSelect').innerHTML = RESULT_DESIGNS.map(v => `<option value="${esc(v)}">${esc(v.replace(/-/g,' ').replace(/\b\w/g, m => m.toUpperCase()))}</option>`).join('');
     $('resultDesignSelect').value = currentDesign;
     $('resultDesignSelect').addEventListener('change', e => applyResultDesign(e.target.value));
@@ -1402,8 +1249,8 @@ showToast(res.message);
         $('authView').classList.add('hidden');
         $('appView').classList.remove('hidden');
         $('logoutBtn').classList.remove('hidden');
-        $('examCodeInput').value = (res.data && (res.data.regId || (res.data.student && res.data.student.regId))) || $('examCodeInput').value;
-        showToast(res.message);
+        $('examCodeInput').value = '';
+        showToast(res.message + (examCode ? ' (' + examCode + ')' : ''));
         await loadResult();
       }catch(err){ showToast(err.message, 'error'); }
     });
@@ -1412,7 +1259,7 @@ showToast(res.message);
       e.preventDefault();
       try{
         const res = await apiRequest('studentSignup', serializeForm(e.target), 'POST', 'Creating account...');
-        showToast(res.message);
+        showToast(res.message + (examCode ? ' (' + examCode + ')' : ''));
         e.target.reset();
         setAuthTab('login');
       }catch(err){ showToast(err.message, 'error'); }
@@ -1423,7 +1270,7 @@ showToast(res.message);
       try{
         const data = serializeForm(e.target);
         const res = await apiRequest('requestPasswordReset', {role:'student', identifier:data.identifier}, 'POST', 'Sending reset code...');
-        showToast(res.message);
+        showToast(res.message + (examCode ? ' (' + examCode + ')' : ''));
       }catch(err){ showToast(err.message, 'error'); }
     });
 
@@ -1432,15 +1279,12 @@ showToast(res.message);
       try{
         const data = serializeForm(e.target);
         const res = await apiRequest('resetPassword', {role:'student', ...data}, 'POST', 'Resetting password...');
-        showToast(res.message);
+        showToast(res.message + (examCode ? ' (' + examCode + ')' : ''));
         setAuthTab('login');
       }catch(err){ showToast(err.message, 'error'); }
     });
 
     $('logoutBtn').addEventListener('click', () => { clearToken(); location.reload(); });
-    $('closePreviewBtn').addEventListener('click', closePreviewModal);
-    $('previewModal').addEventListener('click', e => { if (e.target === $('previewModal')) closePreviewModal(); });
-    document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('previewModal').classList.contains('show')) closePreviewModal(); });
 
     (async function init(){
       setAuthTab('login');
@@ -1450,7 +1294,9 @@ showToast(res.message);
         $('authView').classList.add('hidden');
         $('appView').classList.remove('hidden');
         $('logoutBtn').classList.remove('hidden');
-        await loadResult();
+        if (!$('examCodeInput').value.trim()) {
+          await loadResult();
+        }
       }
     })();
   </script>
