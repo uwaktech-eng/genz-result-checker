@@ -196,7 +196,7 @@
 
         <form id="loginForm">
           <h2 style="margin:0 0 10px">Sign in</h2>
-          <p class="muted">Log in first, then optionally enter one or more <strong>exam codes</strong> separated with commas. Leave it blank to view and download <strong>all published results</strong> available to your account.</p>
+          <p class="muted">Log in first, then preview either a <strong>single subject result</strong> or your <strong>full report card</strong> before downloading. Your Registration ID is used automatically for your account.</p>
           <div class="grid grid-2">
             <div class="field"><label>Registration ID</label><input name="regId" required /></div>
             <div class="field"><label>Password</label><input type="password" name="password" required /></div>
@@ -254,7 +254,7 @@
 
       <div class="glass card">
         <h2 style="margin:0 0 10px">How result access works</h2>
-        <div class="inline-note" id="portalNote">After login, you may enter one or more exam codes separated with commas to load only those results. Leave the exam code blank to load every result that is both <strong>published</strong> and <strong>activated for view</strong> for your account.</div>
+        <div class="inline-note" id="portalNote">After login, your Registration ID is used to load every result that is both <strong>published</strong> and <strong>activated for view</strong> for your account. Then use the subject selector to preview a single-subject result or the full report card before download.</div>
         <div class="grid" style="margin-top:16px">
           <div class="glass card" style="padding:16px">
             <strong>Download as PDF</strong>
@@ -272,7 +272,7 @@
       <div class="glass card print-hide">
         <div class="result-design-row">
           <div class="grid grid-3">
-            <div class="field"><label>Exam Code <span class="muted">(optional, comma separated)</span></label><input id="examCodeInput" placeholder="Leave blank to load all published results, or enter exam codes like EXAM001, EXAM002" /></div>
+            <div class="field"><label>Student Registration ID</label><input id="examCodeInput" placeholder="Your registered ID will appear here after login" readonly /></div>
             <div class="field"><label>Academic Session Filter</label><select id="sessionFilter"><option value="">All sessions</option></select></div>
             <div class="field"><label>Term Filter</label><select id="termFilter"><option value="">All terms</option></select></div>
           </div>
@@ -290,11 +290,11 @@
           <div class="subject-pick-toolbar">
             <div>
               <h2 style="margin:0 0 8px">Published subjects load automatically</h2>
-              <div class="muted">Leave exam code blank to load every published subject for this student automatically. Enter one or more exam codes separated with commas only when you want to load those particular results.</div>
+              <div class="muted">All published subjects for this student load automatically. Use the selector to preview only one subject result or keep all selected to preview the full report card.</div>
             </div>
             <div class="subject-pick-actions">
-              <button class="btn btn-soft" id="selectAllSubjectsBtn" type="button">Refresh</button>
-              <button class="btn btn-soft" id="clearSelectedSubjectsBtn" type="button">Refresh</button>
+              <button class="btn btn-soft" id="selectAllSubjectsBtn" type="button">Select All Subjects</button>
+              <button class="btn btn-soft" id="clearSelectedSubjectsBtn" type="button">Clear Selection</button>
               <div class="subject-pill-count" id="selectedSubjectCount">All loaded published subjects will be used automatically</div>
             </div>
           </div>
@@ -317,7 +317,7 @@
               <div class="report-sub" id="schoolAddress"></div>
               <div class="report-sub"><span id="schoolPhone"></span> • <span id="schoolEmail"></span></div>
               <div class="report-meta-stack">
-                <span class="report-meta-chip" id="metaExamCode">Exam Code • —</span>
+                <span class="report-meta-chip" id="metaExamCode">Registration ID • —</span>
                 <span class="report-meta-chip" id="metaSessionTerm">Session • —</span>
                 <span class="report-meta-chip" id="metaGeneratedOn">Generated • —</span>
               </div>
@@ -356,7 +356,7 @@
             <div class="table-card-title" style="padding:16px 16px 0">
               <div>
                 <div class="table-title">Detailed Subject Breakdown</div>
-                <div class="table-subtitle">Every published subject for the loaded student report card, including exam code, session, term, score, grade, ranking, and status.</div>
+                <div class="table-subtitle">Every published subject for the loaded student report card, including session, term, score, grade, ranking, and status.</div>
               </div>
             </div>
             <table>
@@ -393,7 +393,7 @@
 
           <div class="signature-wrap">
             <div class="inline-note">
-              This result was generated from the official Genz Edutech Innovations result portal. The published date and exam code shown above are part of the official record for this report.
+              This result was generated from the official Genz Edutech Innovations result portal. The published date, registration ID, and subject details shown above are part of the official record for this report.
             </div>
             <div class="signature-box" id="signatureBox">
               <div class="muted">No signature added</div>
@@ -560,7 +560,7 @@
       publicData = res.data;
       currentSettings = res.data.settings || {};
       $('brandHeader').textContent = currentSettings.BRAND_NAME || 'Genz Edutech Innovations';
-      $('portalNote').innerHTML = currentSettings.PORTAL_NOTICE || 'Leave exam code blank to automatically load all published results for your account after login. Enter one or more exam codes separated with commas only when you want to check those particular results.';
+      $('portalNote').innerHTML = currentSettings.PORTAL_NOTICE || 'Your Registration ID is used to load your published results automatically after login. Use the subject selector below to preview either a single-subject result or your full report card before downloading.';
       applyFavicon(currentSettings.FAVICON_URL || currentSettings.BRAND_LOGO_URL || '');
       if ($('signupClassLevel')) $('signupClassLevel').placeholder = 'e.g. Year 5 / JSS 1 / Undergraduate';
       if ($('signupCategory') && (publicData.categoryOptions || []).length){ fillOptions($('signupCategory'), publicData.categoryOptions || [], 'Select category'); }
@@ -646,23 +646,29 @@
 
     function getSelectedRows(baseRows){
       const rows = Array.isArray(baseRows) ? baseRows : getBaseFilteredResults();
-      return rows.slice();
+      if (!subjectSelectionTouched) return rows.slice();
+      if (!selectedSubjects.length) return [];
+      const selectedSet = new Set((selectedSubjects || []).map(normalizeSubjectKey));
+      return rows.filter(row => selectedSet.has(normalizeSubjectKey(row.subject)));
     }
 
     function renderSubjectSelection(rows){
       const list = $('subjectSelectionList');
       const countBox = $('selectedSubjectCount');
       const options = getSubjectOptions(rows);
+      syncSelectedSubjects(options);
       if (!options.length){
         list.innerHTML = `<div class="subject-empty">No published subject is currently available for this account.</div>`;
         countBox.textContent = 'No subject loaded yet';
         return;
       }
-      countBox.textContent = `${rows.length} published subject row(s) loaded automatically`;
+      const selectedSet = new Set((selectedSubjects || []).map(normalizeSubjectKey));
+      countBox.textContent = `${selectedSet.size || options.length} of ${options.length} subject(s) currently selected for preview and download`;
       list.innerHTML = options.map(item => `
-        <div class="subject-pill active">
+        <label class="subject-pill ${selectedSet.has(item.key) ? 'active' : ''}">
+          <input type="checkbox" value="${esc(item.key)}" ${selectedSet.has(item.key) ? 'checked' : ''} style="margin-right:8px" />
           <span>${esc(item.label)} <small>${esc(item.count)}</small></span>
-        </div>
+        </label>
       `).join('');
     }
 
@@ -852,8 +858,7 @@
       if (!box) return false;
       const candidates = publicImageCandidates(raw);
       if (!candidates.length){ box.textContent = emptyText; return false; }
-      return await new Promise(resolve => {
-        let idx = 0;
+      const trySrc = (src) => new Promise(resolve => {
         const img = new Image();
         img.crossOrigin = 'anonymous';
         img.referrerPolicy = 'no-referrer';
@@ -862,13 +867,16 @@
         img.style.height = '100%';
         img.style.objectFit = contain ? 'contain' : 'cover';
         img.onload = () => { box.innerHTML = ''; box.appendChild(img); resolve(true); };
-        img.onerror = () => {
-          idx += 1;
-          if (idx < candidates.length) img.src = candidates[idx];
-          else { box.textContent = emptyText; resolve(false); }
-        };
-        img.src = candidates[idx];
+        img.onerror = () => resolve(false);
+        img.src = src;
       });
+      for (const src of candidates){
+        if (await trySrc(src)) return true;
+      }
+      const backendDataUrl = await fetchImageDataUrlFromBackend(raw);
+      if (backendDataUrl && await trySrc(backendDataUrl)) return true;
+      box.textContent = emptyText;
+      return false;
     }
 
     async function getImageDimensions(dataUrl){
@@ -934,10 +942,10 @@
       const publishedDate = first?.publishedAt || '—';
       const statusText = resultData.student.deleted ? 'Deleted Record' : resultData.student.archived ? 'Archived Record' : (resultData.student.active ? 'Active Record' : 'Inactive Record');
       const badgeTerm = (first?.term || currentResults[0]?.term || 'Result');
-      const selectionSummary = totalAvailable ? `${totalSubjects} published subject(s) loaded${resultData.examCode ? ' for the supplied exam code filter' : ' automatically'}` : 'No subject loaded yet';
+      const selectionSummary = totalAvailable ? `${totalSubjects} published subject(s) selected for this preview` : 'No subject loaded yet';
 
       $('summaryStrip').innerHTML = [
-        ['Exam Code Filter', resultData.examCode || 'All Published Results'],
+        ['Registration ID', (resultData.student && resultData.student.regId) || $('examCodeInput').value.trim() || '—'],
         ['Class', resultData.student.classLevel || '—'],
         ['Selected Subjects', totalSubjects],
         ['Loaded Subjects', totalAvailable],
@@ -957,14 +965,14 @@
           <div class="sub">Your generated result and downloaded PDF now carry every loaded published subject together with the brand logo, student passport, and admin signature.</div>
           <div class="result-seal">Verified academic record • Logo • Passport • Signature</div>
         </div>
-        <div class="selection-pill">${esc(resultData.examCode || first.examCode || 'All Published Results')} • ${esc(first.term || 'All Terms')}</div>
+        <div class="selection-pill">${esc((resultData.student && resultData.student.regId) || $('examCodeInput').value.trim() || '—')} • ${esc(first.term || 'All Terms')}</div>
       `;
 
       $('studentStatusBadge').textContent = statusText;
       $('studentHeadlineSub').textContent = `${resultData.student.fullName || 'Student'} • ${resultData.student.regId || 'No Registration ID'} • ${resultData.student.classLevel || 'Class not set'}`;
       $('resultBadgeLeft').textContent = `SINGLE REPORT CARD`;
       $('resultBadgeRight').textContent = `${totalSubjects} PUBLISHED SUBJECT(S)`;
-      $('metaExamCode').textContent = `Exam Code Filter • ${resultData.examCode || 'All Published Results'}`;
+      $('metaExamCode').textContent = `Registration ID • ${(resultData.student && resultData.student.regId) || $('examCodeInput').value.trim() || '—'}`;
       $('metaSessionTerm').textContent = `Session • ${first?.academicSession || '—'}${first?.term ? ' / ' + first.term : ''}`;
       $('metaGeneratedOn').textContent = `Generated • ${formatDisplayDate(new Date())}`;
       $('heroVerificationText').textContent = `${statusText}. ${selectionSummary} prepared for bulk report card download.`;
@@ -986,7 +994,7 @@
       `).join('') : `<tr><td colspan="10" class="muted">No published subject is available under the current filters.</td></tr>`;
 
       $('examMetaGrid').innerHTML = [
-        ['Exam Code Filter', $('examCodeInput').value.trim() || first.examCode || 'All Published Results'], ['Exam Title', first.examTitle], ['Academic Session', first.academicSession],
+        ['Registration ID', $('examCodeInput').value.trim() || (resultData.student && resultData.student.regId) || '—'], ['Exam Title', first.examTitle], ['Academic Session', first.academicSession],
         ['Term', first.term], ['Exam Date', first.examDate], ['Account Status', statusText], ['Pass Mark Number', first.passMarkNumber],
         ['Pass Mark Percentage', first.passMarkPercentage ? first.passMarkPercentage + '%' : '—'], ['Published Date', formatDisplayDate(first.publishedAt)], ['Selection', selectionSummary]
       ].map(([label,value]) => `<div class="info-item"><div class="info-label">${esc(label)}</div><div class="info-value">${esc(value || '—')}</div></div>`).join('');
@@ -1030,10 +1038,10 @@
       try{
         const examCode = $('examCodeInput').value.trim();
         const res = await apiRequest('loadStudentResults', {
-          examCode: examCode,
+          regId: examCode,
           academicSession: $('sessionFilter').value,
           term: $('termFilter').value
-        }, 'POST', examCode ? 'Loading selected exam code result(s)...' : 'Loading all published results...');
+        }, 'POST', 'Loading published results...');
         selectedSubjects = [];
         subjectSelectionTouched = false;
         await renderReport(res.data);
@@ -1151,7 +1159,7 @@ showToast(res.message);
         const cardW = 122;
         const cardGap = 11;
         const cards = [
-          ['Exam Code Filter', $('examCodeInput').value.trim() || first.examCode || 'All Published Results'],
+          ['Registration ID', $('examCodeInput').value.trim() || (resultData.student && resultData.student.regId) || '—'],
           ['Subjects', String(totalSubjects || 0)],
           ['Average %', `${avg}%`],
           ['Published', publishedDate]
@@ -1269,7 +1277,7 @@ showToast(res.message);
         student: currentStudent,
         results: currentResults,
         settings: currentSettings,
-        examCode: $('examCodeInput').value.trim(),
+        regId: $('examCodeInput').value.trim(),
         sessions: [...new Set(currentResults.map(r => r.academicSession))],
         terms: [...new Set(currentResults.map(r => r.term))]
       });
@@ -1277,9 +1285,26 @@ showToast(res.message);
 
     $('loadResultBtn').addEventListener('click', loadResult);
     $('downloadPdfBtn').addEventListener('click', downloadPdf);
-    $('selectAllSubjectsBtn').addEventListener('click', rerenderCurrentResults);
-    $('clearSelectedSubjectsBtn').addEventListener('click', rerenderCurrentResults);
-    $('subjectSelectionList').addEventListener('change', rerenderCurrentResults);
+    $('selectAllSubjectsBtn').addEventListener('click', () => {
+      const options = getSubjectOptions(getBaseFilteredResults());
+      subjectSelectionTouched = true;
+      selectedSubjects = options.map(item => item.key);
+      rerenderCurrentResults();
+    });
+    $('clearSelectedSubjectsBtn').addEventListener('click', () => {
+      subjectSelectionTouched = true;
+      selectedSubjects = [];
+      rerenderCurrentResults();
+    });
+    $('subjectSelectionList').addEventListener('change', e => {
+      if (!e.target || e.target.type !== 'checkbox') return;
+      subjectSelectionTouched = true;
+      const key = normalizeSubjectKey(e.target.value);
+      const set = new Set((selectedSubjects || []).map(normalizeSubjectKey));
+      if (e.target.checked) set.add(key); else set.delete(key);
+      selectedSubjects = [...set];
+      rerenderCurrentResults();
+    });
     $('resultDesignSelect').innerHTML = RESULT_DESIGNS.map(v => `<option value="${esc(v)}">${esc(v.replace(/-/g,' ').replace(/\b\w/g, m => m.toUpperCase()))}</option>`).join('');
     $('resultDesignSelect').value = currentDesign;
     $('resultDesignSelect').addEventListener('change', e => applyResultDesign(e.target.value));
@@ -1296,8 +1321,8 @@ showToast(res.message);
         $('authView').classList.add('hidden');
         $('appView').classList.remove('hidden');
         $('logoutBtn').classList.remove('hidden');
-        $('examCodeInput').value = '';
-showToast(res.message);
+        $('examCodeInput').value = (res.data && (res.data.regId || (res.data.student && res.data.student.regId))) || $('examCodeInput').value;
+        showToast(res.message);
         await loadResult();
       }catch(err){ showToast(err.message, 'error'); }
     });
@@ -1306,7 +1331,7 @@ showToast(res.message);
       e.preventDefault();
       try{
         const res = await apiRequest('studentSignup', serializeForm(e.target), 'POST', 'Creating account...');
-showToast(res.message);
+        showToast(res.message);
         e.target.reset();
         setAuthTab('login');
       }catch(err){ showToast(err.message, 'error'); }
@@ -1317,7 +1342,7 @@ showToast(res.message);
       try{
         const data = serializeForm(e.target);
         const res = await apiRequest('requestPasswordReset', {role:'student', identifier:data.identifier}, 'POST', 'Sending reset code...');
-showToast(res.message);
+        showToast(res.message);
       }catch(err){ showToast(err.message, 'error'); }
     });
 
@@ -1326,7 +1351,7 @@ showToast(res.message);
       try{
         const data = serializeForm(e.target);
         const res = await apiRequest('resetPassword', {role:'student', ...data}, 'POST', 'Resetting password...');
-showToast(res.message);
+        showToast(res.message);
         setAuthTab('login');
       }catch(err){ showToast(err.message, 'error'); }
     });
@@ -1341,9 +1366,7 @@ showToast(res.message);
         $('authView').classList.add('hidden');
         $('appView').classList.remove('hidden');
         $('logoutBtn').classList.remove('hidden');
-        if (!$('examCodeInput').value.trim()) {
-          await loadResult();
-        }
+        await loadResult();
       }
     })();
   </script>

@@ -372,10 +372,10 @@
               <button class="btn btn-soft" type="button" id="clearReportSelectionBtn">Clear Selection</button>
             </div>
           </div>
-          <div class="inline-note">Use the search, class, exam code, and score filters to bring up only the results you want. Score filter supports <strong>total score upward</strong> or <strong>average percentage upward</strong>.</div>
+          <div class="inline-note">Use the search, Registration ID, class, and score filters to bring up only the result designs you want. Preview first, then download the exact single-subject result or full report card design you need.</div>
           <div class="grid grid-5" style="margin-top:14px">
-            <div class="field"><label>Search Result</label><input id="reportExportSearch" placeholder="Name, reg ID, class, exam code, title" /></div>
-            <div class="field"><label>Exam Code</label><select id="reportExportExamCode"></select></div>
+            <div class="field"><label>Search Result</label><input id="reportExportSearch" placeholder="Name, reg ID, class, subject, session, title" /></div>
+            <div class="field"><label>Student Registration ID</label><select id="reportExportRegId"></select></div>
             <div class="field"><label>Class Filter</label><select id="reportExportClassFilter"></select></div>
             <div class="field"><label>Score Filter</label><select id="reportExportScoreMode"><option value="">No score filter</option><option value="total">Total Score ≥</option><option value="percentage">Average % ≥</option></select></div>
             <div class="field"><label>Minimum Score Upward</label><input id="reportExportScoreValue" type="number" min="0" step="0.01" placeholder="e.g. 200 or 70" /></div>
@@ -577,7 +577,7 @@
             <div class="glass card">
               <h2 class="panel-title">Result filters</h2>
               <div class="grid grid-3">
-                <div class="field"><label>Exam Code</label><input id="resultSearchExamCode" placeholder="Filter by exam code" /></div>
+                <div class="field"><label>Student Registration ID</label><input id="resultSearchExamCode" placeholder="Filter by registration ID" /></div>
                 <div class="field"><label>Session</label><input id="resultSearchSession" placeholder="e.g. 2025/2026" /></div>
                 <div class="field"><label>Term</label><input id="resultSearchTerm" placeholder="e.g. First Term" /></div>
               </div>
@@ -830,6 +830,40 @@
       }
     }
 
+    async function silentApiRequest(action, payload={}, method='GET'){
+      payload = payload || {};
+      const noTokenActions = ['adminLogin', 'requestPasswordReset', 'resetPassword', 'getPublicBootstrap'];
+      if (!payload.token && !noTokenActions.includes(action)) payload.token = token();
+      if (!payload.clientId) payload.clientId = clientId();
+      payload.requestTs = Date.now();
+      payload.requestNonce = requestNonce();
+      let res;
+      if (method === 'GET'){
+        const url = new URL(WEB_APP_URL);
+        url.searchParams.set('action', action);
+        Object.keys(payload).forEach(key => {
+          const value = payload[key];
+          if (value !== undefined && value !== null) url.searchParams.set(key, typeof value === 'object' ? JSON.stringify(value) : String(value));
+        });
+        res = await fetch(url.toString(), {method:'GET', credentials:'omit'});
+      } else {
+        const form = new URLSearchParams();
+        form.set('action', action);
+        form.set('payload', JSON.stringify(payload));
+        res = await fetch(WEB_APP_URL, {
+          method:'POST',
+          headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+          body:form.toString(),
+          credentials:'omit'
+        });
+      }
+      const text = await res.text();
+      let json;
+      try{ json = JSON.parse(text); }catch(err){ throw new Error('Server returned non-JSON response.'); }
+      if (!json.ok) throw new Error(json.message || 'Request failed.');
+      return json;
+    }
+
     function serializeForm(form){
       const data = {};
       new FormData(form).forEach((value,key)=> data[key] = value);
@@ -952,7 +986,7 @@
       return bootstrapData.results.filter(r => {
         const hay = `${r.examCode} ${r.subject} ${r.regId} ${r.examTitle} ${r.classLevel || ''}`.toLowerCase();
         if (q && !hay.includes(q)) return false;
-        if (examCode && !String(r.examCode).toLowerCase().includes(examCode)) return false;
+        if (examCode && !String(r.regId).toLowerCase().includes(examCode)) return false;
         if (session && !String(r.academicSession).toLowerCase().includes(session)) return false;
         if (term && !String(r.term).toLowerCase().includes(term)) return false;
         if (state === 'published' && !r.published) return false;
@@ -1289,20 +1323,20 @@
       }).sort((a,b) => String(b.publishedAt || b.updatedAt || '').localeCompare(String(a.publishedAt || a.updatedAt || '')));
     }
     function refreshReportExportFilters(){
-      const examSelect = $('reportExportExamCode');
+      const examSelect = $('reportExportRegId');
       const classSelect = $('reportExportClassFilter');
       if (!examSelect || !classSelect) return;
       const oldExam = examSelect.value;
       const oldClass = classSelect.value;
       const groups = getResultReportGroups();
-      fillOptions(examSelect, uniqueValues(groups.map(g => g.examCode)).sort((a,b) => String(a).localeCompare(String(b))), 'All exam codes');
+      fillOptions(examSelect, uniqueValues(groups.map(g => g.regId)).sort((a,b) => String(a).localeCompare(String(b))), 'All registration IDs');
       fillOptions(classSelect, uniqueValues(groups.map(g => g.classLevel)).sort((a,b) => String(a).localeCompare(String(b))), 'All classes');
       if ([...examSelect.options].some(opt => opt.value === oldExam)) examSelect.value = oldExam;
       if ([...classSelect.options].some(opt => opt.value === oldClass)) classSelect.value = oldClass;
     }
     function getFilteredReportGroups(){
       const search = String($('reportExportSearch')?.value || '').trim().toLowerCase();
-      const examCode = String($('reportExportExamCode')?.value || '').trim().toLowerCase();
+      const examCode = String($('reportExportRegId')?.value || '').trim().toLowerCase();
       const classLevel = String($('reportExportClassFilter')?.value || '').trim().toLowerCase();
       const scoreMode = String($('reportExportScoreMode')?.value || '').trim().toLowerCase();
       const scoreValueRaw = String($('reportExportScoreValue')?.value || '').trim();
@@ -1403,8 +1437,9 @@
         ['Parent Phone', student.parentPhone], ['Parent Email', student.parentEmail], ['State', student.state],
         ['City / LGA', student.cityLGA], ['Address', student.address]
       ];
+      const isSingleSubject = Number(group.subjectCount || 0) === 1;
       const summary = [
-        ['Report Type', 'Single Report Card'], ['Published Subjects', group.subjectCount], ['Passed Subjects', group.passCount],
+        ['Report Type', isSingleSubject ? 'Single Subject Result' : 'Single Report Card'], ['Published Subjects', group.subjectCount], ['Passed Subjects', group.passCount],
         ['Average %', `${group.avgPercentage.toFixed(2)}%`], ['Latest Publish Date', group.publishedAt || '—']
       ];
       const sessionSummary = (group.sessions || []).join(', ') || '—';
@@ -1416,7 +1451,7 @@
             <div class="pdf-brand-line">
               <div class="pdf-passport contain" style="width:76px;height:76px;border-radius:22px" data-role="brandLogo">LOGO</div>
               <div>
-                <div class="pdf-brand-badge">Single Student Report Card</div>
+                <div class="pdf-brand-badge">${isSingleSubject ? 'Single Subject Result' : 'Single Student Report Card'}</div>
                 <div class="pdf-brand-name">${esc(settings.BRAND_NAME || 'Genz Edutech Innovations')}</div>
                 <div class="pdf-school-title">${esc(settings.SCHOOL_NAME || 'Result Portal')}</div>
                 <div class="pdf-school-sub">${esc(settings.HEAD_OFFICE_ADDRESS || '')}</div>
@@ -1427,9 +1462,9 @@
           <div class="pdf-export-body">
             <div class="selection-spotlight" style="margin-top:0;margin-bottom:18px;background:linear-gradient(135deg,rgba(111,99,255,.14),rgba(34,199,255,.12));border-color:#dce6fb">
               <div>
-                <strong>All Published Results Included</strong>
+                <strong>${isSingleSubject ? 'Single Subject Result Included' : 'All Published Results Included'}</strong>
                 <div class="big">${esc(group.fullName || group.regId)}</div>
-                <div class="sub">This report card combines every published subject currently available for this student, across exam codes, sessions, and terms.</div>
+                <div class="sub">${isSingleSubject ? 'This preview focuses on one published subject result for the student while keeping the same modern design used in the PDF download.' : 'This report card combines every published subject currently available for this student, across exam codes, sessions, and terms.'}</div>
               </div>
               <div class="selection-pill">${esc(group.subjectCount)} Subject(s)</div>
             </div>
@@ -1454,7 +1489,7 @@
                   <div class="pdf-info-item"><div class="pdf-info-label">View Status</div><div class="pdf-info-value">${group.viewActive ? 'Contains active view result(s)' : 'Admin report only'}</div></div>
                 </div>
               </div>
-              <div class="pdf-inline-note" style="display:flex;align-items:center;justify-content:center;min-height:100%">Brand logo, student passport, and authorized signature appear in both the preview and the exported PDF report card. Long result sets are paginated cleanly in the PDF export.</div>
+              <div class="pdf-inline-note" style="display:flex;align-items:center;justify-content:center;min-height:100%">${isSingleSubject ? 'Brand logo, student passport, and authorized signature appear in both the preview and the exported PDF single-subject result.' : 'Brand logo, student passport, and authorized signature appear in both the preview and the exported PDF report card. Long result sets are paginated cleanly in the PDF export.'}</div>
             </div>
             <div class="pdf-subject-table-wrap">
               <table>
@@ -1505,16 +1540,11 @@
         </div>
       `;
     }
-    function loadImageIntoBox(box, raw, alt='Image', contain=false, emptyText='No image'){
-      return new Promise(resolve => {
-        if (!box){ resolve(false); return; }
-        const candidates = buildImageCandidates(raw);
-        if (!candidates.length){
-          box.textContent = emptyText;
-          resolve(false);
-          return;
-        }
-        let idx = 0;
+    async function loadImageIntoBox(box, raw, alt='Image', contain=false, emptyText='No image'){
+      if (!box) return false;
+      const candidates = buildImageCandidates(raw);
+      if (!candidates.length){ box.textContent = emptyText; return false; }
+      const trySrc = (src) => new Promise(resolve => {
         const img = new Image();
         img.crossOrigin = 'anonymous';
         img.referrerPolicy = 'no-referrer';
@@ -1523,13 +1553,19 @@
         img.style.height = '100%';
         img.style.objectFit = contain ? 'contain' : 'cover';
         img.onload = () => { box.innerHTML = ''; box.appendChild(img); resolve(true); };
-        img.onerror = () => {
-          idx += 1;
-          if (idx < candidates.length) img.src = candidates[idx];
-          else { box.textContent = emptyText; resolve(false); }
-        };
-        img.src = candidates[idx];
+        img.onerror = () => resolve(false);
+        img.src = src;
       });
+      for (const src of candidates){
+        if (await trySrc(src)) return true;
+      }
+      try{
+        const res = await silentApiRequest('getImageDataUrl', { url: raw }, 'GET');
+        const dataUrl = res && res.data && res.data.dataUrl ? String(res.data.dataUrl || '') : '';
+        if (dataUrl && await trySrc(dataUrl)) return true;
+      }catch(err){}
+      box.textContent = emptyText;
+      return false;
     }
     async function renderReportGroupInto(target, group){
       if (!target || !group) return;
@@ -1628,6 +1664,7 @@
       const brandName = settings.BRAND_NAME || 'Genz Edutech Innovations';
       const schoolName = settings.SCHOOL_NAME || 'Result Portal';
       const header = [111,99,255], accent = [34,199,255], line = [216,228,248], light = [244,248,255];
+      const isSingleSubject = Number(group.subjectCount || 0) === 1;
       doc.setFillColor(...header);
       doc.rect(0, 0, pageW, 132, 'F');
       doc.setFillColor(255,255,255);
@@ -1652,18 +1689,18 @@
       doc.setTextColor(...header);
       doc.setFont('helvetica','bold');
       doc.setFontSize(10);
-      doc.text('SINGLE REPORT CARD', 491, 49, { align:'center' });
+      doc.text(isSingleSubject ? 'SINGLE SUBJECT RESULT' : 'SINGLE REPORT CARD', 491, 49, { align:'center' });
       doc.setFillColor(250,252,255);
       doc.setDrawColor(...line);
       doc.roundedRect(26, 148, 543, 126, 18, 18, 'FD');
       doc.setTextColor(23,38,64);
       doc.setFont('helvetica','bold');
       doc.setFontSize(14);
-      doc.text('Student Report Card Summary', 42, 173);
+      doc.text(isSingleSubject ? 'Student Result Summary' : 'Student Report Card Summary', 42, 173);
       doc.setFont('helvetica','normal');
       doc.setFontSize(10.4);
       doc.text(`${student.fullName || group.regId} • ${student.regId || group.regId} • ${student.classLevel || 'Class not set'}`, 42, 192);
-      doc.text(`Published subjects: ${group.subjectCount} • Passed: ${group.passCount}/${group.subjectCount || 0} • Average: ${group.avgPercentage.toFixed(2)}%`, 42, 209);
+      doc.text(`${isSingleSubject ? 'Published subject' : 'Published subjects'}: ${group.subjectCount} • Passed: ${group.passCount}/${group.subjectCount || 0} • Average: ${group.avgPercentage.toFixed(2)}%`, 42, 209);
       doc.text(`Exam codes: ${(group.examCodes || []).join(', ') || '—'}`, 42, 226, { maxWidth: 370 });
       doc.text(`Sessions: ${(group.sessions || []).join(', ') || '—'} • Terms: ${(group.terms || []).join(', ') || '—'}`, 42, 243, { maxWidth: 370 });
       doc.setFillColor(...light);
@@ -1671,7 +1708,7 @@
       doc.setTextColor(...header);
       doc.setFont('helvetica','bold');
       doc.setFontSize(9.8);
-      doc.text('This single report card combines every currently published subject for the student.', 51, 263);
+      doc.text(isSingleSubject ? 'This PDF carries the single selected subject result for the student.' : 'This single report card combines every currently published subject for the student.', 51, 263);
       doc.setDrawColor(...line);
       doc.roundedRect(446, 168, 94, 84, 14, 14, 'S');
       if (passportData) await addPdfImage(doc, passportData, 452, 174, 82, 72, 'contain');
@@ -1727,7 +1764,7 @@
       for (let i = 1; i <= totalPages; i++){
         doc.setPage(i); doc.setDrawColor(...line); doc.line(26, pageH - 28, pageW - 26, pageH - 28);
         doc.setTextColor(114,128,149); doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
-        doc.text(`${brandName} • Single Report Card`, 26, pageH - 12);
+        doc.text(`${brandName} • ${isSingleSubject ? 'Single Subject Result' : 'Single Report Card'}`, 26, pageH - 12);
         doc.text(`Page ${i} of ${totalPages}`, pageW - 26, pageH - 12, { align:'right' });
       }
       return doc.output('blob');
@@ -1752,6 +1789,67 @@
       }
     }
     window.downloadSingleReportPdfByKey = downloadSingleReportPdfByKey;
+
+    let currentPreviewSingleResultId = '';
+    function buildSingleResultGroup(resultId){
+      const row = (bootstrapData.results || []).find(r => String(r.resultId || '') === String(resultId || ''));
+      if (!row) return null;
+      const student = (bootstrapData.students || []).find(s => String(s.regId || '').toUpperCase() === String(row.regId || '').toUpperCase()) || { regId: row.regId, fullName: row.regId || 'Student', classLevel: row.classLevel || '' };
+      const percentage = num(row.percentage);
+      return {
+        key: `single_${row.resultId}`,
+        regId: row.regId,
+        fullName: student.fullName || row.regId,
+        classLevel: student.classLevel || row.classLevel || '',
+        category: student.category || '',
+        examCode: row.examCode || 'SINGLE_RESULT',
+        examCodes: uniqueValues([row.examCode].filter(Boolean)),
+        examTitle: row.examTitle || 'Single Subject Result',
+        academicSession: row.academicSession || '',
+        sessions: uniqueValues([row.academicSession].filter(Boolean)),
+        term: row.term || '',
+        terms: uniqueValues([row.term].filter(Boolean)),
+        examDate: row.examDate || '',
+        rows: [row],
+        student: student,
+        publishedAt: row.publishedAt || row.updatedAt || row.createdAt || '',
+        updatedAt: row.updatedAt || row.createdAt || '',
+        published: !!row.published,
+        viewActive: !!row.viewActive,
+        subjectCount: 1,
+        totalScore: num(row.studentScore),
+        avgPercentage: percentage,
+        passCount: String(row.resultStatus || '').toUpperCase() === 'PASS' ? 1 : 0
+      };
+    }
+    async function previewSingleResult(resultId){
+      const group = buildSingleResultGroup(resultId);
+      if (!group) { showToast('That single-subject result is no longer available.', 'error'); return; }
+      currentPreviewSingleResultId = String(resultId || '');
+      const mount = $('singleResultPreviewMount');
+      if (!mount) return;
+      mount.classList.remove('muted');
+      mount.innerHTML = '';
+      await renderReportGroupInto(mount, group);
+      showToast('Single-subject result preview updated.');
+    }
+    window.previewSingleResult = previewSingleResult;
+    async function downloadSingleResultPdf(resultId){
+      const group = buildSingleResultGroup(resultId);
+      if (!group) { showToast('That single-subject result is no longer available.', 'error'); return; }
+      showLoading('Preparing single-subject PDF...');
+      try{
+        const blob = await createPdfBlobFromGroup(group);
+        const fileName = `${slugifyText(group.fullName)}_${slugifyText(group.rows[0]?.subject || 'subject')}_single_result.pdf`;
+        downloadBlob(fileName, blob);
+        showToast('Single-subject PDF downloaded.');
+      }catch(err){
+        showToast(err.message || 'Unable to download single-subject PDF.', 'error');
+      }finally{
+        hideLoading();
+      }
+    }
+    window.downloadSingleResultPdf = downloadSingleResultPdf;
     async function downloadReportsZip(groups, zipName){
       if (!groups.length) throw new Error('No result report matched that export request.');
       if (!window.JSZip) throw new Error('ZIP library is not available on this page.');
@@ -1784,7 +1882,7 @@
           <td>${r.deleted ? '<span class="tag" style="color:#ffdce4">Deleted</span>' : r.archived ? '<span class="tag" style="color:#fff0d8">Archived</span>' : `<span class="tag">${esc(r.resultStatus || 'PENDING')}</span>`}</td>
           <td>
             <div class="result-action-group">
-              <button class="btn btn-soft" onclick="editResult('${esc(r.resultId)}')">Edit</button>
+              <button class="btn btn-soft" onclick="previewSingleResult('${esc(r.resultId)}')">Preview Design</button><button class="btn btn-primary" onclick="downloadSingleResultPdf('${esc(r.resultId)}')">Single PDF</button><button class="btn btn-soft" onclick="editResult('${esc(r.resultId)}')">Edit</button>
               <button class="btn btn-soft" onclick="changeResultState('${esc(r.resultId)}','${r.published ? 'unpublish':'publish'}')">${r.published ? 'Unpublish':'Publish'}</button>
               <button class="btn btn-soft" onclick="changeResultState('${esc(r.resultId)}','${r.viewActive ? 'viewinactive':'viewactive'}')">${r.viewActive ? 'Disable View':'Enable View'}</button>
               <button class="btn btn-warn" onclick="changeResultState('${esc(r.resultId)}','${r.archived ? 'restore':'archive'}')">${r.archived ? 'Restore':'Archive'}</button>
@@ -2350,7 +2448,7 @@
     $('openResultExportManagerBtn').addEventListener('click', () => {
       $('resultExportManagerCard').scrollIntoView({behavior:'smooth', block:'start'});
     });
-    ['reportExportSearch','reportExportExamCode','reportExportClassFilter','reportExportScoreMode','reportExportScoreValue'].forEach(id => {
+    ['reportExportSearch','reportExportRegId','reportExportClassFilter','reportExportScoreMode','reportExportScoreValue'].forEach(id => {
       const el = $(id);
       if (el) el.addEventListener(id === 'reportExportScoreValue' ? 'input' : 'input', renderResultExportManager);
       if (el && el.tagName === 'SELECT') el.addEventListener('change', renderResultExportManager);

@@ -1024,12 +1024,11 @@ function matchesAnyExamCodeFilter_(resultRow, examCodes) {
 }
 
 function loadStudentResults_(payload) {
-
   var session = requireSession_(payload.token, 'student', sanitizeValue_(payload.clientId));
-  var examCodeInput = sanitizeValue_(payload.examCode);
-  var examCodes = parseExamCodeList_(examCodeInput);
+  var regIdInput = sanitizeRegId_(payload.regId || payload.registrationId || '');
   var academicSession = sanitizeValue_(payload.academicSession);
   var term = sanitizeValue_(payload.term);
+  if (regIdInput && regIdInput !== session.id) throw new Error('Use your own Registration ID to load results.');
   var student = cleanStudent_(getStudentByRegId_(session.id));
   if (!student) throw new Error('Student account not found.');
   var results = getSheetObjects_(getSpreadsheet_().getSheetByName(SHEET_NAMES.RESULTS))
@@ -1037,7 +1036,6 @@ function loadStudentResults_(payload) {
     .map(function(r) { r.classLevel = student.classLevel || ''; return r; })
     .filter(function(r) {
       return r.regId === session.id &&
-        matchesAnyExamCodeFilter_(r, examCodes) &&
         r.published && r.viewActive && !r.archived && !r.deleted &&
         (!academicSession || r.academicSession === academicSession) &&
         (!term || r.term === term);
@@ -1056,12 +1054,11 @@ function loadStudentResults_(payload) {
       return String(a.subject || '').localeCompare(String(b.subject || ''));
     });
   if (!results.length) {
-    throw new Error(examCodes.length ? 'No published result was found for the supplied exam code(s). Use the exact exam codes separated with commas.' : 'No published result is currently available for your account.');
+    throw new Error('No published result is currently available for your account.');
   }
-  return ok_(examCodes.length ? 'Published results for the supplied exam code(s) loaded successfully.' : 'All published subjects loaded successfully.', {
-    examCode: examCodeInput || '',
-    examCodeList: examCodes,
-    loadMode: examCodes.length > 1 ? 'multi' : (examCodes.length ? 'single' : 'all'),
+  return ok_('Published results loaded successfully.', {
+    regId: session.id,
+    loadMode: 'all',
     student: student,
     settings: getSettings_(),
     results: results,

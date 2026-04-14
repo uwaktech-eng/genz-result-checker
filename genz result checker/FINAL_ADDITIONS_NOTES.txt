@@ -1,0 +1,1 @@
+Updated WEB_APP_URL, switched admin report-card filter from exam code to Registration ID, added admin single-subject preview/PDF, improved student subject selection for single-subject preview or full report card, and strengthened logo/passport/signature rendering for preview and PDF.
