@@ -582,7 +582,8 @@
 
     function renderStudentProfile(student){
       const passportBox = $('passportBox');
-      if (student.passportUrl) passportBox.innerHTML = `<img src="${esc(normalizeImageUrl(student.passportUrl))}" alt="Passport" crossorigin="anonymous" referrerpolicy="no-referrer" />`;
+      const passportUrl = normalizeImageUrl(student.passportUrl || '');
+      if (passportUrl) passportBox.innerHTML = `<img src="${esc(passportUrl)}" alt="Passport" crossorigin="anonymous" referrerpolicy="no-referrer" />`;
       else passportBox.textContent = 'No passport';
 
       const fieldValues = {
@@ -674,6 +675,26 @@
 
     function initialsFromText(text){
       return String(text || '').trim().split(/\s+/).slice(0,2).map(v => v.charAt(0).toUpperCase()).join('') || 'LG';
+    }
+
+    function firstNonEmptyValue(list){
+      for (const value of (list || [])){
+        const clean = String(value || '').trim();
+        if (clean) return clean;
+      }
+      return '';
+    }
+
+    function getDisplayAssets(resultData){
+      const rows = (resultData && resultData.results) || currentResults || [];
+      const student = (resultData && resultData.student) || currentStudent || {};
+      const settings = currentSettings || {};
+      return {
+        brandLogoUrl: normalizeImageUrl(settings.BRAND_LOGO_URL || ''),
+        passportUrl: normalizeImageUrl(student.passportUrl || ''),
+        signatureUrl: normalizeImageUrl(firstNonEmptyValue(rows.map(r => r && r.signatureUrl)) || settings.SIGNATURE_URL || ''),
+        signatureName: settings.SIGNATURE_NAME || settings.PRINCIPAL_NAME || 'Authorized Signatory'
+      };
     }
 
     function getPdfPalette(name){
@@ -865,7 +886,8 @@
       $('schoolAddress').textContent = currentSettings.HEAD_OFFICE_ADDRESS || '';
       $('schoolPhone').textContent = currentSettings.SCHOOL_PHONE || '';
       $('schoolEmail').textContent = currentSettings.SCHOOL_EMAIL || '';
-      const logoUrl = normalizeImageUrl(currentSettings.BRAND_LOGO_URL || '');
+      const assets = getDisplayAssets(resultData);
+      const logoUrl = assets.brandLogoUrl;
       $('brandLogoBox').innerHTML = logoUrl ? `<img src="${esc(logoUrl)}" alt="Logo" crossorigin="anonymous" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:contain" />` : initialsFromText(currentSettings.BRAND_NAME || 'Logo');
 
       renderStudentProfile(resultData.student);
@@ -913,6 +935,7 @@
           <strong>Bulk Report Card Preview</strong>
           <div class="big">${esc(selectionSummary)}</div>
           <div class="sub">Your generated result and downloaded PDF now carry every loaded published subject together with the brand logo, student passport, and admin signature.</div>
+          <div class="result-seal">Verified academic record • Logo • Passport • Signature</div>
         </div>
         <div class="selection-pill">${esc(resultData.examCode || first.examCode || 'All Published Results')} • ${esc(first.term || 'All Terms')}</div>
       `;
@@ -962,8 +985,8 @@
         </div>
       `).join('') : `<div class="muted">No remarks are available for the currently loaded published subjects.</div>`;
 
-      const signatureUrl = normalizeImageUrl(first.signatureUrl || currentSettings.SIGNATURE_URL || '');
-      const signatureName = currentSettings.SIGNATURE_NAME || currentSettings.PRINCIPAL_NAME || 'Authorized Signatory';
+      const signatureUrl = assets.signatureUrl;
+      const signatureName = assets.signatureName;
       $('signatureBox').innerHTML = signatureUrl
         ? `<img src="${esc(signatureUrl)}" alt="Signature" crossorigin="anonymous" referrerpolicy="no-referrer" /><div class="signature-role">Signed by Admin</div><div class="signature-name">${esc(signatureName)}</div><div class="signature-caption">Official approval signature appears on both this generated result and the downloaded PDF.</div>`
         : `<div class="muted">No signature added</div><div class="signature-role">Signatory</div><div class="signature-name">${esc(signatureName)}</div><div class="signature-caption">Add admin signature in settings so it shows on both generated and downloaded result.</div>`;
@@ -1026,7 +1049,8 @@
         const pageH = doc.internal.pageSize.getHeight();
         const brandName = currentSettings.BRAND_NAME || 'Genz Edutech Innovations';
         const schoolName = currentSettings.SCHOOL_NAME || 'Result Portal';
-        const signatureName = currentSettings.SIGNATURE_NAME || currentSettings.PRINCIPAL_NAME || 'Authorized Signatory';
+        const assets = getDisplayAssets({ results: rows, student: currentStudent });
+        const signatureName = assets.signatureName;
         const publishedDate = formatDisplayDate(first.publishedAt || '—');
         const totalSubjects = rows.length;
         const totalAvailable = baseRows.length;
@@ -1039,9 +1063,9 @@
           getRenderedImageDataUrl('signatureBox')
         ]);
         const [logoData, passportData, signatureData] = await Promise.all([
-          Promise.resolve(logoRendered || '').then(v => v || preparePdfImage(currentSettings.BRAND_LOGO_URL || '')),
-          Promise.resolve(passportRendered || '').then(v => v || preparePdfImage(currentStudent.passportUrl || '')),
-          Promise.resolve(signatureRendered || '').then(v => v || preparePdfImage(first.signatureUrl || currentSettings.SIGNATURE_URL || ''))
+          Promise.resolve(logoRendered || '').then(v => v || preparePdfImage(assets.brandLogoUrl || '')),
+          Promise.resolve(passportRendered || '').then(v => v || preparePdfImage(assets.passportUrl || '')),
+          Promise.resolve(signatureRendered || '').then(v => v || preparePdfImage(assets.signatureUrl || ''))
         ]);
 
         doc.setFillColor(...palette.header);
