@@ -974,21 +974,40 @@ function loadStudentResults_(payload) {
 
 function getImageDataUrl_(payload) {
   requireSession_(payload.token, '', sanitizeValue_(payload.clientId));
-  var url = normalizeImageUrl_(payload.url || payload.imageUrl || '');
-  if (!url) throw new Error('Image URL is required.');
+  var rawInput = sanitizeValue_(payload.url || payload.imageUrl || payload.fileId || '');
+  var url = normalizeImageUrl_(rawInput);
+  if (!url && !rawInput) throw new Error('Image URL is required.');
   try {
-    var response = UrlFetchApp.fetch(url, {
-      muteHttpExceptions: true,
-      followRedirects: true,
-      headers: { 'User-Agent': 'Mozilla/5.0 AppsScript PDF Image Fetcher' }
-    });
-    var code = Number(response.getResponseCode() || 0);
-    if (code >= 400) throw new Error('Image fetch failed with status ' + code + '.');
-    var blob = response.getBlob();
-    var contentType = sanitizeValue_(blob.getContentType() || response.getHeaders()['Content-Type'] || 'image/png').toLowerCase();
-    if (contentType.indexOf('image/') !== 0) contentType = 'image/png';
+    var blob = null;
+    var contentType = '';
+    var driveFileId = extractDriveFileId_(rawInput) || extractDriveFileId_(url);
+    if (driveFileId) {
+      var driveFile = DriveApp.getFileById(driveFileId);
+      blob = driveFile.getBlob();
+      contentType = sanitizeValue_(blob.getContentType() || '');
+    }
+    if (!blob) {
+      var response = UrlFetchApp.fetch(url, {
+        muteHttpExceptions: true,
+        followRedirects: true,
+        headers: { 'User-Agent': 'Mozilla/5.0 AppsScript PDF Image Fetcher' }
+      });
+      var code = Number(response.getResponseCode() || 0);
+      if (code >= 400) throw new Error('Image fetch failed with status ' + code + '.');
+      blob = response.getBlob();
+      contentType = sanitizeValue_(blob.getContentType() || response.getHeaders()['Content-Type'] || '');
+      if ((!contentType || contentType.indexOf('image/') !== 0) && driveFileId) {
+        try {
+          var fallbackFile = DriveApp.getFileById(driveFileId);
+          blob = fallbackFile.getBlob();
+          contentType = sanitizeValue_(blob.getContentType() || '');
+        } catch (fallbackErr) {}
+      }
+    }
+    if (!blob) throw new Error('Image blob was not available.');
+    if (!contentType || contentType.indexOf('image/') !== 0) contentType = 'image/png';
     var dataUrl = 'data:' + contentType + ';base64,' + Utilities.base64Encode(blob.getBytes());
-    return ok_('Image data prepared.', { dataUrl: dataUrl, contentType: contentType });
+    return ok_('Image data prepared.', { dataUrl: dataUrl, contentType: contentType, fileId: driveFileId || '' });
   } catch (err) {
     throw new Error('Unable to prepare image for PDF rendering.');
   }

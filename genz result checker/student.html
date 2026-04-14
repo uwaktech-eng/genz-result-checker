@@ -840,11 +840,23 @@
     async function fetchImageDataUrl(url){
       const raw = normalizeImageUrl(url || '');
       if (!raw) return '';
+      const driveIdMatch = String(raw).match(/drive\.google\.com\/file\/d\/([^\/?#]+)/i)
+        || String(raw).match(/drive\.google\.com\/open\?id=([^&]+)/i)
+        || String(raw).match(/[?&]id=([a-zA-Z0-9_-]+)/i)
+        || String(raw).match(/thumbnail\?[^#]*id=([a-zA-Z0-9_-]+)/i)
+        || String(raw).match(/uc\?export=(?:view|download)&id=([a-zA-Z0-9_-]+)/i)
+        || (/^[A-Za-z0-9_-]{20,}$/.test(String(raw)) ? [raw, raw] : null);
+      if (driveIdMatch && driveIdMatch[1]) {
+        const backendData = await fetchImageDataUrlFromBackend(driveIdMatch[1]);
+        if (backendData) return backendData;
+      }
+      const backendFirst = await fetchImageDataUrlFromBackend(raw);
+      if (backendFirst) return backendFirst;
       for (const candidate of publicImageCandidates(raw)){
         const dataUrl = await fetchCandidateAsDataUrl(candidate);
         if (dataUrl) return dataUrl;
       }
-      return await fetchImageDataUrlFromBackend(raw);
+      return '';
     }
 
     async function preparePdfImage(url){
