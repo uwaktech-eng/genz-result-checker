@@ -126,11 +126,6 @@
     .summary-box{background:rgba(255,255,255,.88);border:1px solid rgba(255,255,255,.9);box-shadow:0 10px 24px rgba(44,71,120,.08)}
     .result-design-row{display:grid;grid-template-columns:1fr 220px;gap:14px;align-items:end}
     .a4-note{font-size:12px;color:var(--muted);margin-top:6px}
-    .pdf-preview-card{padding:18px}
-    .pdf-preview-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-bottom:14px}
-    .pdf-preview-frame{width:100%;height:min(78vh,980px);border:1px solid var(--line);border-radius:20px;background:#fff}
-    .pdf-source-only{position:absolute!important;left:-100000px!important;top:0!important;width:1024px!important;max-width:none!important;visibility:hidden!important;pointer-events:none!important}
-    .btn[disabled]{opacity:.55;cursor:not-allowed;transform:none}
 
     .summary-box{padding:14px;border-radius:18px;background:rgba(255,255,255,.88);border:1px solid rgba(255,255,255,.96);box-shadow:0 14px 28px rgba(44,71,120,.08)}
     .summary-label{font-size:12px;color:#637792;text-transform:uppercase;letter-spacing:.08em}
@@ -157,6 +152,13 @@
     .subject-empty{padding:18px;border-radius:18px;background:linear-gradient(180deg,rgba(255,255,255,.88),rgba(246,249,255,.96));border:1px dashed rgba(170,188,218,.9);color:#58708f;text-align:center}
     .overlay{position:fixed;inset:0;background:rgba(7,16,29,.58);display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(8px)}
     .overlay.show{display:flex}
+    .pdf-preview-modal{position:fixed;inset:0;background:rgba(7,16,29,.72);display:none;align-items:center;justify-content:center;z-index:1002;padding:18px;backdrop-filter:blur(8px)}
+    .pdf-preview-modal.show{display:flex}
+    .pdf-preview-shell{width:min(1100px,100%);height:min(92vh,900px);display:grid;grid-template-rows:auto 1fr;gap:14px;padding:16px}
+    .pdf-preview-head{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+    .pdf-preview-frame{width:100%;height:100%;border:1px solid var(--line);border-radius:18px;background:#f3f6fb;overflow:hidden}
+    .pdf-preview-frame iframe{width:100%;height:100%;border:0;background:#fff}
+    .pdf-preview-note{font-size:13px;color:var(--muted)}
     .loader-box{padding:24px;width:min(90vw,360px);text-align:center}
     .spinner{width:52px;height:52px;border-radius:50%;margin:0 auto 14px;border:4px solid rgba(255,255,255,.3);border-top-color:#fff;animation:spin 1s linear infinite}
     #toast{position:fixed;right:18px;bottom:18px;z-index:1001;padding:14px 16px;border-radius:16px;display:none;max-width:360px;border:1px solid #dfe8f7;box-shadow:var(--shadow)}
@@ -170,13 +172,28 @@
     }
     @media print{
       body{background:#fff}
-      .print-hide,#authView,.topbar,#toast,.overlay{display:none!important}
+      .print-hide,#authView,.topbar,#toast,.overlay,.pdf-preview-modal{display:none!important}
       .glass{box-shadow:none!important;background:#fff!important;border:1px solid #ddd!important}
     }
   </style>
 </head>
 <body>
   <div class="overlay" id="overlay"><div class="glass loader-box"><div class="spinner"></div><div id="overlayText">Loading...</div></div></div>
+  <div class="pdf-preview-modal" id="pdfPreviewModal">
+    <div class="glass pdf-preview-shell">
+      <div class="pdf-preview-head">
+        <div>
+          <div class="brand">PDF Preview</div>
+          <div class="pdf-preview-note">Preview the designed PDF here before downloading. No onscreen result sheet will be shown in the portal.</div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-soft" id="closePdfPreviewBtn" type="button">Close</button>
+          <button class="btn btn-primary" id="downloadPdfFromPreviewBtn" type="button">Download PDF</button>
+        </div>
+      </div>
+      <div class="pdf-preview-frame"><iframe id="pdfPreviewFrame" title="PDF Preview"></iframe></div>
+    </div>
+  </div>
   <div id="toast"></div>
 
   <div class="wrap">
@@ -201,7 +218,7 @@
 
         <form id="loginForm">
           <h2 style="margin:0 0 10px">Sign in</h2>
-          <p class="muted">Log in with your <strong>Registration ID</strong> and password to access your published results, preview the PDF design, and download the official PDF copy.</p>
+          <p class="muted">Log in first, then optionally enter an <strong>exam code</strong> for the published result you want to preview and download as PDF. Leave it blank to load <strong>all published results</strong> available to your account for report card PDF download.</p>
           <div class="grid grid-2">
             <div class="field"><label>Registration ID</label><input name="regId" required /></div>
             <div class="field"><label>Password</label><input type="password" name="password" required /></div>
@@ -259,15 +276,15 @@
 
       <div class="glass card">
         <h2 style="margin:0 0 10px">How result access works</h2>
-        <div class="inline-note" id="portalNote">After login, your portal uses your <strong>Registration ID</strong> automatically to load every result that is both <strong>published</strong> and <strong>activated for view</strong> for your account. Use the session and term filters when you want to narrow what appears in your PDF preview.</div>
+        <div class="inline-note" id="portalNote">After login, you may enter an exam code to load that particular published result. Leave the exam code blank to load every result that is both <strong>published</strong> and <strong>activated for view</strong> for your account for report card PDF download.</div>
         <div class="grid" style="margin-top:16px">
           <div class="glass card" style="padding:16px">
             <strong>Download as PDF</strong>
-            <p class="muted">The student portal exports the report as a real PDF file using high-quality canvas rendering.</p>
+            <p class="muted">The student portal lets you preview the designed PDF first, then download the official report as a real PDF file.</p>
           </div>
           <div class="glass card" style="padding:16px">
             <strong>History filters</strong>
-            <p class="muted">Use the filters to narrow the loaded results by academic session or term after the records appear.</p>
+            <p class="muted">Use the filters to narrow the loaded published results before previewing or downloading the PDF.</p>
           </div>
         </div>
       </div>
@@ -277,7 +294,7 @@
       <div class="glass card print-hide">
         <div class="result-design-row">
           <div class="grid grid-3">
-            <div class="field"><label>Student Reg ID</label><input id="examCodeInput" placeholder="Auto-filled from your student account after login" readonly /></div>
+            <div class="field"><label>Exam Code <span class="muted">(optional)</span></label><input id="examCodeInput" placeholder="Leave blank to load all published results, or enter one exam code like EXAM001" /></div>
             <div class="field"><label>Academic Session Filter</label><select id="sessionFilter"><option value="">All sessions</option></select></div>
             <div class="field"><label>Term Filter</label><select id="termFilter"><option value="">All terms</option></select></div>
           </div>
@@ -286,17 +303,17 @@
         <div class="actions">
           <button class="btn btn-primary" id="loadResultBtn" type="button">Load Result</button>
           <button class="btn btn-soft" id="previewPdfBtn" type="button">Preview PDF</button>
-          <button class="btn btn-soft" id="downloadPdfBtn" type="button" disabled>Download PDF</button>
+          <button class="btn btn-soft" id="downloadPdfBtn" type="button">Download PDF</button>
         </div>
         <div class="status" id="resultLoadStatus"></div>
       </div>
 
-      <div class="glass card print-hide hidden" id="subjectSelectionCard" aria-hidden="true">
+      <div class="glass card print-hide hidden" id="subjectSelectionCard" aria-hidden="true" style="display:none!important">
         <div class="subject-pick-shell">
           <div class="subject-pick-toolbar">
             <div>
               <h2 style="margin:0 0 8px">Published subjects load automatically</h2>
-              <div class="muted">All published subject rows for this student load automatically by Registration ID. Use the session and term filters above when you want to narrow the PDF preview.</div>
+              <div class="muted">Leave exam code blank to load every published subject for this student automatically. Enter an exam code only when you want to load that particular published result.</div>
             </div>
             <div class="subject-pick-actions">
               <button class="btn btn-soft" id="selectAllSubjectsBtn" type="button">Refresh</button>
@@ -309,18 +326,7 @@
       </div>
 
 
-      <div class="glass card print-hide pdf-preview-card hidden" id="pdfPreviewCard">
-        <div class="pdf-preview-head">
-          <div>
-            <h2 style="margin:0 0 8px">PDF Preview</h2>
-            <div class="muted">Only the PDF preview is shown in the student portal. The onscreen result/report card layout has been removed from view.</div>
-          </div>
-          <div class="selection-pill" id="pdfPreviewMeta">No PDF preview yet</div>
-        </div>
-        <iframe id="pdfPreviewFrame" class="pdf-preview-frame" title="Student result PDF preview"></iframe>
-      </div>
-
-      <div class="glass card report-card pdf-source-only" id="reportCapture" aria-hidden="true">
+      <div class="glass card report-card hidden" id="reportCapture" aria-hidden="true">
         <div class="report-head">
           <div class="report-badges">
             <div class="report-badge" id="resultBadgeLeft">Official Result Sheet</div>
@@ -432,9 +438,9 @@
     let currentResults = [];
     let currentSettings = {};
     let currentDesign = 'royal';
-    let currentPdfPreviewUrl = '';
-    let currentPdfPreviewBlob = null;
-    let currentPdfPreviewName = '';
+    let currentPdfBlob = null;
+    let currentPdfObjectUrl = '';
+    let currentPdfFileName = '';
     let selectedSubjects = [];
     let subjectSelectionTouched = false;
     const RESULT_DESIGNS = ['royal','emerald','sunset','violet','carbon','rose','ocean','gold','forest','candy','royal-2','emerald-2','sunset-2','violet-2','carbon-2','rose-2','ocean-2','gold-2','forest-2','candy-2'];
@@ -443,6 +449,8 @@
     const overlay = $('overlay');
     const overlayText = $('overlayText');
     const toast = $('toast');
+    const pdfPreviewModal = $('pdfPreviewModal');
+    const pdfPreviewFrame = $('pdfPreviewFrame');
 
     function showLoading(text='Loading...'){ overlayText.textContent = text; overlay.classList.add('show'); }
     function hideLoading(){ overlay.classList.remove('show'); }
@@ -580,7 +588,7 @@
       publicData = res.data;
       currentSettings = res.data.settings || {};
       $('brandHeader').textContent = currentSettings.BRAND_NAME || 'Genz Edutech Innovations';
-      $('portalNote').innerHTML = currentSettings.PORTAL_NOTICE || 'After login, your portal uses your Registration ID automatically to load every published and view-active result for your account. Use the session and term filters when you want to narrow what appears in your PDF preview.';
+      $('portalNote').innerHTML = currentSettings.PORTAL_NOTICE || 'Leave exam code blank to automatically load all published results for your account after login. Enter an exam code only when you want to load that particular published result.';
       applyFavicon(currentSettings.FAVICON_URL || currentSettings.BRAND_LOGO_URL || '');
       if ($('signupClassLevel')) $('signupClassLevel').placeholder = 'e.g. Year 5 / JSS 1 / Undergraduate';
       if ($('signupCategory') && (publicData.categoryOptions || []).length){ fillOptions($('signupCategory'), publicData.categoryOptions || [], 'Select category'); }
@@ -599,31 +607,6 @@
         clearToken();
         return false;
       }
-    }
-
-    function clearPdfPreview(){
-      if (currentPdfPreviewUrl) {
-        try { URL.revokeObjectURL(currentPdfPreviewUrl); } catch (err) {}
-      }
-      currentPdfPreviewUrl = '';
-      currentPdfPreviewBlob = null;
-      currentPdfPreviewName = '';
-      $('pdfPreviewFrame').src = 'about:blank';
-      $('pdfPreviewMeta').textContent = 'No PDF preview yet';
-      $('pdfPreviewCard').classList.add('hidden');
-      $('downloadPdfBtn').disabled = true;
-    }
-
-    function downloadBlob(filename, blob){
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      setTimeout(() => {
-        URL.revokeObjectURL(a.href);
-        a.remove();
-      }, 250);
     }
 
     function renderStudentProfile(student){
@@ -944,7 +927,6 @@
       currentStudent = resultData.student;
       currentResults = resultData.results || [];
       currentSettings = resultData.settings || currentSettings;
-      clearPdfPreview();
 
       applyResultDesign($('resultDesignSelect').value || currentDesign);
       applyFavicon(currentSettings.FAVICON_URL || currentSettings.BRAND_LOGO_URL || '');
@@ -980,7 +962,7 @@
       const publishedDate = first?.publishedAt || '—';
       const statusText = resultData.student.deleted ? 'Deleted Record' : resultData.student.archived ? 'Archived Record' : (resultData.student.active ? 'Active Record' : 'Inactive Record');
       const badgeTerm = (first?.term || currentResults[0]?.term || 'Result');
-      const selectionSummary = totalAvailable ? `${totalSubjects} published subject(s) loaded automatically for this student` : 'No subject loaded yet';
+      const selectionSummary = totalAvailable ? `${totalSubjects} published subject(s) loaded${resultData.examCode ? ' for the supplied exam code' : ' automatically'}` : 'No subject loaded yet';
 
       $('summaryStrip').innerHTML = [
         ['Student Reg ID', resultData.student.regId || '—'],
@@ -998,12 +980,12 @@
 
       $('selectionSpotlight').innerHTML = `
         <div>
-          <strong>PDF Preview Ready</strong>
+          <strong>Bulk Report Card Preview</strong>
           <div class="big">${esc(selectionSummary)}</div>
-          <div class="sub">Generate the PDF preview below to inspect the design before downloading the official copy.</div>
+          <div class="sub">Your generated result and downloaded PDF now carry every loaded published subject together with the brand logo, student passport, and admin signature.</div>
           <div class="result-seal">Verified academic record • Logo • Passport • Signature</div>
         </div>
-        <div class="selection-pill">${esc(resultData.student.regId || 'No Registration ID')} • ${esc(first.term || 'All Terms')}</div>
+        <div class="selection-pill">${esc(resultData.examCode || first.examCode || 'All Published Results')} • ${esc(first.term || 'All Terms')}</div>
       `;
 
       $('studentStatusBadge').textContent = statusText;
@@ -1013,8 +995,8 @@
       $('metaExamCode').textContent = `Student Reg ID • ${resultData.student.regId || '—'}`;
       $('metaSessionTerm').textContent = `Session • ${first?.academicSession || '—'}${first?.term ? ' / ' + first.term : ''}`;
       $('metaGeneratedOn').textContent = `Generated • ${formatDisplayDate(new Date())}`;
-      $('heroVerificationText').textContent = `${statusText}. ${selectionSummary} prepared for PDF preview and download.`;
-      $('heroGeneratedText').textContent = `This hidden layout is used only to prepare the PDF preview and download file.`;
+      $('heroVerificationText').textContent = `${statusText}. ${selectionSummary} prepared for bulk report card download.`;
+      $('heroGeneratedText').textContent = `Use the PDF preview button to inspect the exact design before downloading.`;
 
       $('resultTableBody').innerHTML = filtered.length ? filtered.map(r => `
         <tr>
@@ -1032,7 +1014,7 @@
       `).join('') : `<tr><td colspan="10" class="muted">No published subject is available under the current filters.</td></tr>`;
 
       $('examMetaGrid').innerHTML = [
-        ['Student Reg ID', resultData.student.regId || $('examCodeInput').value.trim() || '—'], ['Exam Title', first.examTitle], ['Academic Session', first.academicSession],
+        ['Student Reg ID', resultData.student.regId || '—'], ['Exam Title', first.examTitle], ['Academic Session', first.academicSession],
         ['Term', first.term], ['Exam Date', first.examDate], ['Account Status', statusText], ['Pass Mark Number', first.passMarkNumber],
         ['Pass Mark Percentage', first.passMarkPercentage ? first.passMarkPercentage + '%' : '—'], ['Published Date', formatDisplayDate(first.publishedAt)], ['Selection', selectionSummary]
       ].map(([label,value]) => `<div class="info-item"><div class="info-label">${esc(label)}</div><div class="info-value">${esc(value || '—')}</div></div>`).join('');
@@ -1072,283 +1054,296 @@
       })));
     }
 
+
+    function clearPdfPreviewState(){
+      currentPdfBlob = null;
+      currentPdfFileName = '';
+      if (currentPdfObjectUrl) {
+        try { URL.revokeObjectURL(currentPdfObjectUrl); } catch(_err) {}
+      }
+      currentPdfObjectUrl = '';
+      if (pdfPreviewFrame) pdfPreviewFrame.removeAttribute('src');
+    }
+
+    function closePdfPreview(){
+      if (pdfPreviewModal) pdfPreviewModal.classList.remove('show');
+    }
+
+    async function buildResultPdfDoc(){
+      if (!currentStudent || !currentResults.length) {
+        throw new Error('Load published results first before previewing or downloading the PDF.');
+      }
+      if (!window.jspdf || !window.jspdf.jsPDF || typeof window.jspdf.jsPDF.API.autoTable !== 'function') {
+        throw new Error('PDF library did not load completely. Refresh the page and try again.');
+      }
+      const baseRows = getBaseFilteredResults();
+      const rows = getSelectedRows(baseRows);
+      if (!rows.length) throw new Error('No published subject is loaded for the bulk report card PDF.');
+      const first = rows[0] || {};
+      const palette = getPdfPalette(currentDesign);
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation:'portrait', unit:'pt', format:'a4', compress:true });
+      const pageW = doc.internal.pageSize.getWidth();
+      const pageH = doc.internal.pageSize.getHeight();
+      const assets = getDisplayAssets({ student: currentStudent, results: currentResults, settings: currentSettings });
+      const brandName = currentSettings.BRAND_NAME || 'Genz Edutech Innovations';
+      const schoolName = currentSettings.SCHOOL_NAME || 'Genz Result Portal';
+      const totalSubjects = rows.length;
+      const totalAvailable = baseRows.length;
+      const passed = rows.filter(r => String(r.resultStatus).toUpperCase() === 'PASS').length;
+      const avg = totalSubjects ? (rows.reduce((sum,r)=> sum + safeNumber(r.percentage), 0) / totalSubjects).toFixed(2) : '0.00';
+      const publishedDate = formatDisplayDate(first.publishedAt || new Date());
+      const passportData = assets.passportUrl ? await fetchImageDataUrl(assets.passportUrl) : '';
+      const brandData = assets.brandLogoUrl ? await fetchImageDataUrl(assets.brandLogoUrl) : '';
+      const signatureData = assets.signatureUrl ? await fetchImageDataUrl(assets.signatureUrl) : '';
+      const signatureName = assets.signatureName || 'Authorized Signatory';
+
+      doc.setFillColor(...palette.light);
+      doc.rect(0, 0, pageW, pageH, 'F');
+      doc.setFillColor(...palette.header);
+      doc.roundedRect(26, 26, pageW - 52, 98, 22, 22, 'F');
+      doc.setTextColor(255,255,255);
+      if (brandData) {
+        await addPdfImage(doc, brandData, 42, 42, 66, 66, 'contain');
+      } else {
+        doc.setFont('helvetica','bold');
+        doc.setFontSize(14);
+        doc.text(initialsFromText(brandName || 'Logo'), 75, 82, { align:'center' });
+      }
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(20);
+      doc.text(brandName, 124, 56);
+      doc.setFontSize(26);
+      doc.text(schoolName, 124, 84);
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(10.5);
+      const addressLine = currentSettings.HEAD_OFFICE_ADDRESS || '';
+      const contactLine = `${currentSettings.SCHOOL_PHONE || ''}${currentSettings.SCHOOL_PHONE && currentSettings.SCHOOL_EMAIL ? ' • ' : ''}${currentSettings.SCHOOL_EMAIL || ''}`.trim();
+      if (addressLine) doc.text(addressLine, 124, 104);
+      if (contactLine) doc.text(contactLine, 124, 118);
+      doc.setFillColor(255,255,255);
+      doc.roundedRect(420, 26, 144, 34, 12, 12, 'F');
+      doc.setTextColor(...palette.header);
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(10);
+      doc.text(String(first.resultStatus || 'Published').toUpperCase(), 492, 47, { align:'center' });
+
+      doc.setFillColor(250,252,255);
+      doc.setDrawColor(...palette.line);
+      doc.roundedRect(26, 146, 543, 118, 18, 18, 'FD');
+      doc.setTextColor(23,38,64);
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(14);
+      doc.text('Student Performance Summary', 42, 172);
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(10.5);
+      doc.text(`${currentStudent.fullName || 'Student'} • ${currentStudent.regId || '—'} • ${currentStudent.classLevel || 'Class not set'}`, 42, 190);
+      doc.text(`Exam: ${first.examTitle || first.examCode || '—'} • Session: ${first.academicSession || '—'}${first.term ? ' / ' + first.term : ''}`, 42, 206);
+      doc.text(`Published: ${publishedDate} • Average: ${avg}% • Passed: ${passed}/${totalSubjects || 0}`, 42, 222);
+      doc.text(`Selection: ${totalSubjects}/${totalAvailable || totalSubjects} subject(s) included in this bulk report card`, 42, 238);
+      doc.setFillColor(...palette.light);
+      doc.roundedRect(42, 246, 288, 24, 10, 10, 'F');
+      doc.setTextColor(...palette.header);
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(10);
+      doc.text('This PDF includes the official brand logo, student passport, and admin signature.', 52, 262);
+
+      doc.setDrawColor(...palette.line);
+      doc.roundedRect(446, 166, 94, 82, 14, 14, 'S');
+      if (passportData) {
+        await addPdfImage(doc, passportData, 452, 172, 82, 70, 'contain');
+      } else {
+        doc.setTextColor(103,120,146);
+        doc.setFont('helvetica','bold');
+        doc.setFontSize(10);
+        doc.text('No Passport', 493, 208, { align:'center' });
+      }
+
+      const cardY = 294;
+      const cardW = 122;
+      const cardGap = 11;
+      const cards = [
+        ['Student Reg ID', currentStudent.regId || '—'],
+        ['Subjects', String(totalSubjects || 0)],
+        ['Average %', `${avg}%`],
+        ['Published', publishedDate]
+      ];
+      cards.forEach((card, idx) => {
+        const x = 26 + idx * (cardW + cardGap);
+        doc.setFillColor(...palette.light);
+        doc.setDrawColor(...palette.line);
+        doc.roundedRect(x, cardY, cardW, 62, 16, 16, 'FD');
+        doc.setTextColor(95,116,146);
+        doc.setFont('helvetica','bold');
+        doc.setFontSize(9.5);
+        doc.text(card[0].toUpperCase(), x + 12, cardY + 18);
+        doc.setTextColor(24,48,80);
+        doc.setFontSize(14);
+        const lines = doc.splitTextToSize(String(card[1]), cardW - 20);
+        doc.text(lines, x + 12, cardY + 40);
+      });
+
+      doc.autoTable({
+        startY: 378,
+        margin: { left: 26, right: 26 },
+        head: [['Exam Code','Session','Term','Subject', 'Score', 'Percent', 'Grade', 'Rank', 'Status']],
+        body: rows.map(r => [
+          r.examCode || '—',
+          r.academicSession || '—',
+          r.term || '—',
+          r.subject || '—',
+          `${r.studentScore || '—'} / ${r.maxScore || '—'}`,
+          `${r.percentage || '—'}%`,
+          r.grade || '—',
+          r.positionText || '—',
+          r.resultStatus || 'PENDING'
+        ]),
+        theme: 'grid',
+        styles: { fontSize: 9.5, cellPadding: 7, lineColor: palette.line, lineWidth: 0.8, textColor:[23,38,64], overflow:'linebreak' },
+        headStyles: { fillColor: palette.header, textColor:[255,255,255], fontStyle:'bold' },
+        alternateRowStyles: { fillColor: [250,252,255] },
+        bodyStyles: { valign:'middle' }
+      });
+
+      let y = doc.lastAutoTable.finalY + 16;
+      doc.autoTable({
+        startY: y,
+        margin: { left: 26, right: 26 },
+        head: [['Exam / Subject', 'Remark', 'Teacher Comment']],
+        body: rows.map(r => [`${r.examCode || '—'} • ${r.subject || '—'}`, r.remark || '—', r.teacherComment || 'No teacher comment']),
+        theme: 'grid',
+        styles: { fontSize: 9.2, cellPadding: 7, lineColor: palette.line, lineWidth: 0.8, textColor:[23,38,64], overflow:'linebreak' },
+        headStyles: { fillColor: palette.accent, textColor:[255,255,255], fontStyle:'bold' },
+        alternateRowStyles: { fillColor: [252,254,255] }
+      });
+
+      y = doc.lastAutoTable.finalY + 18;
+      if (y > pageH - 130) { doc.addPage(); y = 60; }
+
+      doc.setFillColor(...palette.light);
+      doc.setDrawColor(...palette.line);
+      doc.roundedRect(26, y, 320, 82, 18, 18, 'FD');
+      doc.setTextColor(...palette.header);
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(12);
+      doc.text('Official Verification Note', 42, y + 22);
+      doc.setTextColor(83,102,129);
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(9.8);
+      const noteLines = doc.splitTextToSize(`This result was generated from the official student result portal on ${formatDisplayDate(new Date())}. ${totalSubjects} selected subject(s) were included in this bulk report card. The brand logo, student passport, published result rows, and admin signature form part of this verified academic record.`, 286);
+      doc.text(noteLines, 42, y + 40);
+
+      doc.setDrawColor(...palette.line);
+      doc.line(392, y + 58, 548, y + 58);
+      if (signatureData) await addPdfImage(doc, signatureData, 402, y + 2, 136, 44, 'contain');
+      doc.setTextColor(...palette.header);
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(10.5);
+      doc.text(signatureName, 470, y + 74, { align:'center' });
+      doc.setTextColor(98,115,139);
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(9);
+      doc.text('Authorized Admin Signature', 470, y + 88, { align:'center' });
+
+      const totalPages = doc.internal.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setDrawColor(...palette.line);
+        doc.line(26, pageH - 28, pageW - 26, pageH - 28);
+        doc.setTextColor(114,128,149);
+        doc.setFont('helvetica','normal');
+        doc.setFontSize(8.5);
+        doc.text(`${brandName} • Verified Result Sheet`, 26, pageH - 12);
+        doc.text(`Page ${i} of ${totalPages}`, pageW - 26, pageH - 12, { align:'right' });
+      }
+
+      const code = (resultDataExamCodeForFileName() || first?.examCode || currentResults[0]?.examCode || 'all_published_results');
+      const safeName = `${currentStudent.fullName || 'student'}_${code}_${totalSubjects}_published_subjects_report_card.pdf`.replace(/[^a-z0-9_\-.]+/gi,'_');
+      return { doc, rows, first, fileName: safeName };
+    }
+
+    async function previewPdf(){
+      showLoading('Preparing PDF preview...');
+      try{
+        const built = await buildResultPdfDoc();
+        clearPdfPreviewState();
+        currentPdfBlob = built.doc.output('blob');
+        currentPdfFileName = built.fileName;
+        currentPdfObjectUrl = URL.createObjectURL(currentPdfBlob);
+        pdfPreviewFrame.src = currentPdfObjectUrl;
+        pdfPreviewModal.classList.add('show');
+        showToast('PDF preview is ready.');
+      }catch(err){
+        showToast(err.message, 'error');
+      }finally{
+        hideLoading();
+      }
+    }
+
+    async function downloadPdf(forceRebuild=false){
+      try{
+        if (!currentPdfBlob || forceRebuild) {
+          showLoading('Preparing colorful report card PDF...');
+          const built = await buildResultPdfDoc();
+          clearPdfPreviewState();
+          currentPdfBlob = built.doc.output('blob');
+          currentPdfFileName = built.fileName;
+          currentPdfObjectUrl = URL.createObjectURL(currentPdfBlob);
+          built.doc.save(built.fileName);
+        } else {
+          const link = document.createElement('a');
+          link.href = currentPdfObjectUrl;
+          link.download = currentPdfFileName || `${(currentStudent && currentStudent.fullName) || 'student'}_${resultDataExamCodeForFileName() || 'published_results'}_report_card.pdf`.replace(/[^a-z0-9_\-.]+/gi,'_');
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        }
+        showToast('Designed PDF downloaded successfully.');
+      }catch(err){
+        console.error(err);
+        showToast(err.message || 'Failed to generate the designed PDF.', 'error');
+      }finally{
+        hideLoading();
+      }
+    }
+
     async function loadResult(){
       try{
+        const examCode = $('examCodeInput').value.trim();
         const res = await apiRequest('loadStudentResults', {
-          examCode: '',
+          examCode: examCode,
           academicSession: $('sessionFilter').value,
           term: $('termFilter').value
-        }, 'POST', 'Loading published results...');
-        if (res && res.data && res.data.student && res.data.student.regId) $('examCodeInput').value = res.data.student.regId;
-        await renderReport({
-          ...res.data,
-          examCode: (res && res.data && res.data.student && res.data.student.regId) || $('examCodeInput').value.trim() || ''
-        });
-        $('resultLoadStatus').textContent = res.message;
+        }, 'POST', examCode ? 'Loading the selected published result...' : 'Loading all published results...');
+        clearPdfPreviewState();
+        closePdfPreview();
+        selectedSubjects = [];
+        subjectSelectionTouched = false;
+        await renderReport(res.data);
+        $('resultLoadStatus').textContent = res.message + (examCode ? ' (' + examCode + ')' : '');
         $('resultLoadStatus').className = 'status ok';
+showToast(res.message);
       }catch(err){
-        clearPdfPreview();
         $('resultLoadStatus').textContent = err.message;
         $('resultLoadStatus').className = 'status error';
         showToast(err.message, 'error');
       }
     }
 
-    async function buildReportPdfArtifact(loadingMessage='Preparing PDF preview...'){
-      if (!currentResults.length){
-        showToast('Load published results first before preparing the PDF.', 'error');
-        return null;
-      }
-      showLoading(loadingMessage);
-      try{
-        const rows = getFilteredResults();
-        if (!rows.length) throw new Error('No published subject is loaded for the current filters.');
-        await ensureImagesReady($('reportCapture'));
-
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
-        const pageW = doc.internal.pageSize.getWidth();
-        const pageH = doc.internal.pageSize.getHeight();
-        const first = rows[0] || {};
-        const palette = getPdfPalette($('resultDesignSelect').value || currentDesign);
-        const assets = getDisplayAssets({ student: currentStudent, results: rows });
-        const totalSubjects = rows.length;
-        const totalAvailable = getBaseFilteredResults().length;
-        const passed = rows.filter(r => String(r.resultStatus).toUpperCase() === 'PASS').length;
-        const avg = totalSubjects ? (rows.reduce((sum,r)=> sum + safeNumber(r.percentage), 0) / totalSubjects).toFixed(2) : '0.00';
-        const publishedDate = formatDisplayDate(first.publishedAt || '—');
-        const brandName = currentSettings.BRAND_NAME || 'Genz Edutech Innovations';
-        const signatureName = assets.signatureName || 'Authorized Signatory';
-
-        const brandLogoData = assets.brandLogoUrl ? await fetchDataUrl(assets.brandLogoUrl) : '';
-        const passportData = currentStudent && currentStudent.passportUrl ? await fetchDataUrl(currentStudent.passportUrl) : '';
-        const signatureData = assets.signatureUrl ? await fetchDataUrl(assets.signatureUrl) : '';
-
-        doc.setFillColor(244,247,255);
-        doc.rect(0, 0, pageW, pageH, 'F');
-        doc.setFillColor(...palette.light);
-        doc.rect(0, 0, pageW, 154, 'F');
-        doc.setFillColor(...palette.header);
-        doc.rect(0, 0, pageW, 18, 'F');
-        doc.setDrawColor(...palette.line);
-        doc.roundedRect(18, 18, pageW - 36, pageH - 36, 26, 26, 'S');
-
-        if (brandLogoData) {
-          await addPdfImage(doc, brandLogoData, 30, 34, 74, 74, 'contain');
-        } else {
-          doc.setFillColor(255,255,255);
-          doc.roundedRect(30, 34, 74, 74, 18, 18, 'F');
-          doc.setTextColor(...palette.header);
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(24);
-          doc.text((brandName || 'GR').split(/\s+/).slice(0,2).map(v => v.charAt(0)).join('').toUpperCase(), 67, 79, { align:'center' });
-        }
-
-        doc.setTextColor(...palette.header);
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(22);
-        doc.text(brandName, 118, 58);
-        doc.setFontSize(26);
-        doc.text(currentSettings.SCHOOL_NAME || 'Student Result Portal', 118, 88);
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(10.5);
-        const contactLine = [currentSettings.HEAD_OFFICE_ADDRESS || '', currentSettings.SCHOOL_PHONE || '', currentSettings.SCHOOL_EMAIL || ''].filter(Boolean).join(' • ');
-        doc.text(contactLine || 'Official student result portal', 118, 109);
-        doc.setFontSize(10);
-        doc.text(`Generated ${formatDisplayDate(new Date())} • Student Reg ID ${currentStudent.regId || '—'}`, 118, 126);
-
-        doc.setFillColor(255,255,255);
-        doc.roundedRect(438, 34, 106, 34, 14, 14, 'F');
-        doc.setTextColor(...palette.header);
-        doc.setFont('helvetica','bold');
-        doc.setFontSize(10);
-        doc.text('OFFICIAL PDF', 491, 55, { align:'center' });
-        doc.roundedRect(438, 78, 106, 34, 14, 14, 'F');
-        doc.setFillColor(...palette.header);
-        doc.roundedRect(442, 82, 98, 26, 12, 12, 'F');
-        doc.setTextColor(255,255,255);
-        doc.setFont('helvetica','bold');
-        doc.setFontSize(10);
-        doc.text(String(first.resultStatus || 'Published').toUpperCase(), 491, 99, { align:'center' });
-
-        doc.setFillColor(250,252,255);
-        doc.setDrawColor(...palette.line);
-        doc.roundedRect(26, 146, 543, 118, 18, 18, 'FD');
-        doc.setTextColor(23,38,64);
-        doc.setFont('helvetica','bold');
-        doc.setFontSize(14);
-        doc.text('Student Performance Summary', 42, 172);
-        doc.setFont('helvetica','normal');
-        doc.setFontSize(10.5);
-        doc.text(`${currentStudent.fullName || 'Student'} • ${currentStudent.regId || '—'} • ${currentStudent.classLevel || 'Class not set'}`, 42, 190);
-        doc.text(`Exam: ${first.examTitle || first.examCode || '—'} • Session: ${first.academicSession || '—'}${first.term ? ' / ' + first.term : ''}`, 42, 206);
-        doc.text(`Published: ${publishedDate} • Average: ${avg}% • Passed: ${passed}/${totalSubjects || 0}`, 42, 222);
-        doc.text(`Selection: ${totalSubjects}/${totalAvailable || totalSubjects} subject(s) included in this report`, 42, 238);
-        doc.setFillColor(...palette.light);
-        doc.roundedRect(42, 246, 288, 24, 10, 10, 'F');
-        doc.setTextColor(...palette.header);
-        doc.setFont('helvetica','bold');
-        doc.setFontSize(10);
-        doc.text('This PDF includes the official brand logo, student passport, and admin signature.', 52, 262);
-
-        doc.setDrawColor(...palette.line);
-        doc.roundedRect(446, 166, 94, 82, 14, 14, 'S');
-        if (passportData) {
-          await addPdfImage(doc, passportData, 452, 172, 82, 70, 'contain');
-        } else {
-          doc.setTextColor(103,120,146);
-          doc.setFont('helvetica','bold');
-          doc.setFontSize(10);
-          doc.text('No Passport', 493, 208, { align:'center' });
-        }
-
-        const cardY = 294;
-        const cardW = 122;
-        const cardGap = 11;
-        const cards = [
-          ['Student Reg ID', currentStudent.regId || '—'],
-          ['Subjects', String(totalSubjects || 0)],
-          ['Average %', `${avg}%`],
-          ['Published', publishedDate]
-        ];
-        cards.forEach((card, idx) => {
-          const x = 26 + idx * (cardW + cardGap);
-          doc.setFillColor(...palette.light);
-          doc.setDrawColor(...palette.line);
-          doc.roundedRect(x, cardY, cardW, 62, 16, 16, 'FD');
-          doc.setTextColor(95,116,146);
-          doc.setFont('helvetica','bold');
-          doc.setFontSize(9.5);
-          doc.text(card[0].toUpperCase(), x + 12, cardY + 18);
-          doc.setTextColor(24,48,80);
-          doc.setFontSize(14);
-          const lines = doc.splitTextToSize(String(card[1]), cardW - 20);
-          doc.text(lines, x + 12, cardY + 40);
-        });
-
-        doc.autoTable({
-          startY: 378,
-          margin: { left: 26, right: 26 },
-          head: [['Exam Code','Session','Term','Subject', 'Score', 'Percent', 'Grade', 'Rank', 'Status']],
-          body: rows.map(r => [
-            r.examCode || '—',
-            r.academicSession || '—',
-            r.term || '—',
-            r.subject || '—',
-            `${r.studentScore || '—'} / ${r.maxScore || '—'}`,
-            `${r.percentage || '—'}%`,
-            r.grade || '—',
-            r.positionText || '—',
-            r.resultStatus || 'PENDING'
-          ]),
-          theme: 'grid',
-          styles: { fontSize: 9.5, cellPadding: 7, lineColor: palette.line, lineWidth: 0.8, textColor:[23,38,64], overflow:'linebreak' },
-          headStyles: { fillColor: palette.header, textColor:[255,255,255], fontStyle:'bold' },
-          alternateRowStyles: { fillColor: [250,252,255] },
-          bodyStyles: { valign:'middle' }
-        });
-
-        let y = doc.lastAutoTable.finalY + 16;
-        doc.autoTable({
-          startY: y,
-          margin: { left: 26, right: 26 },
-          head: [['Exam / Subject', 'Remark', 'Teacher Comment']],
-          body: rows.map(r => [`${r.examCode || '—'} • ${r.subject || '—'}`, r.remark || '—', r.teacherComment || 'No teacher comment']),
-          theme: 'grid',
-          styles: { fontSize: 9.2, cellPadding: 7, lineColor: palette.line, lineWidth: 0.8, textColor:[23,38,64], overflow:'linebreak' },
-          headStyles: { fillColor: palette.accent, textColor:[255,255,255], fontStyle:'bold' },
-          alternateRowStyles: { fillColor: [252,254,255] }
-        });
-
-        y = doc.lastAutoTable.finalY + 18;
-        if (y > pageH - 130) { doc.addPage(); y = 60; }
-
-        doc.setFillColor(...palette.light);
-        doc.setDrawColor(...palette.line);
-        doc.roundedRect(26, y, 320, 82, 18, 18, 'FD');
-        doc.setTextColor(...palette.header);
-        doc.setFont('helvetica','bold');
-        doc.setFontSize(12);
-        doc.text('Official Verification Note', 42, y + 22);
-        doc.setTextColor(83,102,129);
-        doc.setFont('helvetica','normal');
-        doc.setFontSize(9.8);
-        const noteLines = doc.splitTextToSize(`This result was generated from the official student result portal on ${formatDisplayDate(new Date())}. ${totalSubjects} selected subject(s) were included in this report. The brand logo, student passport, published result rows, and admin signature form part of this verified academic record.`, 286);
-        doc.text(noteLines, 42, y + 40);
-
-        doc.setDrawColor(...palette.line);
-        doc.line(392, y + 58, 548, y + 58);
-        if (signatureData) await addPdfImage(doc, signatureData, 402, y + 2, 136, 44, 'contain');
-        doc.setTextColor(...palette.header);
-        doc.setFont('helvetica','bold');
-        doc.setFontSize(10.5);
-        doc.text(signatureName, 470, y + 74, { align:'center' });
-        doc.setTextColor(98,115,139);
-        doc.setFont('helvetica','normal');
-        doc.setFontSize(9);
-        doc.text('Authorized Admin Signature', 470, y + 88, { align:'center' });
-
-        const totalPages = doc.internal.getNumberOfPages();
-        for (let i = 1; i <= totalPages; i++) {
-          doc.setPage(i);
-          doc.setDrawColor(...palette.line);
-          doc.line(26, pageH - 28, pageW - 26, pageH - 28);
-          doc.setTextColor(114,128,149);
-          doc.setFont('helvetica','normal');
-          doc.setFontSize(8.5);
-          doc.text(`${brandName} • Verified Result Sheet`, 26, pageH - 12);
-          doc.text(`Page ${i} of ${totalPages}`, pageW - 26, pageH - 12, { align:'right' });
-        }
-
-        const code = (resultDataExamCodeForFileName() || first?.examCode || currentResults[0]?.examCode || 'result');
-        const safeName = `${currentStudent.fullName || 'student'}_${code}_${totalSubjects}_published_subjects_report_card.pdf`.replace(/[^a-z0-9_\-.]+/gi,'_');
-        const blob = doc.output('blob');
-        return { blob, filename: safeName, totalSubjects, publishedDate };
-      }catch(err){
-        console.error(err);
-        showToast(err.message || 'Failed to prepare the designed PDF.', 'error');
-        return null;
-      }finally{
-        hideLoading();
-      }
-    }
-
-    async function previewPdf(){
-      const artifact = await buildReportPdfArtifact('Preparing PDF preview...');
-      if (!artifact) return;
-      clearPdfPreview();
-      currentPdfPreviewBlob = artifact.blob;
-      currentPdfPreviewName = artifact.filename;
-      currentPdfPreviewUrl = URL.createObjectURL(artifact.blob);
-      $('pdfPreviewFrame').src = currentPdfPreviewUrl;
-      $('pdfPreviewMeta').textContent = `${currentStudent.regId || 'Student'} • ${artifact.totalSubjects || 0} subject(s) • ${artifact.publishedDate || '—'}`;
-      $('pdfPreviewCard').classList.remove('hidden');
-      $('downloadPdfBtn').disabled = false;
-      showToast('PDF preview is ready.');
-    }
-
-    async function downloadPdf(){
-      if (!currentPdfPreviewBlob || !currentPdfPreviewName){
-        showToast('Preview the PDF first before downloading.', 'error');
-        return;
-      }
-      downloadBlob(currentPdfPreviewName, currentPdfPreviewBlob);
-      showToast('Designed PDF downloaded successfully.');
-    }
-
     function resultDataExamCodeForFileName(){
-      const raw = (currentStudent && currentStudent.regId) || $('examCodeInput').value.trim();
+      const raw = $('examCodeInput').value.trim();
       if (!raw) return '';
       return raw.replace(/\s+/g,'').replace(/,+/g,'-');
     }
 
     function rerenderCurrentResults(){
       if (!currentResults.length) return;
+      clearPdfPreviewState();
       renderReport({
         student: currentStudent,
         results: currentResults,
         settings: currentSettings,
-        examCode: (currentStudent && currentStudent.regId) || $('examCodeInput').value.trim(),
+        examCode: $('examCodeInput').value.trim(),
         sessions: [...new Set(currentResults.map(r => r.academicSession))],
         terms: [...new Set(currentResults.map(r => r.term))]
       });
@@ -1356,7 +1351,10 @@
 
     $('loadResultBtn').addEventListener('click', loadResult);
     $('previewPdfBtn').addEventListener('click', previewPdf);
-    $('downloadPdfBtn').addEventListener('click', downloadPdf);
+    $('downloadPdfBtn').addEventListener('click', () => downloadPdf(true));
+    $('downloadPdfFromPreviewBtn').addEventListener('click', () => downloadPdf(false));
+    $('closePdfPreviewBtn').addEventListener('click', closePdfPreview);
+    pdfPreviewModal.addEventListener('click', e => { if (e.target === pdfPreviewModal) closePdfPreview(); });
     $('selectAllSubjectsBtn').addEventListener('click', rerenderCurrentResults);
     $('clearSelectedSubjectsBtn').addEventListener('click', rerenderCurrentResults);
     $('subjectSelectionList').addEventListener('change', rerenderCurrentResults);
@@ -1371,15 +1369,13 @@
     $('loginForm').addEventListener('submit', async e => {
       e.preventDefault();
       try{
-        const creds = serializeForm(e.target);
-        const res = await apiRequest('studentLogin', creds, 'POST', 'Signing in...');
+        const res = await apiRequest('studentLogin', serializeForm(e.target), 'POST', 'Signing in...');
         setToken(res.data.token);
-        $('examCodeInput').value = creds.regId || '';
-        clearPdfPreview();
         $('authView').classList.add('hidden');
         $('appView').classList.remove('hidden');
         $('logoutBtn').classList.remove('hidden');
-        showToast(res.message);
+        $('examCodeInput').value = '';
+showToast(res.message);
         await loadResult();
       }catch(err){ showToast(err.message, 'error'); }
     });
@@ -1420,7 +1416,6 @@ showToast(res.message);
       await loadPublicBootstrap();
       const ok = await validateSavedSession();
       if (ok){
-        clearPdfPreview();
         $('authView').classList.add('hidden');
         $('appView').classList.remove('hidden');
         $('logoutBtn').classList.remove('hidden');

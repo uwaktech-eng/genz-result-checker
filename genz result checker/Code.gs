@@ -292,7 +292,7 @@ function bootstrapSettings_() {
     FAVICON_URL: '',
     SIGNATURE_NAME: 'Authorized Signatory',
     SIGNATURE_URL: '',
-    PORTAL_NOTICE: 'After login, your portal uses your Registration ID automatically to load every published and view-active result for your account. Use the session and term filters when you want to narrow what appears in your PDF preview.',
+    PORTAL_NOTICE: 'Leave exam code blank to load all published results, or enter an exam code to load that particular published result.',
     CLASS_OPTIONS: 'Year 1,Year 2,Year 3,Year 4,Year 5,Year 6,JSS 1,JSS 2,JSS 3,SS 1,SS 2,SS 3,Undergraduate',
     CATEGORY_OPTIONS: 'Lower Primary,Upper Primary,Junior High School,Senior High School,Undergraduate',
     SUBJECT_OPTIONS: 'English Language,Mathematics,Basic Science,Social Studies',
@@ -958,9 +958,9 @@ function loadStudentResults_(payload) {
       return String(a.subject || '').localeCompare(String(b.subject || ''));
     });
   if (!results.length) {
-    throw new Error(examCodes.length ? 'No published result was found for the supplied exam code(s). Use the exact exam codes separated with commas.' : 'No published result is currently available for your account.');
+    throw new Error(examCodes.length ? 'No published result was found for the supplied exam code.' : 'No published result is currently available for your account.');
   }
-  return ok_(examCodes.length ? 'Published results for the supplied exam code(s) loaded successfully.' : 'All published subjects loaded successfully.', {
+  return ok_(examCodes.length ? 'Published result(s) for the supplied exam code loaded successfully.' : 'All published subjects loaded successfully.', {
     examCode: examCodeInput || '',
     examCodeList: examCodes,
     loadMode: examCodes.length > 1 ? 'multi' : (examCodes.length ? 'single' : 'all'),
