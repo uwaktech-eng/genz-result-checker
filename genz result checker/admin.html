@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1354,12 +1355,31 @@
       if (val === 'FAIL') return 'tag-fail';
       return 'tag-pending';
     }
+    function firstNonEmptyValue(list){
+      for (const value of (list || [])){
+        const clean = String(value || '').trim();
+        if (clean) return clean;
+      }
+      return '';
+    }
+    function getGroupDisplayAssets(group){
+      const settings = bootstrapData.settings || {};
+      const rows = (group && group.rows) || [];
+      const student = (group && group.student) || {};
+      return {
+        brandLogoUrl: normalizeImageUrl(settings.BRAND_LOGO_URL || ''),
+        passportUrl: normalizeImageUrl(student.passportUrl || ''),
+        signatureUrl: normalizeImageUrl(firstNonEmptyValue(rows.map(r => r && r.signatureUrl)) || settings.SIGNATURE_URL || ''),
+        signatureName: settings.SIGNATURE_NAME || 'Authorized Signatory'
+      };
+    }
     function buildAdminReportMarkup(group){
       const settings = bootstrapData.settings || {};
       const student = group.student || {};
       const first = group.rows[0] || {};
-      const signatureRaw = first.signatureUrl || settings.SIGNATURE_URL || '';
-      const signatureName = settings.SIGNATURE_NAME || 'Authorized Signatory';
+      const assets = getGroupDisplayAssets(group);
+      const signatureRaw = assets.signatureUrl;
+      const signatureName = assets.signatureName;
       const studentInfo = [
         ['Full Name', student.fullName], ['Registration ID', student.regId || group.regId], ['Class Level', student.classLevel],
         ['Category', student.category], ['School Name', student.schoolName], ['Gender', student.gender],
@@ -1485,11 +1505,11 @@
       const settings = bootstrapData.settings || {};
       const first = group.rows[0] || {};
       const promises = [
-        loadImageIntoBox(target.querySelector('[data-role="brandLogo"]'), settings.BRAND_LOGO_URL || '', 'Brand Logo', true, 'LOGO'),
-        loadImageIntoBox(target.querySelector('[data-role="passport"]'), group.student?.passportUrl || '', 'Student Passport', false, 'No passport')
+        loadImageIntoBox(target.querySelector('[data-role="brandLogo"]'), getGroupDisplayAssets(group).brandLogoUrl || '', 'Brand Logo', true, 'LOGO'),
+        loadImageIntoBox(target.querySelector('[data-role="passport"]'), getGroupDisplayAssets(group).passportUrl || '', 'Student Passport', false, 'No passport')
       ];
       const signatureBox = target.querySelector('[data-role="signatureImage"]');
-      if (signatureBox) promises.push(loadImageIntoBox(signatureBox, first.signatureUrl || settings.SIGNATURE_URL || '', 'Signature', true, 'No signature'));
+      if (signatureBox) promises.push(loadImageIntoBox(signatureBox, getGroupDisplayAssets(group).signatureUrl || '', 'Signature', true, 'No signature'));
       await Promise.all(promises);
       await new Promise(resolve => setTimeout(resolve, 120));
     }
