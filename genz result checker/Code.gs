@@ -292,7 +292,7 @@ function bootstrapSettings_() {
     FAVICON_URL: '',
     SIGNATURE_NAME: 'Authorized Signatory',
     SIGNATURE_URL: '',
-    PORTAL_NOTICE: 'Leave exam code blank to load all published results, or enter one or more exam codes separated with commas to load only those results.',
+    PORTAL_NOTICE: 'After login, your portal uses your Registration ID automatically to load every published and view-active result for your account. Use the session and term filters when you want to narrow what appears in your PDF preview.',
     CLASS_OPTIONS: 'Year 1,Year 2,Year 3,Year 4,Year 5,Year 6,JSS 1,JSS 2,JSS 3,SS 1,SS 2,SS 3,Undergraduate',
     CATEGORY_OPTIONS: 'Lower Primary,Upper Primary,Junior High School,Senior High School,Undergraduate',
     SUBJECT_OPTIONS: 'English Language,Mathematics,Basic Science,Social Studies',
