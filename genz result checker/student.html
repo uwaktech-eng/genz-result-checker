@@ -1318,18 +1318,45 @@
       return { doc, rows, first, fileName: safeName };
     }
 
+    function base64ToBlob(base64, mimeType='application/octet-stream'){
+      const clean = String(base64 || '').replace(/\s+/g, '');
+      const binary = atob(clean);
+      const len = binary.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i += 1) bytes[i] = binary.charCodeAt(i);
+      return new Blob([bytes], { type: mimeType });
+    }
+
+    async function requestServerPdfBlob(loadingText){
+      if (!currentResults.length) throw new Error('Load a published result first before generating the PDF.');
+      const res = await apiRequest('generateStudentPdf', {
+        examCode: $('examCodeInput').value.trim(),
+        academicSession: $('sessionFilter').value,
+        term: $('termFilter').value,
+        selectedSubjects: []
+      }, 'POST', loadingText || 'Preparing server PDF...');
+      const base64 = res && res.data && res.data.pdfBase64 ? res.data.pdfBase64 : '';
+      if (!base64) throw new Error('The server did not return the PDF file.');
+      const blob = base64ToBlob(base64, (res.data && res.data.mimeType) || 'application/pdf');
+      return {
+        blob,
+        fileName: (res.data && res.data.fileName) || `${(currentStudent && currentStudent.fullName) || 'student'}_${resultDataExamCodeForFileName() || 'published_results'}_report_card.pdf`.replace(/[^a-z0-9_\-.]+/gi,'_')
+      };
+    }
+
     async function previewPdf(){
       showLoading('Preparing PDF preview...');
       try{
-        const built = await buildResultPdfDoc();
+        const built = await requestServerPdfBlob('Preparing server PDF preview...');
         clearPdfPreviewState();
-        currentPdfBlob = built.doc.output('blob');
+        currentPdfBlob = built.blob;
         currentPdfFileName = built.fileName;
         currentPdfObjectUrl = URL.createObjectURL(currentPdfBlob);
         pdfPreviewFrame.src = currentPdfObjectUrl;
         pdfPreviewModal.classList.add('show');
         showToast('PDF preview is ready.');
       }catch(err){
+        console.error(err);
         showToast(err.message, 'error');
       }finally{
         hideLoading();
@@ -1339,21 +1366,19 @@
     async function downloadPdf(forceRebuild=false){
       try{
         if (!currentPdfBlob || forceRebuild) {
-          showLoading('Preparing colorful report card PDF...');
-          const built = await buildResultPdfDoc();
+          showLoading('Preparing server PDF download...');
+          const built = await requestServerPdfBlob('Preparing server PDF download...');
           clearPdfPreviewState();
-          currentPdfBlob = built.doc.output('blob');
+          currentPdfBlob = built.blob;
           currentPdfFileName = built.fileName;
           currentPdfObjectUrl = URL.createObjectURL(currentPdfBlob);
-          built.doc.save(built.fileName);
-        } else {
-          const link = document.createElement('a');
-          link.href = currentPdfObjectUrl;
-          link.download = currentPdfFileName || `${(currentStudent && currentStudent.fullName) || 'student'}_${resultDataExamCodeForFileName() || 'published_results'}_report_card.pdf`.replace(/[^a-z0-9_\-.]+/gi,'_');
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
         }
+        const link = document.createElement('a');
+        link.href = currentPdfObjectUrl;
+        link.download = currentPdfFileName || `${(currentStudent && currentStudent.fullName) || 'student'}_${resultDataExamCodeForFileName() || 'published_results'}_report_card.pdf`.replace(/[^a-z0-9_\-.]+/gi,'_');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
         showToast('Designed PDF downloaded successfully.');
       }catch(err){
         console.error(err);

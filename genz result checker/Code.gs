@@ -131,6 +131,9 @@ function handleRequest_(e) {
       case 'getImageDataUrl':
         result = getImageDataUrl_(payload);
         break;
+      case 'generateStudentPdf':
+        result = generateStudentPdf_(payload);
+        break;
       case 'sendBulkEmail':
         result = sendBulkEmail_(payload);
         break;
@@ -214,7 +217,7 @@ function validateAction_(action) {
     validateSession: true, getAdminBootstrap: true, saveSettings: true, saveStudent: true, uploadStudentPassport: true, uploadBrandingAsset: true, setStudentState: true,
     importStudentsCsv: true, exportStudentsCsv: true, bulkUpdatePassports: true, importPassportsCsv: true,
     saveResult: true, saveResultEntries: true, importResultsCsv: true, recalculateResults: true, setResultState: true, bulkSetResultState: true,
-    exportResultsCsv: true, loadStudentExamCodes: true, loadStudentResults: true, getImageDataUrl: true, sendBulkEmail: true,
+    exportResultsCsv: true, loadStudentExamCodes: true, loadStudentResults: true, getImageDataUrl: true, generateStudentPdf: true, sendBulkEmail: true,
     authorizeMailStatus: true, exportSmsContacts: true, requestPasswordReset: true, resetPassword: true,
     setAdminState: true
   };
@@ -925,9 +928,7 @@ function matchesAnyExamCodeFilter_(resultRow, examCodes) {
   });
 }
 
-function loadStudentResults_(payload) {
-
-  var session = requireSession_(payload.token, 'student', sanitizeValue_(payload.clientId));
+function getStudentResultBundle_(session, payload) {
   var examCodeInput = sanitizeValue_(payload.examCode);
   var examCodes = parseExamCodeList_(examCodeInput);
   var academicSession = sanitizeValue_(payload.academicSession);
@@ -960,7 +961,7 @@ function loadStudentResults_(payload) {
   if (!results.length) {
     throw new Error(examCodes.length ? 'No published result was found for the supplied exam code.' : 'No published result is currently available for your account.');
   }
-  return ok_(examCodes.length ? 'Published result(s) for the supplied exam code loaded successfully.' : 'All published subjects loaded successfully.', {
+  return {
     examCode: examCodeInput || '',
     examCodeList: examCodes,
     loadMode: examCodes.length > 1 ? 'multi' : (examCodes.length ? 'single' : 'all'),
@@ -969,12 +970,34 @@ function loadStudentResults_(payload) {
     results: results,
     sessions: uniqueList_(results.map(function(r) { return r.academicSession; }).filter(Boolean)),
     terms: uniqueList_(results.map(function(r) { return r.term; }).filter(Boolean))
-  });
+  };
 }
 
-function getImageDataUrl_(payload) {
-  requireSession_(payload.token, '', sanitizeValue_(payload.clientId));
-  var raw = sanitizeValue_((payload && (payload.url || payload.imageUrl || payload.src || payload.fileId)) || '');
+function loadStudentResults_(payload) {
+  var session = requireSession_(payload.token, 'student', sanitizeValue_(payload.clientId));
+  var data = getStudentResultBundle_(session, payload);
+  return ok_(data.examCodeList.length ? 'Published result(s) for the supplied exam code loaded successfully.' : 'All published subjects loaded successfully.', data);
+}
+
+function normalizeSubjectKey_(value) {
+  return sanitizeValue_(value).toLowerCase();
+}
+
+function applySelectedSubjectFilter_(rows, selectedSubjects) {
+  if (!Array.isArray(selectedSubjects) || !selectedSubjects.length) return rows;
+  var allowed = {};
+  selectedSubjects.forEach(function(value) {
+    var key = normalizeSubjectKey_(value);
+    if (key) allowed[key] = true;
+  });
+  var filtered = (rows || []).filter(function(row) {
+    return !!allowed[normalizeSubjectKey_(row && row.subject)];
+  });
+  return filtered.length ? filtered : rows;
+}
+
+function loadImageBlobFromSource_(value) {
+  var raw = sanitizeValue_(value);
   if (!raw) throw new Error('Provide an image URL or file ID.');
   var driveId = extractDriveFileId_(raw);
   var blob = null;
@@ -1092,13 +1115,207 @@ function getImageDataUrl_(payload) {
   }
 
   if (!/^image\//i.test(mimeType)) throw new Error('The selected file is not an image.');
-  var bytes = blob.getBytes();
+  return { blob: blob, mimeType: mimeType, source: source || (driveId ? 'drive' : 'url') };
+}
+
+function safeLoadImageBlob_(value) {
+  try {
+    return loadImageBlobFromSource_(value);
+  } catch (err) {
+    return null;
+  }
+}
+
+function formatDisplayDate_(value) {
+  var raw = sanitizeValue_(value);
+  if (!raw) return '—';
+  var dt = new Date(raw);
+  if (isNaN(dt.getTime())) return raw;
+  return Utilities.formatDate(dt, Session.getScriptTimeZone(), 'MMM d, yyyy');
+}
+
+function formatNumberLikeStudent_(value) {
+  if (value === '' || value == null) return '—';
+  var num = Number(value);
+  if (isNaN(num)) return sanitizeValue_(value);
+  if (Math.abs(num - Math.round(num)) < 0.0000001) return String(Math.round(num));
+  return String(Math.round(num * 100) / 100);
+}
+
+function calculateAveragePercent_(rows) {
+  var list = (rows || []).map(function(row) { return Number(row && row.percentage); }).filter(function(n) { return !isNaN(n); });
+  if (!list.length) return 0;
+  var total = list.reduce(function(sum, value) { return sum + value; }, 0);
+  return Math.round((total / list.length) * 100) / 100;
+}
+
+function makeResultPdfFileName_(student, rows, examCodeInput) {
+  var first = (rows && rows[0]) || {};
+  var code = sanitizeValue_(examCodeInput || first.examCode || 'all_published_results');
+  var totalSubjects = (rows || []).length;
+  return (safeName_(student && student.fullName || 'student') + '_' + safeName_(code) + '_' + totalSubjects + '_published_subjects_report_card.pdf').replace(/_+/g, '_');
+}
+
+function appendStyledParagraph_(body, text, options) {
+  var p = body.appendParagraph(sanitizeValue_(text));
+  options = options || {};
+  if (options.heading) p.setHeading(options.heading);
+  if (options.alignment) p.setAlignment(options.alignment);
+  if (options.bold) p.setBold(true);
+  if (options.italic) p.setItalic(true);
+  if (options.spacingBefore != null) p.setSpacingBefore(options.spacingBefore);
+  if (options.spacingAfter != null) p.setSpacingAfter(options.spacingAfter);
+  if (options.fontSize) p.setFontSize(options.fontSize);
+  if (options.foregroundColor) p.setForegroundColor(options.foregroundColor);
+  return p;
+}
+
+function setTableHeaderStyle_(row) {
+  if (!row) return;
+  for (var i = 0; i < row.getNumCells(); i += 1) {
+    var cell = row.getCell(i);
+    try { cell.setBackgroundColor('#dce8ff'); } catch (err) {}
+    try { cell.editAsText().setBold(true); } catch (err2) {}
+  }
+}
+
+function createTableWithRows_(body, rows) {
+  var table = body.appendTable(rows);
+  if (rows && rows.length) setTableHeaderStyle_(table.getRow(0));
+  return table;
+}
+
+function createStudentPdfBlob_(bundle) {
+  var rows = applySelectedSubjectFilter_(bundle.results || [], bundle.selectedSubjects || []);
+  if (!rows.length) throw new Error('No published result is available for PDF generation.');
+  var settings = bundle.settings || {};
+  var student = bundle.student || {};
+  var first = rows[0] || {};
+  var average = calculateAveragePercent_(rows);
+  var passed = rows.filter(function(row) { return sanitizeValue_(row.resultStatus).toUpperCase() === 'PASS'; }).length;
+  var total = rows.length;
+  var status = passed === total ? 'PASS' : (passed > 0 ? 'PARTIAL PASS' : 'NEEDS IMPROVEMENT');
+  var signatureUrl = sanitizeValue_(first.signatureUrl || settings.SIGNATURE_URL || '');
+  var logoAsset = safeLoadImageBlob_(settings.BRAND_LOGO_URL || '');
+  var passportAsset = safeLoadImageBlob_(student.passportUrl || '');
+  var signatureAsset = safeLoadImageBlob_(signatureUrl);
+  var fileName = makeResultPdfFileName_(student, rows, bundle.examCode);
+
+  var doc = DocumentApp.create(fileName.replace(/\.pdf$/i, ''));
+  var file = DriveApp.getFileById(doc.getId());
+  try {
+    var body = doc.getBody();
+    body.clear();
+
+    if (logoAsset && logoAsset.blob) {
+      var logo = body.appendImage(logoAsset.blob);
+      try { logo.setWidth(72); logo.setHeight(72); } catch (err) {}
+    }
+    appendStyledParagraph_(body, settings.BRAND_NAME || 'Genz Edutech Innovations', { alignment: DocumentApp.HorizontalAlignment.CENTER, bold: true, fontSize: 18, spacingAfter: 2, foregroundColor: '#173f7a' });
+    appendStyledParagraph_(body, settings.SCHOOL_NAME || student.schoolName || 'Genz Result Portal', { alignment: DocumentApp.HorizontalAlignment.CENTER, bold: true, fontSize: 15, spacingAfter: 2 });
+    var addressBits = [settings.HEAD_OFFICE_ADDRESS, settings.SCHOOL_PHONE, settings.SCHOOL_EMAIL].filter(function(v) { return sanitizeValue_(v); });
+    if (addressBits.length) appendStyledParagraph_(body, addressBits.join(' • '), { alignment: DocumentApp.HorizontalAlignment.CENTER, fontSize: 10, foregroundColor: '#54657a', spacingAfter: 8 });
+    appendStyledParagraph_(body, 'RESULT', { alignment: DocumentApp.HorizontalAlignment.CENTER, bold: true, fontSize: 20, spacingBefore: 6, spacingAfter: 2 });
+    appendStyledParagraph_(body, status, { alignment: DocumentApp.HorizontalAlignment.CENTER, bold: true, fontSize: 13, foregroundColor: status === 'PASS' ? '#1b7f39' : '#9b6a00', spacingAfter: 12 });
+
+    if (passportAsset && passportAsset.blob) {
+      var passport = body.appendImage(passportAsset.blob);
+      try { passport.setWidth(96); passport.setHeight(112); } catch (err) {}
+      appendStyledParagraph_(body, 'Student Passport', { alignment: DocumentApp.HorizontalAlignment.CENTER, fontSize: 9, foregroundColor: '#6c7b90', spacingAfter: 8 });
+    } else {
+      appendStyledParagraph_(body, 'No Passport', { alignment: DocumentApp.HorizontalAlignment.CENTER, fontSize: 10, foregroundColor: '#6c7b90', spacingAfter: 8 });
+    }
+
+    appendStyledParagraph_(body, 'Student Performance Summary', { bold: true, fontSize: 14, spacingBefore: 4, spacingAfter: 6, foregroundColor: '#173f7a' });
+    var summaryRows = [
+      ['Student', sanitizeValue_(student.fullName || '—')],
+      ['Student Reg ID', sanitizeValue_(student.regId || '—')],
+      ['Class Level', sanitizeValue_(student.classLevel || '—')],
+      ['Exam', sanitizeValue_(first.examTitle || first.examCode || '—')],
+      ['Session / Term', [sanitizeValue_(first.academicSession), sanitizeValue_(first.term)].filter(Boolean).join(' / ') || '—'],
+      ['Published', formatDisplayDate_(first.publishedAt)],
+      ['Subjects', String(total)],
+      ['Average %', formatNumberLikeStudent_(average)],
+      ['Passed', passed + '/' + total]
+    ];
+    createTableWithRows_(body, [['Field', 'Value']].concat(summaryRows));
+
+    appendStyledParagraph_(body, 'This PDF includes the official brand logo, student passport, and admin signature.', { fontSize: 10, foregroundColor: '#54657a', spacingBefore: 10, spacingAfter: 8 });
+
+    var resultTableRows = [['Exam Code', 'Session', 'Term', 'Subject', 'Score', 'Percent', 'Grade', 'Rank', 'Status']];
+    rows.forEach(function(row) {
+      resultTableRows.push([
+        sanitizeValue_(row.examCode || '—'),
+        sanitizeValue_(row.academicSession || '—'),
+        sanitizeValue_(row.term || '—'),
+        sanitizeValue_(row.subject || '—'),
+        formatNumberLikeStudent_(row.studentScore) + ' / ' + formatNumberLikeStudent_(row.maxScore),
+        formatNumberLikeStudent_(row.percentage) + '%',
+        sanitizeValue_(row.grade || '—'),
+        sanitizeValue_(row.positionText || '—'),
+        sanitizeValue_(row.resultStatus || '—')
+      ]);
+    });
+    appendStyledParagraph_(body, 'Published Subject Results', { bold: true, fontSize: 13, spacingBefore: 12, spacingAfter: 6, foregroundColor: '#173f7a' });
+    createTableWithRows_(body, resultTableRows);
+
+    var remarkRows = [['Exam / Subject', 'Remark', 'Teacher Comment']];
+    rows.forEach(function(row) {
+      remarkRows.push([
+        sanitizeValue_((row.examCode || '—') + ' • ' + (row.subject || '—')),
+        sanitizeValue_(row.remark || '—'),
+        sanitizeValue_(row.teacherComment || 'No teacher comment')
+      ]);
+    });
+    appendStyledParagraph_(body, 'Remarks and Teacher Comments', { bold: true, fontSize: 13, spacingBefore: 12, spacingAfter: 6, foregroundColor: '#173f7a' });
+    createTableWithRows_(body, remarkRows);
+
+    appendStyledParagraph_(body, 'Official Verification Note', { bold: true, fontSize: 13, spacingBefore: 12, spacingAfter: 6, foregroundColor: '#173f7a' });
+    appendStyledParagraph_(body, 'This result was generated from the official student result portal on ' + formatDisplayDate_(new Date()) + '. ' + total + ' selected subject(s) were included in this bulk report card. The brand logo, student passport, published result rows, and admin signature form part of this verified academic record.', { fontSize: 10, foregroundColor: '#49586b', spacingAfter: 10 });
+
+    appendStyledParagraph_(body, 'Authorized Signatory', { bold: true, fontSize: 12, spacingBefore: 8, spacingAfter: 4, alignment: DocumentApp.HorizontalAlignment.CENTER });
+    if (signatureAsset && signatureAsset.blob) {
+      var sign = body.appendImage(signatureAsset.blob);
+      try { sign.setWidth(150); sign.setHeight(48); } catch (err) {}
+    } else {
+      appendStyledParagraph_(body, 'No signature added', { alignment: DocumentApp.HorizontalAlignment.CENTER, fontSize: 10, foregroundColor: '#6c7b90', spacingAfter: 2 });
+    }
+    appendStyledParagraph_(body, settings.SIGNATURE_NAME || settings.PRINCIPAL_NAME || 'Authorized Admin', { alignment: DocumentApp.HorizontalAlignment.CENTER, bold: true, fontSize: 11, spacingAfter: 2 });
+    appendStyledParagraph_(body, 'Authorized Admin Signature', { alignment: DocumentApp.HorizontalAlignment.CENTER, fontSize: 9, foregroundColor: '#6c7b90' });
+
+    doc.saveAndClose();
+    var pdfBlob = file.getAs(MimeType.PDF).setName(fileName);
+    return { blob: pdfBlob, fileName: fileName, mimeType: 'application/pdf', subjectCount: total };
+  } finally {
+    try { doc.saveAndClose(); } catch (saveErr) {}
+    try { file.setTrashed(true); } catch (trashErr) {}
+  }
+}
+
+function generateStudentPdf_(payload) {
+  var session = requireSession_(payload.token, 'student', sanitizeValue_(payload.clientId));
+  var bundle = getStudentResultBundle_(session, payload);
+  bundle.selectedSubjects = Array.isArray(payload.selectedSubjects) ? payload.selectedSubjects : [];
+  var generated = createStudentPdfBlob_(bundle);
+  var bytes = generated.blob.getBytes();
+  return ok_('Student PDF generated successfully.', {
+    fileName: generated.fileName,
+    mimeType: generated.mimeType,
+    subjectCount: generated.subjectCount,
+    pdfBase64: Utilities.base64Encode(bytes)
+  });
+}
+
+function getImageDataUrl_(payload) {
+  requireSession_(payload.token, '', sanitizeValue_(payload.clientId));
+  var loaded = loadImageBlobFromSource_(sanitizeValue_((payload && (payload.url || payload.imageUrl || payload.src || payload.fileId)) || ''));
+  var bytes = loaded.blob.getBytes();
   if (!bytes || !bytes.length) throw new Error('Image data is empty.');
   return ok_('Image data prepared.', {
-    source: source || (driveId ? 'drive' : 'url'),
-    mimeType: mimeType,
+    source: loaded.source,
+    mimeType: loaded.mimeType,
     byteLength: bytes.length,
-    dataUrl: 'data:' + mimeType + ';base64,' + Utilities.base64Encode(bytes)
+    dataUrl: 'data:' + loaded.mimeType + ';base64,' + Utilities.base64Encode(bytes)
   });
 }
 
